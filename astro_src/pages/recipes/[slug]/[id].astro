@@ -1,0 +1,31 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { RecipeDetail } from '@components/recipes/RecipeDetail';
+import { RecipeService } from '@/lib/services/recipes';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+
+let recipe = null;
+let error = null;
+
+try {
+  // Pass the ID to the service. We don't have a token here as it's a public view, 
+  // but the service handles it.
+  recipe = await RecipeService.getById(id);
+} catch (e) {
+  console.error('Error fetching recipe:', e);
+  error = e.message;
+}
+
+// Canonical title for SEO
+const title = recipe ? `${recipe.name} | Smart Recipe Planner` : 'Receta | Smart Recipe Planner';
+const description = recipe ? (recipe.description || `Aprende a preparar ${recipe.name} con nuestra guía paso a paso.`) : 'Cargando receta...';
+---
+
+<Layout title={title} description={description}>
+  <main>
+    <RecipeDetail client:load recipe={recipe} recipeId={id} />
+  </main>
+</Layout>

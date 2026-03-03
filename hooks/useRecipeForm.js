@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useApiClient } from '@hooks/useApiClient';
 import { useAuth } from '@context/AuthContext';
 import { useToast } from '@context/ToastContext';
 import { feedCache } from '@utils/feedCache';
+// import { actions } from 'astro:actions'; // DELETED: Causes build error in Next.js
 
 const INITIAL_STATE = {
   name: '',
@@ -17,7 +17,6 @@ const INITIAL_STATE = {
 };
 
 export function useRecipeForm(recipeId) {
-  const router = useRouter();
   const api = useApiClient();
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -27,6 +26,23 @@ export function useRecipeForm(recipeId) {
   const [status, setStatus] = useState(isEditMode ? 'loading' : 'idle');
   const [apiError, setApiError] = useState(null);
   const [errors, setErrors] = useState({});
+
+  /**
+   * Proactive Authentication Check
+   * Ensures users are logged in to access the form (Create or Edit)
+   */
+  useEffect(() => {
+    if (typeof window !== 'undefined' && user === null) {
+      // Small delay to allow session check to complete
+      const timer = setTimeout(() => {
+        const state = useAuth.getState();
+        if (state.user === null && !state.isLoading) {
+          window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
 
   /**
    * Data Fetching & Normalization Strategy
@@ -41,52 +57,31 @@ export function useRecipeForm(recipeId) {
       .then(recipe => {
         if (!isMounted) return;
 
-        // --- SECURITY CHECK: Ownership Verification ---
-        // If user is logged in, ensure they own the recipe before letting them see the edit form.
-        // API v2 uses `user_id` reliability. We use String() comparison to avoid Type mismatches (int vs string).
-        // FALLBACK: Name comparison as requested by user.
-        const normalize = (str) => String(str || '').trim().toLowerCase();
-
-        const isOwner = (
-          (user.id && recipe.user_id && String(user.id) === String(recipe.user_id)) ||
-          (user.name && (
-            normalize(user.name) === normalize(recipe.authorName) ||
-            normalize(user.name) === normalize(recipe.author_name) ||
-            normalize(user.name) === normalize(recipe.user?.name)
-          ))
-        );
-
-        if (user && !isOwner) {
-          showToast('No tienes permiso para editar esta receta.', 'error');
-          router.push('/');
+        if (!recipe) {
+          setApiError('No se encontró la receta.');
+          setStatus('error');
           return;
         }
 
-        // Legacy Support: Normalize 'instructions' to Array if backend returns Object
-        let normalizedInstructions = [''];
-        if (Array.isArray(recipe.instructions)) {
-          normalizedInstructions = recipe.instructions.length > 0 ? recipe.instructions : [''];
-        } else if (recipe.instructions && typeof recipe.instructions === 'object') {
-          // Object.values guarantees array structure from legacy map
-          normalizedInstructions = Object.values(recipe.instructions);
-        }
-
+        // --- SECURITY CHECK: Ownership Verification ---
+        // We defer the finalized check to a dedicated effect below to ensure 'user' is fully loaded.
+        // But we store the author info to detect unauthorized access early.
         setFormData({
           name: recipe.name || '',
           description: recipe.description || '',
-          // API v2: preparationTimeMinutes (camelCase)
           preparationTime: recipe.preparationTimeMinutes || recipe.preparation_time_minutes || '',
-          // API v2: imageUrl (camelCase)
           imageUrl: recipe.imageUrl || recipe.image_url || '',
-          // API v2: ingredients (array of objects with name, unitOfMeasure, quantity)
           ingredients: recipe.ingredients?.map(ing => ({
             name: ing.name || ing.ingredient?.name || '',
             quantity: ing.quantity || '',
             unit_of_measure: ing.unitOfMeasure || ing.unit_of_measure || '',
           })) || [{ name: '', quantity: '', unit_of_measure: '' }],
-          instructions: normalizedInstructions,
+          instructions: Array.isArray(recipe.instructions) ? recipe.instructions : Object.values(recipe.instructions || {}),
           type: recipe.type || 'lunch',
           visibility: recipe.visibility || 'public',
+          // Store author info for reactive security check
+          _authorId: recipe.user_id || recipe.user?.id,
+          _authorName: recipe.authorName || recipe.author_name || recipe.user?.name
         });
         setStatus('idle');
       })
@@ -99,6 +94,40 @@ export function useRecipeForm(recipeId) {
 
     return () => { isMounted = false; };
   }, [recipeId, api, isEditMode]);
+
+  /**
+   * --- REACTIVE SECURITY CHECK ---
+   * This ensures that even if 'user' loads AFTER the recipe, or vice-versa,
+   * the authorization check is executed correctly.
+   */
+  /**
+   * --- CONSOLIDATED OWNERSHIP LOGIC ---
+   */
+  const normalize = useCallback((str) => String(str || '').trim().toLowerCase(), []);
+
+  const matchesId = !!(user?.id && formData._authorId && String(user.id) === String(formData._authorId));
+  const matchesName = !!(user?.name && formData._authorName && normalize(user.name) === normalize(formData._authorName));
+  const isOwner = isEditMode ? (matchesId || matchesName) : true;
+
+  /**
+   * --- REACTIVE SECURITY REDIRECTION ---
+   * Ensures that even if 'user' or 'recipe' loads out of sync,
+   * unauthorized access triggers a prompt redirection.
+   */
+  useEffect(() => {
+    // Only run this check in edit mode when both auth and recipe are no longer loading
+    if (!isEditMode || status === 'loading' || useAuth.getState().isLoading) return;
+
+    // Wait until we have at least ID or Name to make a decision
+    if (!formData._authorId && !formData._authorName) return;
+
+    // If a user IS logged in, verify ownership.
+    if (user && !isOwner) {
+      console.warn(`[Security] Unauthorized edit attempt for recipe ${recipeId} by user ${user.id}`);
+      showToast('No tienes permiso para editar esta receta.', 'error');
+      window.location.href = `/recipes/${recipeId}`;
+    }
+  }, [user, isOwner, isEditMode, status, recipeId, showToast, formData._authorId, formData._authorName]);
 
   // --- Field Handlers ---
 
@@ -225,8 +254,21 @@ export function useRecipeForm(recipeId) {
         await api.createRecipe(payload);
         showToast('Receta creada', 'success');
       }
-      router.push('/');
-      router.refresh();
+
+      // Invalidate Cloudflare Cache On-Demand for global feed
+      try {
+        // Dynamic import to avoid Next.js build errors
+        const pkg = 'astro:actions';
+        const { actions } = await import(/* webpackIgnore: true */ pkg);
+        if (actions && typeof actions.purgeRecipesCache === 'function') {
+          await actions.purgeRecipesCache();
+        }
+      } catch (cacheErr) {
+        // Safe to ignore if not in Astro or action not found
+        console.debug('Astro cache purge skipped or unavailable in this environment.');
+      }
+
+      window.location.href = '/';
     } catch (err) {
       console.error(err);
       setApiError(err.message || 'Error al procesar la solicitud.');
@@ -239,6 +281,7 @@ export function useRecipeForm(recipeId) {
     status,
     errors,
     apiError,
+    isOwner, // Exposed for UI blocking
     handlers: {
       setFieldValue,
       handleIngredientChange,

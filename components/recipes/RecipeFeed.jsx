@@ -2,12 +2,12 @@
 
 // ... imports
 import React, { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useRecipeFeed } from '@hooks/useRecipeFeed';
 import { useApiClient } from '@hooks/useApiClient';
 import { useToast } from '@context/ToastContext';
 import { useSettings } from '@context/SettingsContext';
 import { slugify } from '@utils/slugify';
+import { getEnv } from '@/utils/env';
 
 // Components
 import { RecipeCard } from '@components/recipes/RecipeCard';
@@ -37,7 +37,6 @@ export function RecipeFeed({ initialData = null }) {
   const [deleteModalState, setDeleteModalState] = useState({ isOpen: false, recipe: null });
 
   const api = useApiClient();
-  const router = useRouter();
   const { showToast } = useToast();
   const { t } = useSettings();
 
@@ -66,7 +65,7 @@ export function RecipeFeed({ initialData = null }) {
   }, [status, hasMore, fetchMoreRecipes, isErrorLoadingMore]);
 
   // Actions
-  const handleEdit = (recipe) => router.push(`/edit-recipe/${recipe.id}`);
+  const handleEdit = (recipe) => window.location.href = `/edit-recipe/${recipe.id}`;
   const handleDelete = (recipe) => setDeleteModalState({ isOpen: true, recipe });
 
   const confirmDelete = async () => {
@@ -119,7 +118,7 @@ export function RecipeFeed({ initialData = null }) {
             <p className="text-muted-foreground text-lg mb-4">{t.feed.empty}</p>
             <Button
               className="mt-2"
-              onClick={() => router.push('/create-recipe')}
+              onClick={() => window.location.href = '/create-recipe'}
             >
               {t.feed.createFirst}
             </Button>
@@ -129,7 +128,8 @@ export function RecipeFeed({ initialData = null }) {
             {recipes.map((recipe, index) => {
               // Insert Ad every 6 items (index 5, 11, 17...) if ads are enabled
               // 0-based index: 5 is the 6th item.
-              const shouldShowAd = (process.env.NEXT_PUBLIC_ENABLE_ADS === 'true') && (index > 0) && (index + 1) % 6 === 0;
+              const PUBLIC_ENABLE_ADS = getEnv('PUBLIC_ENABLE_ADS') || getEnv('NEXT_PUBLIC_ENABLE_ADS');
+              const shouldShowAd = (PUBLIC_ENABLE_ADS === 'true') && (index > 0) && (index + 1) % 6 === 0;
 
               return (
                 <React.Fragment key={recipe.id}>

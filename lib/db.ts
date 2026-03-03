@@ -10,14 +10,15 @@ export interface LocalPantryItem {
     isSynced: boolean; // Flag to sync with backend
 }
 
+export type { LocalPantryItem as PantryItemType };
+
 // Extend Dexie class to handle typescript properly for specific tables
 const db = new Dexie('SmartRecipePlannerDB') as Dexie & {
     pantryItems: EntityTable<LocalPantryItem, 'id'>;
 };
 
 // Schema registration
-// We index ingredientId to query by ingredient, and expirationDate for sorting/filtering
-db.version(1).stores({
+db.version(2).stores({
     pantryItems: '++id, ingredientId, expirationDate'
 });
 

@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import { useAuth } from '@context/AuthContext';
 import { useSettings } from '@context/SettingsContext';
 import { ClockIcon, EditIcon, TrashIcon, UserIcon } from '@components/ui/Icons';
@@ -41,14 +39,12 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
     <div className="group bg-card dark:bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full overflow-hidden">
       {/* Image Container */}
       <div className="relative w-full aspect-[4/3] overflow-hidden bg-muted">
-        <Image
+        <img
           src={imgSrc}
           alt={recipe.name}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-in-out"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onError={() => setImgSrc('https://placehold.co/600x400/f3f4f6/9ca3af?text=Error+Carga')}
-          unoptimized={true} // Forcing unoptimized to ensure external URLs load without strict config for now
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10 opacity-60 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none" />
@@ -100,16 +96,15 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
 
         {/* Footer Actions */}
         <div className="pt-4 mt-auto border-t border-border">
-          <Link
+          <a
             href={viewHref}
-            scroll={false}
             className="w-full inline-flex items-center justify-center bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group/btn relative z-20"
           >
             {t.feed.view}
             <svg className="w-4 h-4 ml-2 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
-          </Link>
+          </a>
         </div>
       </div>
     </div>

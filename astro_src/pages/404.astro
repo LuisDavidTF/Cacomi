@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { NotFoundContent } from '@components/ui/NotFoundContent';
+
+export const prerender = true;
+---
+
+<Layout title="404 - Página no encontrada" description="Lo sentimos, no pudimos encontrar la página que buscas.">
+  <NotFoundContent client:load />
+</Layout>

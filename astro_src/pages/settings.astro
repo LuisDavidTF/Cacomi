@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SettingsClient from '@components/settings/SettingsClient';
+
+export const prerender = false;
+---
+
+<Layout title="Configuración" description="Ajusta las preferencias de Culina Smart.">
+  <SettingsClient client:load />
+</Layout>

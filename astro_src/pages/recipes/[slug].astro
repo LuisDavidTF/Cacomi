@@ -1,0 +1,26 @@
+---
+import { slugify } from '@utils/slugify';
+import { RecipeService } from '@/lib/services/recipes';
+
+export const prerender = false;
+
+// 'slug' here captures the first segment after /recipes/
+// In the legacy case, this is the ID (e.g. /recipes/123 -> slug="123")
+const { slug } = Astro.params;
+
+let recipe = null;
+try {
+  recipe = await RecipeService.getById(slug);
+} catch (error) {
+  recipe = null;
+}
+
+if (!recipe) {
+  return new Response("Recipe Not Found", { status: 404 });
+}
+
+const correctSlug = slugify(recipe.name);
+
+// Redirect to the canonical URL structure: /recipes/[slug]/[id]
+return Astro.redirect(`/recipes/${correctSlug}/${slug}`, 301);
+---

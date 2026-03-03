@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { RecipeForm } from '@components/recipes/RecipeForm';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+---
+
+<Layout title="Editar Receta" description="Modifica los detalles de tu receta existente.">
+  <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+    <div class="max-w-4xl mx-auto">
+      {id && <RecipeForm client:load recipeId={id} />}
+    </div>
+  </div>
+</Layout>

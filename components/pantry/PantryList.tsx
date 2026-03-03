@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { LocalPantryItem } from '@/lib/db';
+import type { LocalPantryItem } from '@/lib/db';
 import { PantryItemGroup } from './PantryItemGroup';
 import { Button } from '@/components/shadcn/button';
 import { Card, CardContent } from '@/components/shadcn/card';

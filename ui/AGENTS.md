@@ -11,6 +11,8 @@
 > - [`ai-sdk-5`](../.agent/skills/ai-sdk-5/SKILL.md) - UIMessage, sendMessage
 > - [`playwright`](../.agent/skills/playwright/SKILL.md) - Page Object Model, selectors
 > - [`smart-recipe-planner-test-ui`](../.agent/skills/smart-recipe-planner-test-ui/SKILL.md) - E2E testing specific to this project
+> - [`smart-recipe-planner-i18n`](../.agent/skills/smart-recipe-planner-i18n/SKILL.md) - Reactive Translation (i18n) and hardcoded texts
+> - [`smart-recipe-planner-offline`](../.agent/skills/smart-recipe-planner-offline/SKILL.md) - Standards and strategies for offline capabilities
 
 ### Auto-invoke Skills
 
@@ -29,6 +31,8 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | Writing Smart Recipe Planner UI E2E tests | `smart-recipe-planner-test-ui` |
 | Writing React components | `react-19` |
 | Writing TypeScript types/interfaces | `typescript` |
+| Adding hardcoded texts or toasts | `smart-recipe-planner-i18n` |
+| Fetching data or handling offline fallbacks | `smart-recipe-planner-offline` |
 
 ---
 

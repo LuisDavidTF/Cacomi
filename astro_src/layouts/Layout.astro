@@ -1,0 +1,110 @@
+---
+import { AppProviders } from '@components/providers/AppProviders';
+import { Navbar } from '@components/ui/Navbar';
+import { Footer } from '@components/ui/Footer';
+import { LegalsConsent } from '@components/ui/LegalsConsent';
+import { ViewTransitions } from 'astro:transitions';
+import '../layouts/globals.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	canonicalURL?: string | URL;
+	type?: 'website' | 'article' | 'profile';
+}
+
+const { 
+	title = 'Culina Smart - Planificador de Recetas Social',
+	description = 'Planifica tus comidas de manera inteligente y eficiente.',
+	image = '/og-image.jpg', // Placeholder image URL for Open Graph
+	canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url),
+	type = 'website',
+} = Astro.props;
+
+const enableAds = import.meta.env.PUBLIC_ENABLE_ADS === 'true';
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+		<link rel="icon" type="image/png" href="/icon.png" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="manifest" href="/manifest.json" />
+		<link rel="canonical" href={canonicalURL} />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content={type} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={new URL(image, Astro.url)} />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={canonicalURL} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content={new URL(image, Astro.url)} />
+
+		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F9F7F2" />
+		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1A1816" />
+		
+		<!-- Google Fonts: Inter -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+		
+		<style>
+			html {
+				font-family: 'Inter', sans-serif;
+			}
+		</style>
+		
+		{enableAds && (
+			<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2928206942835905" crossorigin="anonymous"></script>
+		)}
+		
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-X50BSFS1NL"></script>
+		<script is:inline>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'G-X50BSFS1NL');
+		</script>
+		
+		<script type="application/ld+json" set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "WebApplication",
+			"name": "Culina Smart",
+			"applicationCategory": "LifestyleApplication",
+			"operatingSystem": "All",
+			"offers": {
+				"@type": "Offer",
+				"price": "0",
+				"priceCurrency": "USD"
+			}
+		})} />
+		
+		<ViewTransitions />
+	</head>
+	<body class="min-h-screen font-sans antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+		<AppProviders client:load>
+			<div class="flex flex-col min-h-screen">
+				<Navbar client:load />
+
+				<main id="main-content" class="flex-grow pt-16">
+					<slot />
+				</main>
+
+				<Footer client:load />
+			</div>
+
+			<LegalsConsent client:load />
+		</AppProviders>
+	</body>
+</html>

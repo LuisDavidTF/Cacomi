@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useRef } from 'react';
-import Link from 'next/link';
 import { FormInput } from '@components/ui/FormInput';
 import { Button } from '@components/ui/Button';
 import { ErrorState } from '@components/ui/ErrorState';
@@ -12,8 +11,9 @@ import { InstructionsManager } from './form/InstructionsManager';
 import { IngredientsManager } from './form/IngredientsManager';
 import { MagicGenerator } from './form/MagicGenerator';
 
-// Logic Hook
+// Logic Hook & Context
 import { useRecipeForm } from '@hooks/useRecipeForm';
+import { useAuth } from '@context/AuthContext';
 
 export function RecipeForm({ recipeId }) {
   const {
@@ -21,16 +21,27 @@ export function RecipeForm({ recipeId }) {
     status,
     errors,
     apiError,
+    isOwner,
     handlers
   } = useRecipeForm(recipeId);
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { t } = useSettings();
 
   const isEditMode = !!recipeId;
 
-  // Refs for UX enhancements (scroll to error) can be implemented here if needed
-
-  if (status === 'loading') {
+  if (status === 'loading' || isAuthLoading) {
     return <div className="p-12 text-center text-gray-500 dark:text-gray-400 animate-pulse">Cargando datos de la receta...</div>;
+  }
+
+  // --- STRICT AUTHORIZATION UI BLOCK ---
+  // If we have data and user, but ownership fails: block and redirect.
+  if (isEditMode && user && !isOwner && status === 'idle') {
+    if (typeof window !== 'undefined') window.location.href = `/recipes/${recipeId}`;
+    return (
+      <div className="max-w-xl mx-auto mt-20 p-8 text-center">
+        <p className="text-destructive font-bold">Redirigiendo... No tienes permiso.</p>
+      </div>
+    );
   }
 
   if (status === 'error') {
@@ -168,12 +179,12 @@ export function RecipeForm({ recipeId }) {
 
         {/* --- Action Buttons --- */}
         <div className="flex gap-4 pt-4">
-          <Link
+          <a
             href="/"
-            className="flex-1 text-center px-4 py-3 border border-border rounded-lg shadow-sm text-sm font-medium text-foreground bg-background hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-border transition-colors"
+            className="flex-1 flex items-center justify-center px-4 py-3 border border-border rounded-lg shadow-sm text-sm font-medium text-foreground bg-background hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-border transition-colors"
           >
             {t.createRecipe.cancel}
-          </Link>
+          </a>
           <Button
             type="submit"
             isLoading={status === 'submitting'}

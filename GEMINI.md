@@ -15,12 +15,13 @@ Use these skills for detailed patterns on-demand:
 |-------|-------------|-----|
 | `typescript` | Const types, flat interfaces, best practices | [SKILL.md](.agent/skills/typescript/SKILL.md) |
 | `react-19` | React 19 patterns (no useMemo/useCallback) | [SKILL.md](.agent/skills/react-19/SKILL.md) |
-| `nextjs-16` | Next.js 16 App Router, Server Actions | [SKILL.md](.agent/skills/nextjs-16/SKILL.md) |
+| `astro-6` | Astro 6 SSR, Islands, Routing and API Endpoints | [SKILL.md](.agent/skills/astro-6/SKILL.md) |
 | `tailwind-4` | Tailwind CSS 4 patterns | [SKILL.md](.agent/skills/tailwind-4/SKILL.md) |
 | `playwright` | E2E testing patterns | [SKILL.md](.agent/skills/playwright/SKILL.md) |
 | `zod-4` | Schema validation (v4 API) | [SKILL.md](.agent/skills/zod-4/SKILL.md) |
 | `zustand-5` | State management patterns | [SKILL.md](.agent/skills/zustand-5/SKILL.md) |
 | `ai-sdk-5` | Vercel AI SDK patterns | [SKILL.md](.agent/skills/ai-sdk-5/SKILL.md) |
+| `learning-loop` | Protocol for QA, error verification, and skill evolution | [SKILL.md](.agent/skills/learning-loop/SKILL.md) |
 | `smart-recipe-planner-ui` | UI components and styling conventions | [SKILL.md](.agent/skills/smart-recipe-planner-ui/SKILL.md) |
 | `smart-recipe-planner-test-ui` | Frontend E2E testing patterns | [SKILL.md](.agent/skills/smart-recipe-planner-test-ui/SKILL.md) |
 | `smart-recipe-planner-git` | Git, Commits, and PR workflow | [SKILL.md](.agent/skills/smart-recipe-planner-git/SKILL.md) |
@@ -32,8 +33,9 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
 | Action | Skill |
 |--------|-------|
-| App Router / Server Actions | `nextjs-16` |
+| Astro Pages / API / Layouts | `astro-6` |
 | Building AI chat features | `ai-sdk-5` |
+| After fixing ANY error or bug | `learning-loop` |
 | Creating Zod schemas | `zod-4` |
 | Creating/modifying UI components | `smart-recipe-planner-ui` |
 | Managing Commits / PRs | `smart-recipe-planner-git` |
@@ -51,7 +53,7 @@ Smart Recipe Planner is a modern web application for managing recipes and meal p
 
 | Component | Location | Tech Stack |
 |-----------|----------|------------|
-| UI/App | `app/`, `ui/` | Next.js 16, React 19, Tailwind 4 |
+| UI/App | `src/pages/`, `src/layouts/`, `ui/` | Astro 6, React 19, Tailwind 4 |
 | Skills | `.agent/skills/` | Agentic Skills Definitions |
 
 ---

@@ -1,12 +1,10 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@components/ui/Button';
 import { useSettings } from '@context/SettingsContext';
 
 export function LandingHero() {
-    const router = useRouter();
     const { t } = useSettings();
 
     return (
@@ -27,7 +25,7 @@ export function LandingHero() {
                     <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
                         <Button
                             size="lg"
-                            onClick={() => router.push('/register')}
+                            onClick={() => window.location.href = '/register'}
                             className="text-lg px-8 py-6 shadow-lg shadow-primary/25"
                         >
                             {t.landing?.ctaStart || 'Comenzar Gratis'}

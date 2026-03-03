@@ -1,24 +1,22 @@
 'use client'
-import React, { useState, useEffect, useContext, createContext } from 'react';
+import React, { useEffect } from 'react';
+import { create } from 'zustand';
 
-const ToastContext = createContext(null);
+export const useToast = create((set) => ({
+  toast: null,
+  showToast: (message, type = 'success') => {
+    set({ toast: { message, type } });
+    setTimeout(() => {
+      set({ toast: null });
+    }, 3000);
+  }
+}));
 
 export function ToastProvider({ children }) {
-  const [toast, setToast] = useState(null);
-
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
-
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-  };
+  const toast = useToast((state) => state.toast);
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <>
       {children}
       {toast && (
         <div className={`fixed bottom-5 right-5 p-4 rounded-lg shadow-xl text-white
@@ -28,8 +26,6 @@ export function ToastProvider({ children }) {
           {toast.message}
         </div>
       )}
-    </ToastContext.Provider>
+    </>
   );
 }
-
-export const useToast = () => useContext(ToastContext);

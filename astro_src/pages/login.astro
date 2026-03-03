@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { AuthForm } from '@components/auth/AuthForm';
+
+// We do not prerender to allow authentication checks if implemented via middleware
+export const prerender = false;
+---
+
+<Layout title="Inicia Sesión" description="Accede a tu cuenta de Culina Smart para gestionar tus recetas y planificar tus comidas.">
+  <div class="min-h-screen flex items-center justify-center">
+    <AuthForm isRegister={false} client:load />
+  </div>
+</Layout>

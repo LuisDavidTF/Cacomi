@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { LocalPantryItem } from '@/lib/db';
+import type { LocalPantryItem } from '@/lib/db';
 import { Button } from '@/components/shadcn/button';
 import { Trash2, Pencil, Calendar } from 'lucide-react';
 import { useSettings } from '@/context/SettingsContext';

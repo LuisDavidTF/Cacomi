@@ -1,32 +1,33 @@
 {
+  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": false,
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "noEmit": true,
     "jsx": "react-jsx",
+    "esModuleInterop": true,
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
+    "types": [
+      "astro/client",
+      "vite-plugin-pwa/info",
+      "vite-plugin-pwa/pwa-assets"
     ],
-    "baseUrl": ".", 
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
-      ], 
+      ],
       "@components/*": [
         "components/*"
       ],
@@ -38,18 +39,21 @@
       ],
       "@utils/*": [
         "utils/*"
+      ],
+      "@layouts/*": [
+        "astro_src/layouts/*"
       ]
     }
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    "**/*.astro",
+    "env.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }

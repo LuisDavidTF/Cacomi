@@ -102,9 +102,14 @@ function isUser(value: unknown): value is User {
 }
 ```
 
-## Import Types
+## Import Types (REQUIRED)
 
 ```typescript
 import type { User } from "./types";
 import { createUser, type Config } from "./utils";
 ```
+
+> [!CAUTION]
+> **AVOID** importing interfaces or types using standard `import { SomeType }` when using bundlers like Vite/Astro.
+> **BECAUSE** standard imports might cause the bundler to look for a JavaScript export that doesn't exist, leading to `SyntaxError` or hydration failures in the browser.
+> **CORRECT APPROACH**: Always use `import type` or the `type` prefix within an import statement to ensure types are correctly stripped during compilation.

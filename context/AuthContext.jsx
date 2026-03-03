@@ -1,41 +1,34 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { AuthService } from '@/lib/services/auth';
+import React, { useEffect } from 'react';
+import { create } from 'zustand';
 import { CacheManager } from '@utils/cacheManager';
 
-// Context
-const AuthContext = createContext(null);
+export const useAuth = create((set, get) => ({
+  user: null,
+  isLoading: true,
+  isAuthenticated: false,
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const checkUserSession = useCallback(async () => {
+  checkUserSession: async () => {
+    set({ isLoading: true });
     try {
       const res = await fetch('/api/me');
 
-      // 1. Explicitly handle 401 (Token Expired / Invalid)
       if (res.status === 401) {
-        console.warn("Session expired (401). Clearing local session.");
-        setUser(null);
+        set({ user: null, isAuthenticated: false, isLoading: false });
         if (typeof window !== 'undefined') {
           localStorage.removeItem('culina_user_session');
-          // Optional: clear other caches if needed, but session is critical
         }
-        return; // STOP here. Do not throw, do not go to catch.
+        return;
       }
 
-      // 2. Handle other errors (500, etc) -> throw to trigger offline logic
       if (!res.ok) {
         throw new Error('No autenticado o Error de Servidor');
       }
 
-      // 3. Success (200 OK)
       const { user } = await res.json();
-      setUser(user);
+      set({ user, isAuthenticated: true, isLoading: false });
 
-      // SECURITY: Only store safe fields offline. No tokens, no passwords.
       const safeUser = {
         id: user.id,
         name: user.name,
@@ -46,31 +39,20 @@ export const AuthProvider = ({ children }) => {
 
     } catch (error) {
       console.warn("Session check failed (Network/Server):", error);
-      
-      // Offline Persistence: Only try to restore if it was NOT a 401 (which returns early)
-      // If we are here, it's likely a network error or 500.
       if (typeof window !== 'undefined') {
         const cachedUser = localStorage.getItem('culina_user_session');
         if (cachedUser) {
-          console.log("Restoring user session from cache (Offline Mode)");
-          setUser(JSON.parse(cachedUser));
+          set({ user: JSON.parse(cachedUser), isAuthenticated: true, isLoading: false });
         } else {
-          setUser(null);
+          set({ user: null, isAuthenticated: false, isLoading: false });
         }
       } else {
-        setUser(null);
+        set({ user: null, isAuthenticated: false, isLoading: false });
       }
-    } finally {
-      setIsLoading(false);
     }
-  }, []);
+  },
 
-  useEffect(() => {
-    checkUserSession();
-  }, [checkUserSession]);
-
-  const login = useCallback(async (email, password) => {
-    // We use the Next.js API route for Login to handle efficient Cookie setting
+  login: async (email, password) => {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -83,7 +65,6 @@ export const AuthProvider = ({ children }) => {
       throw new Error(data.message || 'Error al iniciar sesión');
     }
 
-    setUser(data.user);
     const safeUser = {
       id: data.user.id,
       name: data.user.name,
@@ -91,11 +72,12 @@ export const AuthProvider = ({ children }) => {
       profile_photo: data.user.profile_photo_url || data.user.profile_photo
     };
     localStorage.setItem('culina_user_session', JSON.stringify(safeUser));
-    return data.user;
-  }, []);
 
-  const register = useCallback(async (name, email, password, passwordConfirmation) => {
-    // Call our internal Next.js API route which proxies to the backend
+    set({ user: data.user, isAuthenticated: true });
+    return data.user;
+  },
+
+  register: async (name, email, password, passwordConfirmation) => {
     const res = await fetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -112,22 +94,17 @@ export const AuthProvider = ({ children }) => {
     }
 
     return data;
-  }, []);
+  },
 
-
-  // ...
-
-  const logout = useCallback(async (options = {}) => {
+  logout: async (options = {}) => {
     const { returnUrl } = options;
     try {
       await fetch('/api/logout', { method: 'POST' });
     } catch (error) {
     } finally {
-      setUser(null);
+      set({ user: null, isAuthenticated: false });
       if (typeof window !== 'undefined') {
         localStorage.removeItem('culina_user_session');
-        // PRIVACY: Clear ALL recipe caches ONLY if explicit logout (no returnUrl)
-        // If auto-logout (returnUrl exists), we preserve cache to restore feed state.
         if (!returnUrl) {
           CacheManager.clearAll();
         }
@@ -139,13 +116,13 @@ export const AuthProvider = ({ children }) => {
 
       window.location.assign(loginUrl);
     }
+  }
+}));
+
+export const AuthProvider = ({ children }) => {
+  useEffect(() => {
+    useAuth.getState().checkUserSession();
   }, []);
 
-  return (
-    <AuthContext.Provider value={{ isAuthenticated: !!user, user, isLoading, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <>{children}</>;
 };
-
-export const useAuth = () => useContext(AuthContext);

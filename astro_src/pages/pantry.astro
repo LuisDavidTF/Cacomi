@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PantryPageClient from '@components/pantry/PantryPageClient';
+
+export const prerender = false;
+---
+
+<Layout title="Mi Despensa" description="Gestiona tus ingredientes para cocinar siempre fresco.">
+  <PantryPageClient client:load />
+</Layout>

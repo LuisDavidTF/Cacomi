@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { LocalPantryItem } from '@/lib/db';
+import type { LocalPantryItem } from '@/lib/db';
 import { BatchList } from './BatchList';
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';

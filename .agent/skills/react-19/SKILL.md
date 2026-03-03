@@ -1,8 +1,11 @@
+```
 ---
 name: react-19
 description: >
   React 19 patterns with React Compiler.
-  Trigger: When writing React 19 components/hooks in .tsx (React Compiler rules, hook patterns, refs as props). If using Next.js App Router/Server Actions, also use nextjs-15.
+  Trigger: When writing| React 18 | 19.1 | Async components, React Compiler (no useMemo/useCallback) |
+| Next.js | Astro 6 | Moved from Next.js App Router to Astro SSR |
+| NextUI | HeroUI 2.8.4 | Package rename only, same API |
 license: Apache-2.0
 metadata:
   author: prowler-cloud

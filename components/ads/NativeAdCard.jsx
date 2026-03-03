@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import Image from 'next/image';
 
 export function NativeAdCard({ adSlotId }) {
     const adRef = useRef(null);
@@ -38,9 +37,9 @@ export function NativeAdCard({ adSlotId }) {
                         className="adsbygoogle block"
                         style={{ display: "block", width: "100%", height: "100%" }}
                         data-ad-format="fluid"
-                        data-ad-layout-key="-6t+ed+2i-1n-4w" // Optional: Example native layout key, user might need to change
+                        data-ad-layout-key="-6t+ed+2i-1n-4w"
                         data-ad-client="ca-pub-2928206942835905"
-                        data-ad-slot={adSlotId || "1234567890"} // Default placeholder, User needs to replace
+                        data-ad-slot={adSlotId || "1234567890"}
                     />
                 </div>
             </div>

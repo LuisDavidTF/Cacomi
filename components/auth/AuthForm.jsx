@@ -3,8 +3,7 @@
 
 // ... imports
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+
 import { useAuth } from '@context/AuthContext';
 import { useToast } from '@context/ToastContext';
 import { useSettings } from '@context/SettingsContext';
@@ -22,9 +21,7 @@ export function AuthForm({ isRegister = false }) {
 
   const { login, register } = useAuth();
   const { t } = useSettings();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl');
+  const callbackUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('callbackUrl') : null;
   const { showToast } = useToast();
 
   const validateEmail = (email) => {
@@ -120,14 +117,13 @@ export function AuthForm({ isRegister = false }) {
         await register(formData.name, formData.email, formData.password, formData.passwordConfirmation);
         showToast(t.auth.registerSuccess, 'success');
 
-        router.push('/login');
+        window.location.href = '/login';
       } else {
         await login(formData.email, formData.password);
         showToast(t.auth.welcome, 'success');
 
         const destination = callbackUrl || '/';
-        router.push(destination);
-        router.refresh();
+        window.location.href = destination;
       }
     } catch (err) {
       setApiError(err.message);
@@ -188,13 +184,13 @@ export function AuthForm({ isRegister = false }) {
             <div className="text-sm">
               <label htmlFor="terms" className="font-medium text-foreground cursor-pointer select-none">
                 {t.auth.termsAccept}
-                <Link href="/terms" className="text-primary hover:underline" target="_blank">
+                <a href="/terms" className="text-primary hover:underline" target="_blank">
                   {t.auth.termsLink}
-                </Link>
+                </a>
                 {t.auth.and}
-                <Link href="/privacy" className="text-primary hover:underline" target="_blank">
+                <a href="/privacy" className="text-primary hover:underline" target="_blank">
                   {t.auth.privacyLink}
-                </Link>
+                </a>
               </label>
               {errors.terms && <p className="text-xs text-destructive mt-1">{errors.terms}</p>}
             </div>
@@ -205,12 +201,12 @@ export function AuthForm({ isRegister = false }) {
       <p className="text-sm text-center text-muted-foreground mt-6">
         {isRegister ? t.auth.haveAccount : t.auth.noAccount}
 
-        <Link
+        <a
           href={isRegister ? '/login' : '/register'}
           className="font-medium text-primary hover:text-primary/80 hover:underline ml-1"
         >
           {isRegister ? t.auth.loginLink : t.auth.registerLink}
-        </Link>
+        </a>
       </p>
     </div>
   );

@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { RecipeForm } from '@components/recipes/RecipeForm';
+
+export const prerender = false;
+---
+
+<Layout title="Crear Receta" description="Añade una nueva receta a tu colección de Culina Smart.">
+  <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+    <div class="max-w-4xl mx-auto">
+      <RecipeForm client:load />
+    </div>
+  </div>
+</Layout>

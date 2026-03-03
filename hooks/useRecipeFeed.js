@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useApiClient } from '@hooks/useApiClient';
 import { useToast } from '@context/ToastContext';
+import { useSettings } from '@context/SettingsContext';
 import { feedCache } from '@utils/feedCache';
 
 /**
@@ -44,6 +45,7 @@ export function useRecipeFeed({ initialData } = {}) {
     const initialFetchedRef = useRef(initialRecipes.length > 0);
     const api = useApiClient();
     const { showToast } = useToast();
+    const { t } = useSettings();
 
     // Refs for tracking state
     const stateRef = useRef({ isLoadingMore, hasMore, nextCursor, isErrorLoadingMore });
@@ -200,9 +202,9 @@ export function useRecipeFeed({ initialData } = {}) {
                 setNextCursor(cached.nextCursor);
                 setHasMore(cached.hasMore);
                 setStatus('success'); // Show success because we have content
-                showToast('Modo Offline: Mostrando recetas guardadas.', 'info');
+                showToast(t.common?.offlineMode || 'Modo Offline: Mostrando recetas guardadas.', 'info');
             } else {
-                setErrorMessage(error.message || 'Error al cargar recetas');
+                setErrorMessage(error.message || t.feed?.error || 'Error al cargar recetas');
                 setStatus('error');
             }
         }

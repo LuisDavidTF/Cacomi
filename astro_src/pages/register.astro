@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { AuthForm } from '@components/auth/AuthForm';
+
+export const prerender = false;
+---
+
+<Layout title="Regístrate" description="Crea tu cuenta en Culina Smart y empieza a organizar tus recetas favoritas hoy mismo.">
+  <div class="min-h-screen flex items-center justify-center">
+    <AuthForm isRegister={true} client:load />
+  </div>
+</Layout>

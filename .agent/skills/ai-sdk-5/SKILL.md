@@ -124,12 +124,13 @@ function Message({ message }: { message: UIMessage }) {
 ## Server-Side (Route Handler)
 
 ```typescript
-// app/api/chat/route.ts
+// src/pages/api/chat.ts
+import type { APIRoute } from 'astro';
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
-export async function POST(req: Request) {
-  const { messages } = await req.json();
+export const POST: APIRoute = async ({ request }) => {
+  const { messages } = await request.json();
 
   const result = await streamText({
     model: openai("gpt-4o"),
@@ -144,13 +145,14 @@ export async function POST(req: Request) {
 ## With LangChain
 
 ```typescript
-// app/api/chat/route.ts
+// src/pages/api/chat.ts
+import type { APIRoute } from 'astro';
 import { toUIMessageStream } from "@ai-sdk/langchain";
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 
-export async function POST(req: Request) {
-  const { messages } = await req.json();
+export const POST: APIRoute = async ({ request }) => {
+  const { messages } = await request.json();
 
   const model = new ChatOpenAI({
     modelName: "gpt-4o",

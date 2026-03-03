@@ -77,11 +77,23 @@ export function usePantry() {
     };
 
     const syncFromBackend = async () => {
-        // Stub: Implement backend fetch here
-        console.log('Bootstrapping: Syncing pantry from backend...');
-        // const response = await fetch('/api/pantry');
-        // const data = await response.json();
-        // await db.pantryItems.bulkAdd(data);
+        try {
+            console.log('Bootstrapping: Syncing pantry from backend...');
+            const response = await fetch('/api/pantry');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.items && Array.isArray(data.items)) {
+                    // Clear and replace with backend data to ensure sync
+                    await db.pantryItems.clear();
+                    await db.pantryItems.bulkAdd(data.items.map((item: any) => ({
+                        ...item,
+                        isSynced: true
+                    })));
+                }
+            }
+        } catch (error) {
+            console.error('Initial sync failed:', error);
+        }
     };
 
     // Bootstrapping: Check if local DB is empty, if so, try to sync from backend
@@ -107,7 +119,8 @@ export function usePantry() {
     }, [syncToBackend]);
 
     return {
-        items: items || [], // Ensure it always returns an array
+        items: items || [],
+        isLoading: items === undefined,
         addItem,
         updateItem,
         removeItem,

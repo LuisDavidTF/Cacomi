@@ -18,7 +18,7 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash, WebFetch, WebSearch, Task
 
 - `typescript` - Const types, flat interfaces
 - `react-19` - No useMemo/useCallback, compiler
-- `nextjs-15` - App Router, Server Actions
+- `astro-6` - Astro Pages, API endpoints, Island Architecture
 - `tailwind-4` - cn() utility, styling rules
 - `zod-4` - Schema validation
 - `zustand-5` - State management
@@ -28,7 +28,7 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash, WebFetch, WebSearch, Task
 ## Tech Stack (Versions)
 
 ```
-Next.js 15.5.9 | React 19.2.2 | Tailwind 4.1.13 | shadcn/ui
+Astro 6.0 | React 19.2.2 | Tailwind 4.1.13 | shadcn/ui
 Zod 4.1.11 | React Hook Form 7.62.0 | Zustand 5.0.8
 NextAuth 5.0.0-beta.30 | Recharts 2.15.4
 HeroUI 2.8.4 (LEGACY - do not add new components)
@@ -212,3 +212,13 @@ cd ui && pnpm start
 ## Resources
 
 - **Documentation**: See [references/](references/) for links to local developer guide
+
+> [!CAUTION]
+> **AVOID** accessing global context properties (like `user` or `settings`) directly without optional chaining `?.` or explicit loading checks in components that hydrate on the client.
+> **BECAUSE** during initial hydration, context values might be null or in a loading state, leading to a `TypeError` and breaking the entire UI.
+> **CORRECT APPROACH**: Implement robust loading states and use `isLoading` flags or optional chaining for all external data access.
+
+> [!CAUTION]
+> **AVOID** naming files or components `CookieConsent`, `Ads`, or `Tracking` as they are frequently blocked by client-side browser extensions.
+> **BECAUSE** this results in `ERR_BLOCKED_BY_CLIENT` and the component failing to load/mount.
+> **CORRECT APPROACH**: Use naming like `Legals`, `Compliance`, or `Privacy` to ensure visibility.

@@ -1,0 +1,45 @@
+import type { APIRoute } from 'astro';
+import { AuthService } from '@/lib/services/auth';
+
+const TOKEN_NAME = 'auth_token';
+
+export const GET: APIRoute = async ({ cookies }) => {
+    const tokenCookie = cookies.get(TOKEN_NAME);
+
+    if (!tokenCookie) {
+        return new Response(JSON.stringify({ message: 'No autorizado' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    const token = tokenCookie.value;
+
+    try {
+        const user = await AuthService.me(token);
+        return new Response(JSON.stringify({ user }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    } catch (error: any) {
+        if (error.status === 401) {
+            cookies.delete(TOKEN_NAME, {
+                path: '/',
+                secure: import.meta.env.PROD,
+                httpOnly: true,
+                sameSite: 'lax'
+            } as any);
+
+            return new Response(JSON.stringify({ message: error.message || 'Token inválido' }), {
+                status: 401,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        const status = error.status || 500;
+        return new Response(JSON.stringify({ message: 'Error interno del servidor', error: error.message }), {
+            status,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+};

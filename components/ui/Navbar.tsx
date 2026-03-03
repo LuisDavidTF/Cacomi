@@ -1,9 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-
 // Context
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -25,7 +22,6 @@ import { Button } from '@/components/shadcn/button';
 export function Navbar() {
     const { isAuthenticated, logout, user } = useAuth();
     const { t } = useSettings();
-    const router = useRouter();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     // Format user name for display (First Name + Last Initial)
@@ -41,14 +37,12 @@ export function Navbar() {
 
     const handleLogoClick = (e: React.MouseEvent) => {
         e.preventDefault();
-        router.push('/');
+        window.location.href = '/';
         setIsMobileMenuOpen(false);
-        // Force a refresh to ensure the recipe feed is up to date when clicking logo
-        router.refresh();
     };
 
     return (
-        <header className="bg-background dark:bg-card shadow-xs sticky top-0 z-50 transition-colors duration-300 border-b border-border/50">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 dark:bg-card/95 backdrop-blur-md shadow-xs transition-colors duration-300 border-b border-border/50">
             <nav
                 className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
                 aria-label="Main Navigation"
@@ -56,7 +50,7 @@ export function Navbar() {
                 <div className="flex justify-between items-center h-16">
 
                     {/* Logo / Home Link */}
-                    <Link href="/" onClick={handleLogoClick} className="shrink-0 flex items-center gap-2">
+                    <a href="/" onClick={handleLogoClick} className="shrink-0 flex items-center gap-2">
                         <span className="text-2xl font-bold text-primary tracking-tight md:flex items-center gap-2 hidden">
                             Culina Smart
                         </span>
@@ -64,7 +58,7 @@ export function Navbar() {
                             {/* App Icon for Mobile */}
                             <img src="/icon.png" alt="App Icon" className="w-8 h-8 rounded-md" />
                         </span>
-                    </Link>
+                    </a>
 
                     {/* Desktop Actions */}
                     <div className="hidden md:flex items-center space-x-4">
@@ -74,31 +68,31 @@ export function Navbar() {
                                     {t?.nav?.greeting || 'Hola'} {getDisplayName()}
                                 </span>
 
-                                <Link
+                                <a
                                     href="/pantry"
                                     className="flex items-center text-sm font-medium px-4 py-2 rounded-lg text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
                                     aria-label={t?.nav?.pantry || 'Despensa'}
                                 >
                                     <ShoppingBasket className="w-4 h-4 mr-2" />
                                     {t?.nav?.pantry || 'Despensa'}
-                                </Link>
+                                </a>
 
-                                <Link
+                                <a
                                     href="/create-recipe"
                                     className="flex items-center text-sm font-medium px-4 py-2 rounded-lg text-primary-foreground bg-primary hover:opacity-90 transition-colors shadow-sm"
                                     aria-label={t?.nav?.create || 'Crear'}
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
                                     {t?.nav?.create || 'Crear'}
-                                </Link>
+                                </a>
 
-                                <Link
+                                <a
                                     href="/settings"
                                     className="p-2 text-muted-foreground hover:text-primary transition-colors"
                                     aria-label={t?.nav?.settings || 'Ajustes'}
                                 >
                                     <Settings className="w-5 h-5" />
-                                </Link>
+                                </a>
 
                                 <button
                                     onClick={logout}
@@ -112,21 +106,21 @@ export function Navbar() {
                         ) : (
                             // Guest Users
                             <>
-                                <Link
+                                <a
                                     href="/login"
                                     className="flex items-center text-sm font-medium px-4 py-2 rounded-lg text-secondary bg-secondary/10 hover:bg-secondary/20 transition-colors"
                                 >
                                     <LogIn className="w-4 h-4 mr-2" />
                                     {t?.nav?.login || 'Entrar'}
-                                </Link>
+                                </a>
 
-                                <Link
+                                <a
                                     href="/register"
                                     className="flex items-center text-sm font-medium px-4 py-2 rounded-lg text-primary-foreground bg-primary hover:opacity-90 shadow-sm transition-colors"
                                 >
                                     <User className="w-4 h-4 mr-2" />
                                     {t?.nav?.register || 'Registro'}
-                                </Link>
+                                </a>
                             </>
                         )}
                     </div>
@@ -157,32 +151,32 @@ export function Navbar() {
                                         {t?.nav?.greeting || 'Hola'} {getDisplayName()}
                                     </div>
 
-                                    <Link
+                                    <a
                                         href="/pantry"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="flex items-center text-base font-medium px-3 py-2 rounded-md text-foreground hover:bg-muted"
                                     >
                                         <ShoppingBasket className="w-5 h-5 mr-3" />
                                         {t?.nav?.pantry || 'Despensa'}
-                                    </Link>
+                                    </a>
 
-                                    <Link
+                                    <a
                                         href="/create-recipe"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="flex items-center text-base font-medium px-3 py-2 rounded-md text-primary bg-primary/10"
                                     >
                                         <Plus className="w-5 h-5 mr-3" />
                                         {t?.nav?.create || 'Crear'}
-                                    </Link>
+                                    </a>
 
-                                    <Link
+                                    <a
                                         href="/settings"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="flex items-center text-base font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-muted"
                                     >
                                         <Settings className="w-5 h-5 mr-3" />
                                         {t?.nav?.settings || 'Ajustes'}
-                                    </Link>
+                                    </a>
 
                                     <button
                                         onClick={() => { logout(); setIsMobileMenuOpen(false); }}
@@ -194,23 +188,23 @@ export function Navbar() {
                                 </>
                             ) : (
                                 <>
-                                    <Link
+                                    <a
                                         href="/login"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="flex items-center text-base font-medium px-3 py-2 rounded-md text-secondary-foreground bg-secondary hover:opacity-90 shadow-sm transition-colors"
                                     >
                                         <LogIn className="w-5 h-5 mr-3" />
                                         {t?.nav?.login || 'Entrar'}
-                                    </Link>
+                                    </a>
 
-                                    <Link
+                                    <a
                                         href="/register"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="flex items-center text-base font-medium px-3 py-2 rounded-md text-primary-foreground bg-primary hover:opacity-90 transition-colors"
                                     >
                                         <User className="w-5 h-5 mr-3" />
                                         {t?.nav?.register || 'Registro'}
-                                    </Link>
+                                    </a>
                                 </>
                             )}
                         </div>
