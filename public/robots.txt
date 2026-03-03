@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://smart-recipe-planner.com/sitemap-index.xml
+Sitemap: https://smart-recipe-planner.pages.dev/sitemap.xml
