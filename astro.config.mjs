@@ -48,7 +48,7 @@ export default defineConfig({
                 ]
             },
             workbox: {
-                globDirectory: '.vercel/output/static',
+                globDirectory: 'dist',
                 globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
             },
         })
