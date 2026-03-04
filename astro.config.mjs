@@ -18,11 +18,18 @@ export default defineConfig({
         : cloudflare({
             imageService: 'cloudflare',
             platformProxy: {
-                enabled: false
+                enabled: true
             }
         }),
     vite: {
-        plugins: [tailwindcss()]
+        plugins: [tailwindcss()],
+        resolve: {
+            alias: isVercel
+                ? {}
+                : {
+                    'react-dom/server': 'react-dom/server.edge',
+                },
+        },
     },
     integrations: [
         react(),
