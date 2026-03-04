@@ -1,8 +1,9 @@
-import * as React from 'react';
-import { useState } from 'react';
+/** @jsxImportSource react */
+import React, { useState } from 'react';
 import type { LocalPantryItem } from '@/lib/db';
 import { BatchList } from './BatchList';
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { formatQuantityUnit } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { AddBatchModal } from './AddBatchModal';
 import { Button } from '@/components/shadcn/button';
@@ -14,29 +15,29 @@ interface PantryItemGroupProps {
     ingredientId: number;
     name: string;
     items: LocalPantryItem[];
-    onUpdate: (id: number, updates: Partial<LocalPantryItem>) => Promise<void>;
-    onRemove: (id: number) => Promise<void>;
-    onAddBatch: (item: Omit<LocalPantryItem, 'id' | 'isSynced'>) => Promise<void>;
+    onUpdate: (id: string, updates: Partial<LocalPantryItem>) => Promise<void>;
+    onRemove: (id: string) => Promise<void>;
+    onAddBatch: (item: Omit<LocalPantryItem, 'id' | 'isSynced' | 'isDeleted' | 'isNew' | 'addedDate'>) => Promise<void>;
+    pauseSync: () => void;
+    resumeSync: () => void;
 }
 
-export function PantryItemGroup({ ingredientId, name, items, onUpdate, onRemove, onAddBatch }: PantryItemGroupProps) {
+export function PantryItemGroup({ ingredientId, name, items, onUpdate, onRemove, onAddBatch, pauseSync, resumeSync }: PantryItemGroupProps) {
     const { t } = useSettings();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
-    // Calculate total quantity (assuming same unit for simplicity, or just showing first unit found)
-    const totalQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
-    const rawUnit = items[0]?.unit || '';
-    const displayUnit = t.units?.[rawUnit] || rawUnit;
+    const totalQuantityRaw = items.reduce((acc, item) => acc + item.quantity, 0);
+    const rawUnit = items[0]?.unitType || '';
+    const { q: displayQty, u: displayUnit } = formatQuantityUnit(totalQuantityRaw, rawUnit, t.units || {});
 
-    // Determine status (red if any batch is expired/expiring soon)
     const now = new Date();
     const threeDaysFromNow = new Date();
     threeDaysFromNow.setDate(now.getDate() + 3);
 
-    let isCritical = false; // Expired
-    let isWarning = false;  // Expiring soon
+    let isCritical = false;
+    let isWarning = false;
 
     items.forEach(item => {
         if (!item.expirationDate) return;
@@ -46,9 +47,6 @@ export function PantryItemGroup({ ingredientId, name, items, onUpdate, onRemove,
     });
 
     const handleDeleteAll = async () => {
-        // Delete all items in this group
-        // We do this by calling onRemove for each ID. 
-        // In a real app, might want a bulk delete API, but this works for local DB loop.
         const promises = items.map(item => item.id && onRemove(item.id));
         await Promise.all(promises);
     };
@@ -76,13 +74,11 @@ export function PantryItemGroup({ ingredientId, name, items, onUpdate, onRemove,
                     <div>
                         <h3 className="font-serif text-lg font-bold text-foreground group-hover:text-primary transition-colors">{name}</h3>
                         <p className="text-sm text-muted-foreground flex items-center gap-2">
-                            <span>{t.pantry.total} <strong className="text-foreground">{totalQuantity} {displayUnit}</strong></span>
+                            <span>{t.pantry.total} <strong className="text-foreground">{displayQty} {displayUnit}</strong></span>
                             {(isCritical || isWarning) && (
                                 <span className={cn(
                                     "inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium",
-                                    isCritical
-                                        ? "bg-destructive/10 text-destructive"
-                                        : "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300"
+                                    isCritical ? "bg-destructive/10 text-destructive" : "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300"
                                 )}>
                                     {t.pantry.attention}
                                 </span>
@@ -92,7 +88,6 @@ export function PantryItemGroup({ ingredientId, name, items, onUpdate, onRemove,
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Allow deleting entire group from header if expanded or just show chevron */}
                     {isExpanded && (
                         <Button
                             variant="ghost"
@@ -118,6 +113,8 @@ export function PantryItemGroup({ ingredientId, name, items, onUpdate, onRemove,
                         items={items}
                         onUpdate={onUpdate}
                         onRemove={onRemove}
+                        pauseSync={pauseSync}
+                        resumeSync={resumeSync}
                     />
                     <div className="mt-4 pt-4 border-t border-border/50 flex justify-end">
                         <Button
@@ -125,6 +122,7 @@ export function PantryItemGroup({ ingredientId, name, items, onUpdate, onRemove,
                             className="text-primary hover:text-primary hover:bg-primary/10"
                             onClick={(e) => {
                                 e.stopPropagation();
+                                pauseSync();
                                 setIsAddModalOpen(true);
                             }}
                         >
@@ -137,14 +135,20 @@ export function PantryItemGroup({ ingredientId, name, items, onUpdate, onRemove,
             {isAddModalOpen && (
                 <AddBatchModal
                     isOpen={isAddModalOpen}
-                    onClose={() => setIsAddModalOpen(false)}
+                    onClose={() => { resumeSync(); setIsAddModalOpen(false); }}
                     onSave={async (batchData) => {
-                        await onAddBatch({
-                            ingredientId,
-                            name,
-                            ...batchData
-                        });
-                        setIsAddModalOpen(false);
+                        try {
+                            await onAddBatch({
+                                ingredientId,
+                                ingredientName: name,
+                                quantity: batchData.quantity,
+                                unitType: batchData.unit as Extract<LocalPantryItem['unitType'], string>,
+                                expirationDate: batchData.expirationDate
+                            });
+                        } finally {
+                            setIsAddModalOpen(false);
+                            resumeSync(); // CRITICAL: Ensure sync resumes
+                        }
                     }}
                     defaultUnit={rawUnit}
                 />

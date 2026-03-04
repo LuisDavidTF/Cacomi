@@ -134,3 +134,13 @@ To use React components interactively:
 > **AVOID** relying purely on API-side authorization for sensitive UI forms like "Edit Recipe".
 > **BECAUSE** while the API might block the save action, the unauthorized user might still see sensitive data or a broken UI before a manual redirection occurs.
 > **CORRECT APPROACH**: Implement reactive ownership checks in the UI (comparing ID and name as fallback) that block rendering and trigger an immediate redirection if authorship can't be verified.
+
+> [!CAUTION]
+> **AVOID** importing Node-only libraries (e.g., `crypto`, `fs`) or using `require()` inside utilities that are executed in Astro Client components or React Islands during SSR.
+> **BECAUSE** Vite's SSR module runner cannot resolve `require` or Node polyfills natively when building the client bundle, causing an aggressive `ReferenceError: require is not defined` crashing the page.
+> **CORRECT APPROACH**: Use standard Web APIs (like `Math.random()`, `crypto.getRandomValues()`) or ensure your utilities are strictly isomorphic. If you must use Node modules, isolate them securely in `.astro` frontmatter or `/api` endpoints.
+
+> [!CAUTION]
+> **AVOID** placing core logic folders (`components`, `hooks`, `lib`, `context`, `utils`) outside the configured `srcDir` (e.g., `astro_src` or `src`) when using TypeScript and JSX.
+> **BECAUSE** even if the build succeeds, the TypeScript Language Server (IDE) often fails to correctly resolve "IntrinsicElements" (like `div`, `span`, `svg`) for files located outside the source root, leading to persistent red errors and broken autocompletado despite correct `tsconfig.json` configurations.
+> **CORRECT APPROACH**: Consolidate all functional source code into the directory defined as `srcDir` in `astro.config.mjs` and ensure `tsconfig.json` paths and `include` arrays point strictly within that directory.

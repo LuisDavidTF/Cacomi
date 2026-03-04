@@ -22,13 +22,7 @@ export default defineConfig({
             }
         }),
     vite: {
-        plugins: [tailwindcss()],
-        resolve: {
-            alias: {
-                // Use edge-compatible version of react-dom/server for Cloudflare Workers
-                'react-dom/server': 'react-dom/server.edge',
-            }
-        }
+        plugins: [tailwindcss()]
     },
     integrations: [
         react(),

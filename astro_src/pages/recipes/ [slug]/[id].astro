@@ -30,6 +30,6 @@ const description = recipe.description || `Aprende a preparar ${recipe.name} con
 
 <Layout title={title} description={description}>
   <main>
-    <RecipeDetail client:load recipe={recipe} />
+    <RecipeDetail client:load recipe={recipe} recipeId={id} />
   </main>
 </Layout>

@@ -113,3 +113,8 @@ import { createUser, type Config } from "./utils";
 > **AVOID** importing interfaces or types using standard `import { SomeType }` when using bundlers like Vite/Astro.
 > **BECAUSE** standard imports might cause the bundler to look for a JavaScript export that doesn't exist, leading to `SyntaxError` or hydration failures in the browser.
 > **CORRECT APPROACH**: Always use `import type` or the `type` prefix within an import statement to ensure types are correctly stripped during compilation.
+
+> [!CAUTION]
+> **AVOID** leaving behind commented-out code (like exports or functions) that you temporarily disabled to isolate a bug.
+> **BECAUSE** this breaks the TypeScript contract for other files that depend on those exports (e.g., throwing `Module has no exported member` or `Property does not exist on type`), forcing other agents or the user to clean up after you.
+> **CORRECT APPROACH**: Always revert your diagnostic/isolation changes (uncomment code) immediately after identifying the root cause of a bug, BEFORE declaring the task complete.

@@ -64,3 +64,5 @@ public/fallback-*
 # playwright
 /playwright-report/
 /test-results/
+
+astro_src/node_modules

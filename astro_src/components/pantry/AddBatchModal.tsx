@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 import React, { useState, useEffect } from 'react';
 import {
     Dialog,
@@ -38,9 +39,22 @@ export function AddBatchModal({ isOpen, onClose, onSave, defaultUnit = 'pza', ex
         e.preventDefault();
         setIsSubmitting(true);
         try {
+            let parsedQuantity = parseFloat(quantity);
+            let finalUnit = unit;
+
+            if (unit === 'kg') {
+                parsedQuantity *= 1000;
+                finalUnit = 'g';
+            } else if (unit === 'L') {
+                parsedQuantity *= 1000;
+                finalUnit = 'ml';
+            } else if (unit === 'pza') {
+                finalUnit = 'pz';
+            }
+
             await onSave({
-                quantity: parseFloat(quantity),
-                unit,
+                quantity: parsedQuantity,
+                unit: finalUnit,
                 expirationDate: expirationDate || null
             });
             onClose();

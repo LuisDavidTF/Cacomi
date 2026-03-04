@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 import React, { useState } from 'react';
 import {
     Dialog,
@@ -29,10 +30,23 @@ export function AddIngredientModal({ isOpen, onClose, onSave }: AddIngredientMod
         e.preventDefault();
         setIsSubmitting(true);
         try {
+            let parsedQuantity = parseFloat(quantity);
+            let finalUnit = unit;
+
+            if (unit === 'kg') {
+                parsedQuantity *= 1000;
+                finalUnit = 'g';
+            } else if (unit === 'L') {
+                parsedQuantity *= 1000;
+                finalUnit = 'ml';
+            } else if (unit === 'pza') {
+                finalUnit = 'pz';
+            }
+
             await onSave({
                 name,
-                quantity: parseFloat(quantity),
-                unit,
+                quantity: parsedQuantity,
+                unit: finalUnit,
                 expirationDate: expirationDate || null
             });
             // Reset form

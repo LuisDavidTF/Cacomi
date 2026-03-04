@@ -9,6 +9,7 @@
     ],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "verbatimModuleSyntax": false,
     "strict": false,
     "allowJs": true,
     "skipLibCheck": true,
@@ -16,9 +17,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "esModuleInterop": true,
     "incremental": true,
     "types": [
+      "react",
+      "react-dom",
       "astro/client",
       "vite-plugin-pwa/info",
       "vite-plugin-pwa/pwa-assets"
@@ -26,19 +30,19 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./*"
+        "astro_src/*"
       ],
       "@components/*": [
-        "components/*"
+        "astro_src/components/*"
       ],
       "@context/*": [
-        "context/*"
+        "astro_src/context/*"
       ],
       "@hooks/*": [
-        "hooks/*"
+        "astro_src/hooks/*"
       ],
       "@utils/*": [
-        "utils/*"
+        "astro_src/utils/*"
       ],
       "@layouts/*": [
         "astro_src/layouts/*"
@@ -46,11 +50,12 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.mts",
-    "**/*.astro",
-    "env.d.ts"
+    ".astro/types.d.ts",
+    "astro_src/**/*.ts",
+    "astro_src/**/*.tsx",
+    "astro_src/**/*.mts",
+    "astro_src/**/*.astro",
+    "astro_src/env.d.ts"
   ],
   "exclude": [
     "node_modules",
