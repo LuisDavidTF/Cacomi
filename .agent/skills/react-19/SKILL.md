@@ -125,3 +125,69 @@ function Input({ ref, ...props }) {
 // ❌ Old way (unnecessary now)
 const Input = forwardRef((props, ref) => <input ref={ref} {...props} />);
 ```
+
+---
+
+## Stale Closures in Timers — Stable Ref Pattern (REQUIRED)
+
+When you schedule a `setTimeout` or `setInterval` inside a `useCallback`, the callback captures the function references **at the time the closure was created**. If React recreates callbacks between the time the timer is scheduled and when it fires, the stale closure will run the old version.
+
+```typescript
+// ❌ NEVER: capture the callback directly in the closure
+const scheduleSync = useCallback(() => {
+    setTimeout(() => {
+        syncToBackend(); // ← stale if syncToBackend was recreated
+    }, 4000);
+}, [syncToBackend]); // if syncToBackend changes mid-timer, closure is stale
+
+// ✅ CORRECT: declare a stable ref at the top of the hook, keep it updated
+const syncToBackendRef = useRef<() => Promise<void>>(async () => {});
+useEffect(() => { syncToBackendRef.current = syncToBackend; }, [syncToBackend]);
+
+const scheduleSync = useCallback(() => {
+    setTimeout(() => {
+        syncToBackendRef.current(); // ← always calls the latest version
+    }, 4000);
+}, []); // no longer depends on syncToBackend
+```
+
+> [!CAUTION]
+> **AVOID** capturing `useCallback` functions directly inside `setTimeout`/`setInterval` closures.
+> **BECAUSE** if the callback's identity changes (due to dep change) between scheduling and firing, the timer still executes the **old stale closure**, which may have outdated state like `isAuthenticated = false`.
+> **CORRECT APPROACH**: Declare a `useRef` of the same type, update it via `useEffect([dep])`, and call `ref.current()` inside the timer. This always calls the latest version regardless of re-renders.
+
+---
+
+## useEffect Cleanup — Unmount vs Dep Change (REQUIRED)
+
+A `useEffect`'s **cleanup function runs in two situations**:
+1. When the component **actually unmounts** (desired)
+2. Before the effect **re-runs** because a dependency changed (often undesired)
+
+This is the source of "false-positive unmount" bugs.
+
+```typescript
+// ❌ BUG: cleanup fires every time syncToBackend recreates (dep change)
+const isUnmounting = useRef(false);
+useEffect(() => {
+    return () => {
+        isUnmounting.current = true; // ← set permanently on EVERY dep change!
+        syncToBackend();
+    };
+}, [syncToBackend]); // cleanup runs when syncToBackend recreates, not only on unmount
+
+// ✅ CORRECT: use [] so cleanup only runs once on actual unmount
+// use a stable ref inside so you still call the latest callback version
+useEffect(() => {
+    return () => {
+        isUnmounting.current = true;
+        syncToBackendRef.current(); // stable ref, no deps needed
+    };
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []); // only unmount
+```
+
+> [!CAUTION]
+> **AVOID** using non-empty deps arrays in `useEffect` whose cleanup sets permanent flags like `isUnmounting = true` or unregisters listeners meant to last the full component lifetime.
+> **BECAUSE** React runs that cleanup function not only on unmount but **before every re-run** of the effect. Any side effect in the cleanup (like setting a boolean flag) will execute on every dependency change, permanently polluting state.
+> **CORRECT APPROACH**: Use `[]` for effects whose cleanup should only run on unmount. Inside the cleanup, access dynamic values via **stable refs** (updated by separate `useEffect([dep])` calls) rather than including them in the deps of the outer effect.
