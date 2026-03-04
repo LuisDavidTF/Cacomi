@@ -1,105 +1,183 @@
-# Smart Recipe Planner
+# 🍽️ Culina Smart — Smart Recipe Planner
 
-Smart Recipe Planner is a modern, AI-powered web application that helps users discover, plan, and create recipes. Built with the latest web technologies, it offers a seamless experience across all devices with full PWA (Progressive Web App) support.
+Culina Smart es una aplicación web moderna e inteligente para planificar comidas, gestionar tu despensa y generar recetas con IA. Construida con tecnologías de punta y optimizada para experiencia de escritorio y móvil con soporte offline completo.
 
-## Features
+## ✨ Features
 
-*   **AI-Powered Chef:** Generate creative recipes tailored to your preferences using advanced AI (Backend Integration).
-*   **PWA Support:** Installable on mobile and desktop with offline capabilities.
-*   **Modern UI/UX:** A premium, responsive design featuring a "Modern Rustic" aesthetic with dark mode support.
-*   **Recipe Management:** Create, edit, and organize your favorite recipes.
-*   **Smart Search:** Filter recipes by ingredients, categories, and more.
-*   **Legal Compliance:** Integrated Privacy Policy, Terms of Service, and Cookie Consent.
-*   **SEO Optimized:** Fully optimized for search engines with dynamic sitemaps and metadata.
+- **🤖 IA Generativa de Recetas** — Genera recetas personalizadas usando Google Gemini (vía API propia en Koyeb).
+- **📦 Gestión de Despensa (Pantry)** — Agrega, edita y elimina ingredientes con sincronización en tiempo real. Funciona offline con IndexedDB (Dexie.js) y sincroniza automáticamente al recuperar conexión.
+- **📋 CRUD de Recetas** — Crea, edita, consulta y elimina tus recetas favoritas.
+- **🔐 Autenticación** — Registro e inicio de sesión seguros con sesiones basadas en cookies JWT (httpOnly).
+- **📱 PWA** — Instalable en móvil y escritorio. Soporte offline con Service Worker.
+- **🌙 Modo Oscuro** — Tema claro/oscuro con persistencia de preferencia.
+- **⚡ SSR + Edge Ready** — Renderizado en servidor con Astro 6, deployable en Cloudflare Pages o Vercel.
+- **🗺️ SEO** — Sitemap dinámico, canonical URLs, Open Graph y meta tags optimizados.
+- **⚖️ Legal** — Política de Privacidad, Términos y Condiciones y consentimiento de cookies integrados.
 
-## Tech Stack
+---
 
-*   **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
-*   **Core:** [React 19](https://react.dev/)
-*   **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
-*   **Language:** JavaScript / TypeScript
-*   **Icons:** Heroicons
+## 🛠️ Tech Stack
 
-## Getting Started
+| Capa | Tecnología |
+|------|-----------|
+| Framework | [Astro 6](https://astro.build/) (SSR, Islands Architecture) |
+| UI | [React 19](https://react.dev/) (Islands) |
+| Estilos | [Tailwind CSS 4](https://tailwindcss.com/) |
+| Componentes | [shadcn/ui](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/) |
+| Estado | [Zustand 5](https://zustand-demo.pmnd.rs/) |
+| Base de datos local | [Dexie.js](https://dexie.org/) (IndexedDB) |
+| Iconos | [Lucide React](https://lucide.dev/) |
+| PWA | [@vite-pwa/astro](https://vite-pwa-org.netlify.app/frameworks/astro) |
+| Lenguaje | TypeScript 5 |
 
-Follow these steps to set up the project locally.
+### Infraestructura
 
-### Prerequisites
+| Servicio | Rol |
+|---------|-----|
+| [Cloudflare Pages](https://pages.cloudflare.com/) | Hosting principal (Edge Workers) |
+| [Vercel](https://vercel.com/) | Hosting alternativo |
+| [Koyeb](https://koyeb.com/) | Backend API (recetas, auth, pantry) |
+| [Google Analytics](https://analytics.google.com/) | Analítica de uso |
+| [Google AdSense](https://adsense.google.com/) | Publicidad |
 
-*   Node.js (v20 or later recommended)
-*   npm or yarn
+---
 
-### Installation
+## 🚀 Getting Started
 
-1.  Clone the repository:
-    ```sh
-    git clone https://github.com/LuisDavidTF/smart-recipe-planner.git
-    cd smart-recipe-planner
-    ```
+### Requisitos
 
-2.  Install dependencies:
-    ```sh
-    npm install
-    ```
+- Node.js **v20** o superior
+- npm
 
-3.  Configure Environment Variables:
-    Create a `.env.local` file in the root directory:
-    ```sh
-    NEXT_PUBLIC_API_URL="your_api_url"
-    NEXT_PUBLIC_BASE_URL="your_base_url"
-    ```
+### Instalación
 
-4.  Run the development server:
-    ```sh
-    npm run dev
-    ```
+```sh
+git clone https://github.com/LuisDavidTF/smart-recipe-planner.git
+cd smart-recipe-planner
+npm install
+```
 
-5.  Open [your_base_url](your_base_url) in your browser.
+### Variables de Entorno
 
-## Project Structure
+Crea un archivo `.env.local` en la raíz del proyecto:
+
+```sh
+# URL de la API backend (Koyeb)
+PUBLIC_API_URL=https://tu-api.com
+
+# URL base de la app
+PUBLIC_SITE_URL=https://tu-sitio.com
+
+# Habilitar anuncios (true/false)
+PUBLIC_ENABLE_ADS=false
+
+# (Opcional) Para purgar caché de Cloudflare en builds
+CLOUDFLARE_ZONE_ID=your_zone_id
+CLOUDFLARE_API_TOKEN=your_api_token
+```
+
+### Desarrollo local
+
+```sh
+npm run dev
+```
+
+Abre [http://localhost:5173](http://localhost:5173) en tu navegador.
+
+---
+
+## 📁 Estructura del Proyecto
 
 ```
 smart-recipe-planner/
-├── app/
-│   ├── api/                # API proxies/routes
-│   ├── recipes/            # Recipe pages
-│   ├── privacy/            # Legal pages
-│   ├── layout.jsx          # Root layout with providers
-│   └── page.jsx            # Landing page
-├── components/
-│   ├── recipes/            # Recipe cards, feed, and forms
-│   ├── ui/                 # Reusable UI library (Modal, Buttons, etc.)
-│   └── auth/               # Authentication forms
-├── lib/
-│   └── services/           # API service layer
-├── hooks/                  # Custom React hooks (useRecipeFeed, etc.)
-└── public/                 # Static assets (PWA icons, manifests)
+├── astro_src/
+│   ├── components/
+│   │   ├── pantry/         # Gestión de despensa (CRUD + sync offline)
+│   │   ├── recipes/        # Tarjetas, feed y formularios de recetas
+│   │   ├── ui/             # Componentes reutilizables (botones, modals, etc.)
+│   │   ├── auth/           # Formularios de autenticación
+│   │   ├── ads/            # Componentes de anuncios (AdSense)
+│   │   └── shadcn/         # Primitivas UI (shadcn/ui)
+│   ├── hooks/
+│   │   ├── useApiClient.js # Cliente HTTP autenticado
+│   │   ├── usePantry.ts    # Lógica de despensa + sync offline
+│   │   ├── useRecipeFeed.js
+│   │   └── useRecipeForm.js
+│   ├── layouts/            # Layout principal (Astro)
+│   ├── lib/
+│   │   ├── db.ts           # Schema IndexedDB (Dexie)
+│   │   ├── utils.ts        # Utilidades generales
+│   │   └── services/       # Capa de servicios API
+│   ├── middleware.ts        # Auth guard + security headers + CSRF
+│   ├── pages/
+│   │   ├── api/            # API endpoints SSR (Astro)
+│   │   ├── index.astro     # Landing page
+│   │   ├── pantry.astro    # Página de despensa
+│   │   ├── create-recipe.astro
+│   │   ├── edit-recipe/    # Edición dinámica
+│   │   ├── recipes/        # Detalle de receta
+│   │   ├── login.astro
+│   │   ├── register.astro
+│   │   ├── settings.astro
+│   │   ├── terms.astro     # Términos y Condiciones
+│   │   ├── privacy.astro   # Política de Privacidad
+│   │   └── ~offline.astro  # Página offline (PWA)
+│   └── utils/              # Utilidades de cliente
+├── public/                 # Íconos PWA, manifest
+├── astro.config.mjs        # Config Astro (adaptadores Cloudflare/Vercel)
+├── wrangler.toml           # Config Cloudflare Pages
+├── tailwind.config.mjs
+└── tsconfig.json
 ```
 
-## Deployment
+---
+
+## 🚢 Deployment
+
+### Cloudflare Pages (Producción)
+
+1. Conecta tu repositorio en el dashboard de Cloudflare Pages.
+2. Configura el build:
+   - **Build command**: `npm run build`
+   - **Build output directory**: `dist`
+3. En **Settings > Functions > Compatibility Flags**, agrega:
+   - `nodejs_compat`
+4. Agrega las variables de entorno en **Settings > Environment variables**.
+
+> La app detecta automáticamente el entorno con `VERCEL=1`. Si esa variable no está presente, usa el adaptador de Cloudflare.
 
 ### Vercel
-The project is fully compatible with Vercel.
-1. Connect your repository to Vercel.
-2. Vercel will automatically detect the Next.js project.
-3. Ensure your Environment Variables are set in the Vercel Dashboard.
 
-### Cloudflare Pages
-To deploy to Cloudflare Pages:
-1. Connect your repository to Cloudflare Pages.
-2. Go to **Settings > Builds & deployments > Build configuration**:
-   - **Build command**: `npm run pages:build`
-   - **Build output directory**: `.vercel/output/static`
-3. Go to **Settings > Functions > Compatibility Flags**:
-   - Add `nodejs_compat` flag.
-4. Add your Environment Variables in **Settings > Environment variables**.
+1. Conecta tu repositorio en Vercel.
+2. Define la variable de entorno `VERCEL=1` en el dashboard de Vercel.
+3. Agrega el resto de variables de entorno.
+4. Deploy automático en cada push a `main`.
 
-## Contributing
+---
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## 🔒 Seguridad
 
-1.  Fork the project
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+- Sesiones con cookies `httpOnly` + `SameSite=Strict`.
+- Headers de seguridad aplicados en middleware: `X-Frame-Options`, `X-Content-Type-Options`, `X-XSS-Protection`, `Referrer-Policy`, `Content-Security-Policy`.
+- Protección básica CSRF en rutas API para mutaciones.
+
+---
+
+## 📜 Legal
+
+- [Términos y Condiciones](/terms)
+- [Política de Privacidad](/privacy)
+
+---
+
+## 🤝 Contributing
+
+¡Las contribuciones son bienvenidas!
+
+1. Fork del proyecto
+2. Crea tu rama: `git checkout -b feat/mi-feature`
+3. Commit: `git commit -m 'feat(scope): descripción'`
+4. Push: `git push origin feat/mi-feature`
+5. Abre un Pull Request
+
+Sigue el estilo de **Conventional Commits**: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`.
