@@ -27,7 +27,25 @@ export const onRequest = defineMiddleware(async (context, next) => {
         return redirect(loginUrl.toString());
     }
 
-    // 4. Proceed and append security headers
+    // 4. CSRF Protection for API Routes — must run BEFORE next() so the handler
+    //    doesn't execute (e.g. set cookies) when the request is rejected.
+    const isDev = import.meta.env.DEV;
+    if (pathname.startsWith('/api') && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+        const origin = request.headers.get('Origin');
+        const referer = request.headers.get('Referer');
+
+        if (!isDev && origin) {
+            const allowedOrigin = new URL(request.url).origin;
+            if (origin !== allowedOrigin && (!referer || !referer.startsWith(allowedOrigin))) {
+                return new Response(
+                    JSON.stringify({ message: 'CSRF token validation failed' }),
+                    { status: 403, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+        }
+    }
+
+    // 5. Proceed and append security headers
     const response = await next();
 
     // Implement Secure Headers
@@ -36,26 +54,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
     response.headers.set('X-XSS-Protection', '1; mode=block');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-    // Basic CSP (can be tightened later)
-    // Ensure development environment allows Vite tools
-    const isDev = import.meta.env.DEV;
+    // Basic CSP
     if (!isDev) {
         const csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://pagead2.googlesyndication.com https://www.google-analytics.com;";
         response.headers.set('Content-Security-Policy', csp);
-    }
-
-    // CSRF Protection for API Routes
-    if (pathname.startsWith('/api') && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
-        const origin = request.headers.get('Origin');
-        const referer = request.headers.get('Referer');
-
-        // Only check if it's not a local dev environment or if origin is available
-        if (!isDev && origin) {
-            const allowedOrigin = new URL(request.url).origin;
-            if (origin !== allowedOrigin && (!referer || !referer.startsWith(allowedOrigin))) {
-                return new Response('CSRF token validation failed', { status: 403 });
-            }
-        }
     }
 
     return response;
