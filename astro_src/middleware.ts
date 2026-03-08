@@ -35,7 +35,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
         const referer = request.headers.get('Referer');
 
         if (!isDev && origin) {
-            const allowedOrigin = new URL(request.url).origin;
+            // Usamos el header "Host" para reconstruir el origen permitido.
+            // En Vercel, request.url puede ser una URL interna del lambda
+            // (ej: smart-recipe-planner-xyz.vercel.app) que no coincide con
+            // el Origin del navegador. El header Host sí refleja el dominio real.
+            const host = request.headers.get('Host') || request.headers.get('X-Forwarded-Host');
+            const proto = request.headers.get('X-Forwarded-Proto') || 'https';
+            const allowedOrigin = host ? `${proto}://${host}` : new URL(request.url).origin;
+
             if (origin !== allowedOrigin && (!referer || !referer.startsWith(allowedOrigin))) {
                 return new Response(
                     JSON.stringify({ message: 'CSRF token validation failed' }),
