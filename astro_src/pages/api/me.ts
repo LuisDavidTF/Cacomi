@@ -23,11 +23,13 @@ export const GET: APIRoute = async ({ cookies }) => {
         });
     } catch (error: any) {
         if (error.status === 401 || error.status === 409) {
-            cookies.delete(TOKEN_NAME, {
+            cookies.set(TOKEN_NAME, '', {
                 path: '/',
                 secure: import.meta.env.PROD,
                 httpOnly: true,
-                sameSite: 'lax'
+                sameSite: 'lax',
+                maxAge: 0,
+                expires: new Date(0),
             } as any);
 
             const message = error.status === 409
