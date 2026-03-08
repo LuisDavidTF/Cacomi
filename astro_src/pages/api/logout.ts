@@ -35,10 +35,11 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
     const url = new URL(request.url);
     const callbackUrl = url.searchParams.get('callbackUrl');
 
-    const loginUrl = new URL('/login', request.url);
-    if (callbackUrl) {
-        loginUrl.searchParams.set('callbackUrl', callbackUrl);
-    }
+    // Usamos path relativo para evitar que request.url (URL interna del lambda en Vercel)
+    // construya una URL absoluta con hostname incorrecto (ej: https://localhost/login)
+    const loginPath = callbackUrl
+        ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+        : '/login';
 
-    return redirect(loginUrl.toString());
+    return redirect(loginPath);
 };
