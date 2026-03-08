@@ -108,23 +108,23 @@ export const useAuth = create((set, get) => ({
 
   logout: async (options = {}) => {
     const { returnUrl } = options;
-    try {
-      await fetch('/api/logout', { method: 'POST' });
-    } catch (error) {
-    } finally {
-      set({ user: null, isAuthenticated: false });
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('culina_user_session');
-        if (!returnUrl) {
-          CacheManager.clearAll();
-        }
+
+    // Limpiamos el estado del cliente antes de navegar
+    set({ user: null, isAuthenticated: false });
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('culina_user_session');
+      if (!returnUrl) {
+        CacheManager.clearAll();
       }
 
-      const loginUrl = returnUrl
-        ? `/login?callbackUrl=${encodeURIComponent(returnUrl)}`
-        : '/login';
+      // Navegamos al endpoint GET /api/logout que borra la cookie y redirige a /login
+      // en una sola respuesta HTTP. Esto es más fiable que un fetch POST + redirect manual
+      // porque elimina la condición de carrera donde la cookie persiste entre dos requests.
+      const logoutUrl = returnUrl
+        ? `/api/logout?callbackUrl=${encodeURIComponent(returnUrl)}`
+        : '/api/logout';
 
-      window.location.assign(loginUrl);
+      window.location.assign(logoutUrl);
     }
   }
 }));
