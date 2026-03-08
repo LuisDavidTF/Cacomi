@@ -22,7 +22,7 @@ export const GET: APIRoute = async ({ cookies }) => {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error: any) {
-        if (error.status === 401) {
+        if (error.status === 401 || error.status === 409) {
             cookies.delete(TOKEN_NAME, {
                 path: '/',
                 secure: import.meta.env.PROD,
@@ -30,8 +30,12 @@ export const GET: APIRoute = async ({ cookies }) => {
                 sameSite: 'lax'
             } as any);
 
-            return new Response(JSON.stringify({ message: error.message || 'Token inválido' }), {
-                status: 401,
+            const message = error.status === 409
+                ? (error.message || 'Cuenta desactivada')
+                : (error.message || 'Token inválido');
+
+            return new Response(JSON.stringify({ message }), {
+                status: error.status,
                 headers: { 'Content-Type': 'application/json' }
             });
         }

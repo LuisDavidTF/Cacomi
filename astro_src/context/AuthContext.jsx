@@ -14,6 +14,16 @@ export const useAuth = create((set, get) => ({
     try {
       const res = await fetch('/api/me');
 
+      if (res.status === 409) {
+        // Cuenta desactivada: limpiar sesión y redirigir a login
+        set({ user: null, isAuthenticated: false, isLoading: false });
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('culina_user_session');
+          window.location.assign('/login');
+        }
+        return;
+      }
+
       if (res.status === 401) {
         set({ user: null, isAuthenticated: false, isLoading: false });
         if (typeof window !== 'undefined') {
