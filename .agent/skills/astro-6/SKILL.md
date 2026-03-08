@@ -164,3 +164,33 @@ To use React components interactively:
 > **AVOID** placing core logic folders (`components`, `hooks`, `lib`, `context`, `utils`) outside the configured `srcDir` (e.g., `astro_src` or `src`) when using TypeScript and JSX.
 > **BECAUSE** even if the build succeeds, the TypeScript Language Server (IDE) often fails to correctly resolve "IntrinsicElements" (like `div`, `span`, `svg`) for files located outside the source root, leading to persistent red errors and broken autocompletado despite correct `tsconfig.json` configurations.
 > **CORRECT APPROACH**: Consolidate all functional source code into the directory defined as `srcDir` in `astro.config.mjs` and ensure `tsconfig.json` paths and `include` arrays point strictly within that directory.
+
+> [!CAUTION]
+> **AVOID** running CSRF validation *after* `await next()` in Astro middleware, and avoid returning plain-text responses from middleware.
+> **BECAUSE** (1) if the CSRF check runs after `next()`, the actual API handler (e.g. login) has already executed and may have set cookies or mutated state before the 403 is returned — the client sees an error but the side-effect already happened. (2) A plain-text `'CSRF token validation failed'` response causes `res.json()` on the client to throw `Unexpected token 'C'...`. (3) On Vercel, `new URL(request.url).origin` inside the SSR function may resolve to an internal deployment URL (e.g. `smart-recipe-planner-xyz.vercel.app`) that differs from the browser's `Origin` header (e.g. `smart-recipe-planner.vercel.app`), causing legitimate requests to be rejected.
+> **CORRECT APPROACH**: Place CSRF validation **before** `await next()`, and always return `JSON.stringify({ message })` with `Content-Type: application/json`:
+> ```ts
+> // ✅ CORRECT — CSRF checked before handler runs
+> if (isMutatingApiRoute) {
+>     if (csrfFails) {
+>         return new Response(JSON.stringify({ message: 'CSRF token validation failed' }), {
+>             status: 403, headers: { 'Content-Type': 'application/json' }
+>         });
+>     }
+> }
+> const response = await next(); // handler runs only if CSRF passes
+> ```
+
+> [!CAUTION]
+> **AVOID** using `new URL('/path', request.url)` to build redirect URLs in Astro API endpoints deployed to Vercel. Also avoid `cookies.delete()` for clearing auth cookies.
+> **BECAUSE** on Vercel's serverless runtime, `request.url` resolves to an internal lambda URL with `https://localhost` as the hostname (e.g. `https://localhost/api/logout`). Constructing URLs from it produces broken absolute URLs like `https://localhost/login` that redirect users off the real domain. Additionally, `cookies.delete()` may not reliably send the `Set-Cookie` header on some adapters, leaving the cookie in the browser.
+> **CORRECT APPROACH**:
+> 1. Use **relative path strings** directly for redirects: `return redirect('/login')` instead of `return redirect(new URL('/login', request.url).toString())`.
+> 2. Clear cookies with **`cookies.set(NAME, '', { maxAge: 0, expires: new Date(0), ... })`** instead of `cookies.delete()`.
+> ```ts
+> // ✅ Relative redirect — works on all adapters
+> return redirect('/login');
+>
+> // ✅ Reliable cookie clearing — works on Vercel and Cloudflare
+> cookies.set(TOKEN_NAME, '', { maxAge: 0, expires: new Date(0), path: '/', httpOnly: true, sameSite: 'lax' });
+> ```
