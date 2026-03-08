@@ -141,6 +141,26 @@ To use React components interactively:
 > **CORRECT APPROACH**: Use standard Web APIs (like `Math.random()`, `crypto.getRandomValues()`) or ensure your utilities are strictly isomorphic. If you must use Node modules, isolate them securely in `.astro` frontmatter or `/api` endpoints.
 
 > [!CAUTION]
+> **AVOID** applying the Vite alias `'react-dom/server': 'react-dom/server.edge'` unconditionally in `astro.config.mjs`.
+> **BECAUSE** `react-dom/server.edge` is the Edge Runtime variant of React compiled without Node.js APIs. When Vite's SSR Module Runner evaluates it in a local Node.js context it triggers `ReferenceError: require is not defined` because the `.edge` build does not expect a CommonJS environment.
+> **CORRECT APPROACH**: Always gate this alias behind a production + Cloudflare check. In `astro.config.mjs`:
+> ```js
+> const isVercel = process.env.VERCEL === '1';
+> const isDev   = process.env.NODE_ENV === 'development';
+>
+> // vite.resolve.alias
+> alias: (isDev || isVercel)
+>     ? {}
+>     : { 'react-dom/server': 'react-dom/server.edge' }
+> ```
+> Additionally, add `ssr.external` for native Node built-ins to prevent Vite from bundling them on Windows:
+> ```js
+> ssr: {
+>     external: ['node:buffer', 'node:async_hooks', 'node:path', 'node:url']
+> }
+> ```
+
+> [!CAUTION]
 > **AVOID** placing core logic folders (`components`, `hooks`, `lib`, `context`, `utils`) outside the configured `srcDir` (e.g., `astro_src` or `src`) when using TypeScript and JSX.
 > **BECAUSE** even if the build succeeds, the TypeScript Language Server (IDE) often fails to correctly resolve "IntrinsicElements" (like `div`, `span`, `svg`) for files located outside the source root, leading to persistent red errors and broken autocompletado despite correct `tsconfig.json` configurations.
 > **CORRECT APPROACH**: Consolidate all functional source code into the directory defined as `srcDir` in `astro.config.mjs` and ensure `tsconfig.json` paths and `include` arrays point strictly within that directory.
