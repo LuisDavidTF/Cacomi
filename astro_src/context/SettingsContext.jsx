@@ -127,7 +127,12 @@ const translations = {
             magicError: 'No se pudo generar el borrador.',
             magicDisclaimer: 'La IA puede cometer errores. Verifica la información antes de publicar.',
             sensitiveWarn: 'Protege tu privacidad: No incluyas datos personales (teléfonos, direcciones) en la descripción.',
-            imageRights: 'Al usar esta URL, confirmas tener derecho a compartir esta imagen.'
+            imageRights: 'Al usar esta URL, confirmas tener derecho a compartir esta imagen.',
+            loadingRecipe: 'Cargando datos de la receta...',
+            noPermission: 'Redirigiendo... No tienes permiso.',
+            deleteStep: 'Eliminar paso',
+            disclaimerRetention: 'Al desactivar/eliminar tu cuenta, conservaremos tus datos temporalmente por 30 días para fines legales y de políticas de la plataforma antes de su eliminación definitiva.',
+            disclaimerTransfer: 'Si pones una receta pública, al desactivar/eliminar tu cuenta, las recetas que ya estén guardadas por otros usuarios podrían transferirse a la comunidad de Culina Smart para mantener la integridad de sus recetarios.'
         },
 
         feed: {
@@ -219,6 +224,30 @@ const translations = {
             save: 'Guardar',
             saving: 'Guardando...',
             unknownIngredient: 'Ingrediente desconocido'
+        },
+
+        profile: {
+            editProfile: 'Editar Perfil',
+            editCover: 'Editar Portada',
+            editPhoto: 'Editar foto de perfil',
+            name: 'Nombre',
+            namePlaceholder: 'Tu nombre',
+            biography: 'Biografía',
+            bioPlaceholder: 'Escribe algo sobre ti...',
+            photoUrl: 'URL de Foto de Perfil',
+            photoPlaceholder: 'https://ejemplo.com/foto.jpg',
+            cancel: 'Cancelar',
+            save: 'Guardar cambios',
+            saving: 'Guardando...',
+            myRecipes: 'Mis Recetas',
+            savedRecipes: 'Guardados',
+            joined: 'Se unió recientemente',
+            errorLoad: 'Error al cargar el perfil',
+            noProfile: 'No se pudo cargar el perfil',
+            loading: 'Cargando perfil...',
+            viewAsMe: 'Ver como yo',
+            viewAsPublic: 'Público',
+            viewAs: 'Vista:'
         }
     },
     en: {
@@ -344,7 +373,12 @@ const translations = {
             magicError: 'Could not generate draft.',
             magicDisclaimer: 'AI can make mistakes. Verify info before publishing.',
             sensitiveWarn: 'Protect your privacy: Do not include personal data (phones, addresses) in the description.',
-            imageRights: 'By using this URL, you confirm you have the right to share this image.'
+            imageRights: 'By using this URL, you confirm you have the right to share this image.',
+            loadingRecipe: 'Loading recipe data...',
+            noPermission: 'Redirecting... You do not have permission.',
+            deleteStep: 'Delete step',
+            disclaimerRetention: 'Upon account deactivation/deletion, we will temporarily retain your data for 30 days for legal and platform policy purposes before permanent deletion.',
+            disclaimerTransfer: 'If you set a recipe to public, upon account deactivation/deletion, recipes already saved by other users may be transferred to the Culina Smart community to maintain their cookbooks\' integrity.'
         },
 
         feed: {
@@ -436,6 +470,30 @@ const translations = {
             save: 'Save',
             saving: 'Saving...',
             unknownIngredient: 'Unknown ingredient'
+        },
+
+        profile: {
+            editProfile: 'Edit Profile',
+            editCover: 'Edit Cover',
+            editPhoto: 'Edit profile photo',
+            name: 'Name',
+            namePlaceholder: 'Your name',
+            biography: 'Biography',
+            bioPlaceholder: 'Write something about yourself...',
+            photoUrl: 'Profile Photo URL',
+            photoPlaceholder: 'https://example.com/photo.jpg',
+            cancel: 'Cancel',
+            save: 'Save changes',
+            saving: 'Saving...',
+            myRecipes: 'My Recipes',
+            savedRecipes: 'Saved',
+            joined: 'Joined recently',
+            errorLoad: 'Error loading profile',
+            noProfile: 'Could not load profile',
+            loading: 'Loading profile...',
+            viewAsMe: 'View as me',
+            viewAsPublic: 'Public',
+            viewAs: 'View:'
         }
     },
     fr: {
@@ -561,7 +619,12 @@ const translations = {
             magicError: 'Impossible de générer le brouillon.',
             magicDisclaimer: 'L\'IA peut faire des erreurs. Vérifiez les infos avant de publier.',
             sensitiveWarn: 'Protégez votre vie privée : N\'incluez pas de données personnelles.',
-            imageRights: 'En utilisant cette URL, vous confirmez avoir le droit de partager cette image.'
+            imageRights: 'En utilisant cette URL, vous confirmez avoir le droit de partager cette image.',
+            loadingRecipe: 'Chargement des données de la recette...',
+            noPermission: 'Redirection... Vous n\'avez pas la permission.',
+            deleteStep: 'Supprimer l\'étape',
+            disclaimerRetention: 'Dès la désactivation/suppression du compte, nous conserverons temporairement vos données pendant 30 jours à des fins légales et de politique de la plateforme avant suppression définitive.',
+            disclaimerTransfer: 'Si vous rendez une recette publique, lors de la désactivation/suppression du compte, les recettes déjà enregistrées par d\'autres utilisateurs peuvent être transférées à la communauté Culina Smart.'
         },
 
         feed: {
@@ -653,6 +716,30 @@ const translations = {
             save: 'Enregistrer',
             saving: 'Enregistrement...',
             unknownIngredient: 'Ingrédient inconnu'
+        },
+
+        profile: {
+            editProfile: 'Modifier le Profil',
+            editCover: 'Modifier la Couverture',
+            editPhoto: 'Modifier la photo de profil',
+            name: 'Nom',
+            namePlaceholder: 'Votre nom',
+            biography: 'Biographie',
+            bioPlaceholder: 'Écrivez quelque chose sur vous...',
+            photoUrl: 'URL de la Photo de Profil',
+            photoPlaceholder: 'https://exemple.com/photo.jpg',
+            cancel: 'Annuler',
+            save: 'Enregistrer les modifications',
+            saving: 'Enregistrement...',
+            myRecipes: 'Mes Recettes',
+            savedRecipes: 'Enregistrés',
+            joined: 'A rejoint récemment',
+            errorLoad: 'Erreur lors du chargement du profil',
+            noProfile: 'Impossible de charger le profil',
+            loading: 'Chargement du profil...',
+            viewAsMe: 'Voir comme moi',
+            viewAsPublic: 'Public',
+            viewAs: 'Vue :'
         }
     }
 };

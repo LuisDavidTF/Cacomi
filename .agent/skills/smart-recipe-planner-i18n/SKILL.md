@@ -12,6 +12,7 @@ Smart Recipe Planner supports multiple languages and uses a **reactive `t` objec
 1. **NO Hardcoded Strings in Components**: Always check if a relevant translated string exists. If not, add the key to the `SettingsContext.jsx` file rather than hardcoding it in the component.
 2. **Accessing Translations**: Use the `useSettings` hook to load translations.
 3. **Safe Access & Fallbacks**: Always use optional chaining and a robust fallback text when referring to deep translation keys, especially for translations that might not exist in all languages yet.
+4. **Proactive Translation**: When creating or generating ANY new feature, section, component, or page, you MUST apply translations from the very start. DO NOT write hardcoded strings and wait for the user to ask for translations later. Add the new translation payload to `SettingsContext.jsx` immediately.
 
 ## Adding New Translations
 

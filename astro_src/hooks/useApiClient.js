@@ -105,6 +105,14 @@ export const useApiClient = () => {
 
     deleteRecipe: (id) => request(`/api/recipes/${id}`, { method: 'DELETE' }),
 
+    getUserProfile: () => request('/api/users/me'),
+
+    updateUserProfile: (data) => request('/api/users/me', { body: data, method: 'PATCH' }),
+
+    changePassword: (data) => request('/api/users/me/password', { body: data, method: 'POST' }),
+
+    deactivateAccount: () => request('/api/users/me', { method: 'DELETE' }),
+
     // TODO: Ticket FE-02 - Remove mock data when backend is ready
     syncPantry: async (changes) => {
       // Offline-first sync with deltas

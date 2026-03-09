@@ -5,6 +5,8 @@ import { useSettings } from '@context/SettingsContext';
 import { Button } from '@components/ui/Button';
 import { useToast } from '@context/ToastContext';
 import { CacheManager } from '@utils/cacheManager';
+import { useApiClient } from '@hooks/useApiClient';
+import { Modal } from '@components/ui/Modal';
 
 function SettingsSection({ title, children }) {
     return (
@@ -22,7 +24,10 @@ function SettingsSection({ title, children }) {
 export default function SettingsPage() {
     const { imageStrategy, setStrategy, clearCache, isWifi, theme, setTheme, language, setLanguage, t } = useSettings();
     const { showToast } = useToast();
+    const apiClient = useApiClient();
     const [isClearing, setIsClearing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [stats, setStats] = useState({ feedCount: 0, visitedCount: 0 });
 
     useEffect(() => {
@@ -49,6 +54,21 @@ export default function SettingsPage() {
             showToast('Error', 'error');
         } finally {
             setIsClearing(false);
+        }
+    };
+
+    const handleDeactivateAccount = async () => {
+        setIsDeleting(true);
+        try {
+            await apiClient.deactivateAccount();
+            showToast(language === 'es' ? 'Cuenta desactivada exitosamente.' : 'Account deactivated successfully.', 'success');
+            setTimeout(() => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }, 1000);
+        } catch (error) {
+            showToast(error.message || 'Error', 'error');
+            setIsDeleting(false);
         }
     };
 
@@ -174,16 +194,23 @@ export default function SettingsPage() {
 
             {/* CUENTA Y PRIVACIDAD */}
             <SettingsSection title={t.settings.account || 'Cuenta y Privacidad'}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <p className="text-sm text-muted-foreground">
-                        {t.settings.deleteAccountDesc || 'Solicitar la baja permanente de tus datos.'}
-                    </p>
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex-1">
+                        <p className="text-sm font-medium text-foreground mb-1">
+                            {t.settings.deleteAccountDesc || 'Solicitar la baja permanente de tus datos.'}
+                        </p>
+                        <p className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
+                            {t.createRecipe.disclaimerRetention}
+                        </p>
+                    </div>
                     <Button
                         variant="ghost"
-                        disabled={true}
-                        className="text-destructive/50 border border-destructive/10 cursor-not-allowed"
+                        onClick={() => setIsDeleteModalOpen(true)}
+                        disabled={isDeleting}
+                        isLoading={isDeleting}
+                        className="text-destructive font-medium border border-destructive/20 hover:bg-destructive hover:text-destructive-foreground transition-colors shrink-0"
                     >
-                        {t.settings.deleteAccount || 'Eliminar mi cuenta'} (Próximamente)
+                        {t.settings.deleteAccount || 'Eliminar mi cuenta'}
                     </Button>
                 </div>
             </SettingsSection>
@@ -192,7 +219,42 @@ export default function SettingsPage() {
                 Culina Smart v1.2.0 • Build 2026
             </div>
 
-
+            {/* Modal de confirmación para eliminar cuenta */}
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={() => !isDeleting && setIsDeleteModalOpen(false)}
+                title={
+                    language === 'es' ? '¿Eliminar cuenta?' :
+                        language === 'en' ? 'Delete account?' :
+                            'Supprimer le compte ?'
+                }
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                        {language === 'es' ? '¿Estás seguro de que deseas eliminar tu cuenta permanentemente? Esta acción no se puede deshacer y perderás el acceso a todas tus recetas privadas e inventario.' :
+                            language === 'en' ? 'Are you sure you want to permanently delete your account? This action cannot be undone and you will lose access to all your private recipes and inventory.' :
+                                'Êtes-vous sûr de vouloir supprimer votre compte définitivement ? Cette action est irréversible et vous perdrez l\'accès à toutes vos recettes privées et à votre inventaire.'}
+                    </p>
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            disabled={isDeleting}
+                        >
+                            {t.settings.cancel || 'Cancelar'}
+                        </Button>
+                        <Button
+                            variant="danger"
+                            onClick={handleDeactivateAccount}
+                            isLoading={isDeleting}
+                            disabled={isDeleting}
+                            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                        >
+                            {t.settings.deleteAccount || 'Eliminar'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

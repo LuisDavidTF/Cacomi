@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApiClient } from '@hooks/useApiClient';
 import { useAuth } from '@context/AuthContext';
 import { useToast } from '@context/ToastContext';
@@ -26,6 +26,7 @@ export function useRecipeForm(recipeId) {
   const [status, setStatus] = useState(isEditMode ? 'loading' : 'idle');
   const [apiError, setApiError] = useState(null);
   const [errors, setErrors] = useState({});
+  const initialPayloadRef = useRef(null);
 
   /**
    * Proactive Authentication Check
@@ -66,7 +67,7 @@ export function useRecipeForm(recipeId) {
         // --- SECURITY CHECK: Ownership Verification ---
         // We defer the finalized check to a dedicated effect below to ensure 'user' is fully loaded.
         // But we store the author info to detect unauthorized access early.
-        setFormData({
+        const loadedData = {
           name: recipe.name || '',
           description: recipe.description || '',
           preparationTime: recipe.preparationTimeMinutes || recipe.preparation_time_minutes || '',
@@ -79,10 +80,31 @@ export function useRecipeForm(recipeId) {
           instructions: Array.isArray(recipe.instructions) ? recipe.instructions : Object.values(recipe.instructions || {}),
           type: recipe.type || 'lunch',
           visibility: recipe.visibility || 'public',
+        };
+
+        setFormData({
+          ...loadedData,
           // Store author info for reactive security check
           _authorId: recipe.user_id || recipe.user?.id,
           _authorName: recipe.authorName || recipe.author_name || recipe.user?.name
         });
+
+        // Store standard payload for dirty checking
+        initialPayloadRef.current = JSON.stringify({
+          name: loadedData.name,
+          description: loadedData.description,
+          type: loadedData.type,
+          visibility: loadedData.visibility,
+          preparationTimeMinutes: parseInt(loadedData.preparationTime, 10),
+          imageUrl: (loadedData.imageUrl || '').trim(),
+          ingredients: loadedData.ingredients.filter(i => (i.name || '').trim()).map(i => ({
+            name: (i.name || '').trim(),
+            unitOfMeasure: (i.unit_of_measure || '').trim(),
+            quantity: i.quantity ? parseFloat(i.quantity) : undefined
+          })),
+          instructions: loadedData.instructions.map(s => (s || '').trim()).filter(s => s.length > 0)
+        });
+
         setStatus('idle');
       })
       .catch(err => {
@@ -238,6 +260,14 @@ export function useRecipeForm(recipeId) {
         .map(s => (s || '').trim())
         .filter(s => s.length > 0)
     };
+
+    // Dirty Checking logic
+    if (isEditMode && initialPayloadRef.current === JSON.stringify(payload)) {
+      // No changes were made, immediately return without making an API request
+      showToast('No se detectaron cambios.', 'success');
+      window.location.href = `/recipes/${recipeId}`;
+      return;
+    }
 
     try {
       if (isEditMode) {

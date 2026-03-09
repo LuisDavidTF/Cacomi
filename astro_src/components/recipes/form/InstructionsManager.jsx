@@ -45,7 +45,7 @@ export function InstructionsManager({ instructions, onChange, onAdd, onRemove, e
               type="button"
               onClick={() => onRemove(index)}
               className="mt-2 text-muted-foreground hover:text-destructive transition-colors p-1 rounded-md hover:bg-destructive/10"
-              title="Eliminar paso"
+              title={t.createRecipe.deleteStep}
               // Prevent removing the last item to ensure form usability
               disabled={instructions.length <= 1}
               aria-disabled={instructions.length <= 1}

@@ -163,6 +163,15 @@ export function MyForm() {
 }
 ```
 
+### Form Dirty Checking (Performance & UX)
+
+**CRITICAL RULE**: Before making an API request to `UPDATE/PATCH` an existing resource, you **MUST** verify if the user actually made changes.
+
+1. **Store original state**: Keep a copy of the initial state (via `useRef` or `isDirty` from React Hook Form).
+2. **Compare on submit**: If the current payload matches the initial state exactly, **DO NOT send the request**.
+3. **Graceful exit**: Simply show a success toast (e.g., "No se detectaron cambios") or close the modal immediately.
+4. **Why?**: Saves unnecessary backend load, prevents triggering "Updated At" timestamps when nothing changed, and is faster for the user.
+
 ## Commands
 
 ```bash

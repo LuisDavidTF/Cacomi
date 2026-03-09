@@ -57,6 +57,12 @@ export class ApiClient {
   register = (userData) => this._request('POST', '/register', userData);
   logout = () => this._request('POST', '/logout');
 
+  // User Profile Endpoints
+  getUserProfile = () => this._request('GET', '/users/me');
+  updateUserProfile = (data) => this._request('PATCH', '/users/me', data);
+  changePassword = (data) => this._request('POST', '/users/me/password', data);
+  deactivateAccount = () => this._request('DELETE', '/users/me');
+
   // TODO: Ticket FE-02 - Remove mock data when backend is ready
   syncPantry = async (items) => {
     // return this._request('POST', '/pantry', { items });

@@ -30,7 +30,7 @@ export function RecipeForm({ recipeId }) {
   const isEditMode = !!recipeId;
 
   if (status === 'loading' || isAuthLoading) {
-    return <div className="p-12 text-center text-gray-500 dark:text-gray-400 animate-pulse">Cargando datos de la receta...</div>;
+    return <div className="p-12 text-center text-gray-500 dark:text-gray-400 animate-pulse">{t.createRecipe.loadingRecipe}</div>;
   }
 
   // --- STRICT AUTHORIZATION UI BLOCK ---
@@ -39,7 +39,7 @@ export function RecipeForm({ recipeId }) {
     if (typeof window !== 'undefined') window.location.href = `/recipes/${recipeId}`;
     return (
       <div className="max-w-xl mx-auto mt-20 p-8 text-center">
-        <p className="text-destructive font-bold">Redirigiendo... No tienes permiso.</p>
+        <p className="text-destructive font-bold">{t.createRecipe.noPermission}</p>
       </div>
     );
   }
@@ -174,6 +174,18 @@ export function RecipeForm({ recipeId }) {
         {apiError && (
           <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{apiError}</span>
+          </div>
+        )}
+
+        {/* --- Legal Disclaimers --- */}
+        {formData.visibility === 'public' && (
+          <div className="bg-muted/30 p-4 border border-border/50 rounded-lg text-xs text-muted-foreground space-y-2 mt-4">
+            <p className="flex items-start gap-2">
+              <svg className="w-4 h-4 shrink-0 mt-0.5 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span>{t.createRecipe.disclaimerTransfer}</span>
+            </p>
           </div>
         )}
 
