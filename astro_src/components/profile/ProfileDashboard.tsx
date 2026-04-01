@@ -6,7 +6,7 @@ import { useApiClient } from "@/hooks/useApiClient";
 import { EditProfileModal } from "./EditProfileModal";
 import { ViewAsToggle, VIEW_AS_OPTIONS, type ViewAsType } from "./ViewAsToggle";
 import { Button } from "@/components/shadcn/button";
-import { Camera, MapPin, CalendarDays, Link as LinkIcon } from "lucide-react";
+import { Camera, MapPin, CalendarDays, Link as LinkIcon, Activity } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 
 export function ProfileDashboard() {
@@ -95,9 +95,24 @@ export function ProfileDashboard() {
                     <div className="flex flex-wrap items-center gap-3 py-4 sm:py-0">
                         <ViewAsToggle viewAs={viewAs} onChange={setViewAs} />
                         {isMeView && (
-                            <Button onClick={() => setIsEditModalOpen(true)} className="rounded-full">
-                                {t?.profile?.editProfile || "Editar Perfil"}
-                            </Button>
+                            <div className="flex gap-2">
+                                <div className="relative">
+                                    <Button
+                                        variant="outline"
+                                        className="rounded-full border-primary/20 text-primary opacity-60 pointer-events-none cursor-not-allowed"
+                                        disabled
+                                    >
+                                        <Activity className="w-4 h-4 mr-2" />
+                                        {t?.nav?.progress || "Mi Progreso"}
+                                    </Button>
+                                    <span className="absolute -top-2 -right-1 bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm z-10 tracking-widest">
+                                        {t?.nav?.comingSoon || 'Soon'}
+                                    </span>
+                                </div>
+                                <Button onClick={() => setIsEditModalOpen(true)} className="rounded-full">
+                                    {t?.profile?.editProfile || "Editar Perfil"}
+                                </Button>
+                            </div>
                         )}
                     </div>
                 </div>

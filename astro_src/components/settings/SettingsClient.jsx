@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@context/SettingsContext';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@components/ui/Button';
 import { useToast } from '@context/ToastContext';
 import { CacheManager } from '@utils/cacheManager';
@@ -24,6 +25,7 @@ function SettingsSection({ title, children }) {
 export default function SettingsPage() {
     const { imageStrategy, setStrategy, clearCache, isWifi, theme, setTheme, language, setLanguage, t } = useSettings();
     const { showToast } = useToast();
+    const { isAuthenticated } = useAuth();
     const apiClient = useApiClient();
     const [isClearing, setIsClearing] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -192,28 +194,30 @@ export default function SettingsPage() {
                 </p>
             </SettingsSection>
 
-            {/* CUENTA Y PRIVACIDAD */}
-            <SettingsSection title={t.settings.account || 'Cuenta y Privacidad'}>
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    <div className="flex-1">
-                        <p className="text-sm font-medium text-foreground mb-1">
-                            {t.settings.deleteAccountDesc || 'Solicitar la baja permanente de tus datos.'}
-                        </p>
-                        <p className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
-                            {t.createRecipe.disclaimerRetention}
-                        </p>
+            {/* CUENTA Y PRIVACIDAD (Solo usuarios autenticados) */}
+            {isAuthenticated && (
+                <SettingsSection title={t.settings.account || 'Cuenta y Privacidad'}>
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-foreground mb-1">
+                                {t.settings.deleteAccountDesc || 'Solicitar la baja permanente de tus datos.'}
+                            </p>
+                            <p className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
+                                {t.createRecipe.disclaimerRetention}
+                            </p>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsDeleteModalOpen(true)}
+                            disabled={isDeleting}
+                            isLoading={isDeleting}
+                            className="text-destructive font-medium border border-destructive/20 hover:bg-destructive hover:text-destructive-foreground transition-colors shrink-0"
+                        >
+                            {t.settings.deleteAccount || 'Eliminar mi cuenta'}
+                        </Button>
                     </div>
-                    <Button
-                        variant="ghost"
-                        onClick={() => setIsDeleteModalOpen(true)}
-                        disabled={isDeleting}
-                        isLoading={isDeleting}
-                        className="text-destructive font-medium border border-destructive/20 hover:bg-destructive hover:text-destructive-foreground transition-colors shrink-0"
-                    >
-                        {t.settings.deleteAccount || 'Eliminar mi cuenta'}
-                    </Button>
-                </div>
-            </SettingsSection>
+                </SettingsSection>
+            )}
 
             <div className="text-center text-xs text-muted-foreground mt-8">
                 Culina Smart v1.2.0 • Build 2026

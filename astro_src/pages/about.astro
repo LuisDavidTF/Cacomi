@@ -1,0 +1,135 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { translations } from '@context/SettingsContext';
+import { Target, Heart, Sparkles, Sprout, ArrowRight, Rss } from 'lucide-react';
+
+export const prerender = false;
+
+const lang = Astro.cookies.get('culina_language')?.value || 'es';
+const t = translations[lang] || translations.es;
+
+const values = [
+  {
+    icon: Sprout,
+    title: t.about.pillar1Title,
+    description: t.about.pillar1Desc
+  },
+  {
+    icon: Sparkles,
+    title: t.about.pillar2Title,
+    description: t.about.pillar2Desc
+  },
+  {
+    icon: Heart,
+    title: t.about.pillar3Title,
+    description: t.about.pillar3Desc
+  }
+];
+---
+
+<Layout 
+  title={t.about.title} 
+  description={t.about.desc}
+>
+  <div class="bg-background min-h-screen">
+    {/* Hero Section */}
+    <section class="relative pt-24 pb-32 overflow-hidden flex flex-col items-center justify-center text-center px-6">
+      <div class="absolute inset-0 z-0">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+      </div>
+      <div class="relative z-10 max-w-4xl mx-auto max-w-[800px]">
+        <div class="inline-flex items-center justify-center gap-2 px-3 py-1 mb-6 rounded-full bg-primary/10 text-primary text-sm font-medium">
+           <Target className="w-4 h-4" /> {t.about.missionTag}
+        </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-foreground !leading-[1.1]">
+          {t.about.missionTitle}
+        </h1>
+        <p class="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+          {t.about.missionDesc}
+        </p>
+      </div>
+    </section>
+
+    {/* Values / Pilares */}
+    <section class="py-24 bg-muted/30 border-y border-border/50">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl font-bold mb-4">{t.about.pillarsTitle}</h2>
+          <p class="text-muted-foreground text-lg max-w-xl mx-auto">
+            {t.about.pillarsSubtitle}
+          </p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+          {values.map(val => (
+            <div class="bg-background border border-border/50 rounded-3xl p-8 lg:p-10 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform origin-top-right">
+                <val.icon className="w-32 h-32" />
+              </div>
+              <div class="relative z-10">
+                <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6">
+                  <val.icon className="w-7 h-7" />
+                </div>
+                <h3 class="text-xl font-bold mb-3">{val.title}</h3>
+                <p class="text-muted-foreground leading-relaxed">{val.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* Future / Blog Mention */}
+    <section class="py-24 px-6 overflow-hidden">
+      <div class="max-w-6xl mx-auto relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-card to-card border border-border shadow-xl">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 blur-[100px] rounded-full"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 blur-[100px] rounded-full"></div>
+        
+        <div class="relative z-10 p-10 md:p-16 lg:p-20 flex flex-col md:flex-row items-center justify-between gap-12">
+          <div class="flex-1 max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 mb-5 rounded-full bg-primary/10 text-primary text-sm font-medium">
+               <Rss className="w-4 h-4" /> {t.about.blogTag}
+            </div>
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 tracking-tight">{t.about.blogTitle}</h2>
+            <p class="text-muted-foreground text-lg sm:text-xl leading-relaxed mb-6">
+              {t.about.blogDesc}
+            </p>
+          </div>
+          <div class="flex-1 w-full max-w-sm lg:max-w-md hidden md:block">
+            <div class="backdrop-blur-xl bg-background/60 border border-border/50 rounded-3xl p-8 shadow-2xl relative rotate-3 translate-x-4">
+              <div class="flex items-center gap-4 mb-6 opacity-40">
+                <div class="w-12 h-12 rounded-full bg-muted animate-pulse"></div>
+                <div class="space-y-3 flex-1">
+                  <div class="h-4 bg-muted animate-pulse rounded w-3/4"></div>
+                  <div class="h-3 bg-muted animate-pulse rounded w-1/2"></div>
+                </div>
+              </div>
+              <div class="space-y-4 opacity-40">
+                <div class="h-3 bg-muted animate-pulse rounded w-full"></div>
+                <div class="h-3 bg-muted animate-pulse rounded w-full"></div>
+                <div class="h-3 bg-muted animate-pulse rounded w-4/5"></div>
+                <div class="h-3 bg-muted animate-pulse rounded w-5/6"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Final CTA */}
+    <section class="py-32 px-6 text-center">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 tracking-tight">{t.about.ctaTitle}</h2>
+        <p class="text-xl text-muted-foreground mb-10 max-w-xl mx-auto">
+          {t.about.ctaDesc}
+        </p>
+        <a 
+          href="/register" 
+          class="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-10 py-4 rounded-full text-lg font-bold hover:scale-[1.03] transition-transform shadow-xl shadow-primary/25"
+        >
+          {t.about.ctaBtn}
+          <ArrowRight className="w-5 h-5" />
+        </a>
+      </div>
+    </section>
+  </div>
+</Layout>

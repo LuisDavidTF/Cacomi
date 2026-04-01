@@ -1,0 +1,37 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { translations } from '../../context/SettingsContext';
+
+export const prerender = false;
+
+const lang = Astro.cookies.get('culina_language')?.value || 'es';
+const t = translations[lang] || translations.es;
+---
+
+<Layout title={`${t.nav.progress} - ${t.nav.comingSoon}`}>
+  <div class="min-h-[70vh] flex flex-col items-center justify-center px-4 py-20 text-center">
+    <div class="w-24 h-24 bg-primary/10 rounded-3xl flex items-center justify-center mb-8 animate-pulse text-primary">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </div>
+    
+    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-6">
+      {t.nav.progress}
+      <span class="block bg-clip-text text-transparent bg-gradient-to-r from-primary to-amber-500 pb-1">
+        {t.nav.comingSoon}
+      </span>
+    </h1>
+    
+    <p class="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+      {t.nav.progressDesc}
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4">
+      <a 
+        href="/" 
+        class="px-8 py-3 bg-primary text-primary-foreground rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+      >
+        {t.notFound.backHome}
+      </a>
+    </div>
+  </div>
+</Layout>
