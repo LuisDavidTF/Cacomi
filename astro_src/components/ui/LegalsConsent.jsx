@@ -39,7 +39,7 @@ export function LegalsConsent() {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 md:p-6 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-all duration-500 ease-in-out dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-[100] p-4 md:p-6 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-all duration-500 ease-in-out dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="text-sm text-foreground/90 leading-relaxed text-center md:text-left">
                     <p className="font-medium mb-1">

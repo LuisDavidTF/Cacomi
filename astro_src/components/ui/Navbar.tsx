@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 // Context
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -14,31 +14,49 @@ import {
     Menu,
     X,
     Plus,
-    ChefHat,
-    ShoppingBasket
+    Home,
+    ShoppingBasket,
+    CalendarDays,
+    Activity
 } from 'lucide-react';
-import { Button } from '@/components/shadcn/button';
 
 export function Navbar() {
     const { isAuthenticated, logout, user } = useAuth();
     const { t } = useSettings();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Check if we are running in the browser to get the path
+    // Close dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsProfileDropdownOpen(false);
+            }
+        };
+
+        if (isProfileDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isProfileDropdownOpen]);
     const [currentPath, setCurrentPath] = useState('');
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (typeof window !== 'undefined') {
             setCurrentPath(window.location.pathname);
         }
     }, []);
 
-    // Format user name for display (First Name + Last Initial)
+    // Format user name for display
     const getDisplayName = () => {
         if (!user || !user.name) return '';
         const nameParts = user.name.split(' ');
-        // If we have more than one name, take the first and the initial of the last
         if (nameParts.length > 1) {
             return `${nameParts[0]} ${nameParts[nameParts.length - 1].charAt(0)}.`;
         }
@@ -47,294 +65,349 @@ export function Navbar() {
 
     const handleLogoClick = (e: React.MouseEvent) => {
         e.preventDefault();
-        if (currentPath === '/' || currentPath === '') {
-            // If already on home and at the top, reload. Otherwise, scroll to top.
-            if (window.scrollY === 0) {
-                window.location.reload();
-            } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+        const activePath = window.location.pathname;
+        if (activePath === '/' || activePath === '') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Garantizar el scroll al elemento más alto si window no responde
+            setTimeout(() => {
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+            }, 10);
         } else {
-            // If on another page, go to home
             window.location.href = '/';
         }
         setIsMobileMenuOpen(false);
     };
 
+    const getIsActive = (path: string) => currentPath === path;
+
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 dark:bg-card/95 backdrop-blur-md shadow-xs transition-colors duration-300 border-b border-border/50">
-            <nav
-                className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
-                aria-label="Main Navigation"
-            >
-                <div className="flex justify-between items-center h-16">
+        <>
+            {/* Desktop Top Navbar (Header) */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 dark:bg-card/95 backdrop-blur-md shadow-xs transition-colors duration-300 border-b border-border/50 hidden md:block">
+                <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Main Navigation">
+                    <div className="flex justify-between items-center h-18 w-full transition-all duration-300">
+                        {/* Left: Logo */}
+                        <div className="flex-1 flex items-center justify-start">
+                            <a href="/" onClick={handleLogoClick} className="shrink-0 flex items-center gap-2 group">
+                                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent tracking-tight md:flex items-center gap-2 hidden group-hover:opacity-80 transition-opacity">
+                                    Culina Smart
+                                </span>
+                            </a>
+                        </div>
 
-                    {/* Logo / Home Link */}
-                    <a href="/" onClick={handleLogoClick} className="shrink-0 flex items-center gap-2">
-                        <span className="text-2xl font-bold text-primary tracking-tight md:flex items-center gap-2 hidden">
-                            Culina Smart
-                        </span>
-                        <span className="md:hidden text-2xl font-bold text-primary tracking-tight flex items-center gap-2">
-                            {/* App Icon for Mobile */}
-                            <img src="/icon.png" alt="App Icon" className="w-8 h-8 rounded-md" />
-                        </span>
-                    </a>
+                        {/* Center: Main Navigation (Desktop) */}
+                        <div className="hidden md:flex flex-1 items-center justify-center space-x-1 lg:space-x-2">
+                            <a href="/" onClick={handleLogoClick} className={`flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <Home className="w-6 h-6" />
+                                <span className="hidden lg:inline">{t?.nav?.home || 'Inicio'}</span>
+                            </a>
+                            <a href="/pantry" className={`flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/pantry') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <ShoppingBasket className="w-6 h-6" />
+                                <span className="hidden lg:inline">{t?.nav?.pantry || 'Despensa'}</span>
+                            </a>
+                            <a href="/planner" className="relative flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap pointer-events-none cursor-not-allowed group">
+                                <div className="flex items-center gap-2 lg:gap-3 opacity-60">
+                                    <CalendarDays className="w-6 h-6 text-muted-foreground" />
+                                    <span className="hidden lg:inline text-muted-foreground">{t?.nav?.planner || 'Planificador'}</span>
+                                </div>
+                                <span className="absolute left-1/2 -translate-x-1/2 -top-2 bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border border-primary/20 backdrop-blur-md z-[60] whitespace-nowrap shadow-sm tracking-widest">
+                                    {t?.nav?.comingSoon || 'Soon'}
+                                </span>
+                            </a>
+                        </div>
 
-                    {/* Desktop Actions */}
-                    <div className="hidden md:flex items-center space-x-3">
-                        {isAuthenticated ? (
-                            <>
-                                {/* Primary Action: Create Recipe */}
-                                <a
-                                    href="/create-recipe"
-                                    className={`flex items-center text-sm font-medium px-4 py-2 rounded-full transition-colors shadow-sm ${currentPath === '/create-recipe' ? 'text-primary-foreground bg-primary pointer-events-none' : 'text-primary-foreground bg-primary hover:bg-primary/90'}`}
-                                    aria-label={t?.nav?.create || 'Crear'}
-                                    onClick={(e) => currentPath === '/create-recipe' && e.preventDefault()}
-                                >
-                                    <Plus className="w-4 h-4 mr-1.5" />
-                                    {t?.nav?.create || 'Crear'}
-                                </a>
-
-                                {/* Profile Dropdown Container */}
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                                        className="flex items-center gap-2 p-1 pl-2 pr-3 rounded-full hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 ml-2 relative z-50"
-                                        aria-haspopup="true"
-                                        aria-expanded={isProfileDropdownOpen}
+                        {/* Right: Actions (Desktop) */}
+                        <div className="hidden md:flex flex-1 items-center justify-end space-x-2 lg:space-x-3">
+                            {isAuthenticated ? (
+                                <>
+                                    <a
+                                        href="/create-recipe"
+                                        className={`group relative flex items-center text-sm lg:text-base font-medium px-4 lg:px-6 py-2 lg:py-2.5 rounded-full transition-all duration-200 overflow-hidden shadow-sm whitespace-nowrap flex-shrink-0 ${getIsActive('/create-recipe') ? 'text-primary-foreground bg-primary pointer-events-none' : 'text-primary-foreground bg-primary hover:scale-[1.02] hover:shadow-md'}`}
+                                        aria-label={t?.nav?.create || 'Crear'}
+                                        onClick={(e) => currentPath === '/create-recipe' && e.preventDefault()}
                                     >
-                                        {user?.profile_photo ? (
-                                            <img src={user.profile_photo} alt="Perfil" className="w-8 h-8 rounded-full border border-border object-cover" />
-                                        ) : (
-                                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary">
-                                                <User className="w-4 h-4" />
-                                            </div>
-                                        )}
-                                        <div className="flex flex-col text-left">
-                                            <span className="text-sm font-medium leading-none text-foreground">
-                                                {getDisplayName()}
-                                            </span>
-                                        </div>
-                                    </button>
+                                        <Plus className="w-5 h-5 mr-1 lg:mr-2 transition-transform group-hover:rotate-90" />
+                                        {t?.nav?.create || 'Crear Receta'}
+                                    </a>
 
-                                    {/* Invisible Overlay for closing dropdown */}
-                                    {isProfileDropdownOpen && (
+                                    {/* Profile Dropdown Container */}
+                                    <div className="relative ml-1" ref={dropdownRef}>
+                                        <button
+                                            onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                                            className="flex items-center gap-2 p-1 pl-2 pr-3 rounded-full border border-transparent hover:border-border/50 hover:bg-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 relative z-50"
+                                            aria-haspopup="true"
+                                            aria-expanded={isProfileDropdownOpen}
+                                        >
+                                            {user?.profile_photo ? (
+                                                <img src={user.profile_photo} alt="Perfil" className="w-8 h-8 rounded-full border border-border/80 object-cover shadow-sm" />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary border border-primary/10">
+                                                    <User className="w-4 h-4" />
+                                                </div>
+                                            )}
+                                            <div className="flex flex-col text-left">
+                                                <span className="text-sm font-semibold leading-none text-foreground">
+                                                    {getDisplayName()}
+                                                </span>
+                                            </div>
+                                        </button>
+
+                                        {/* Dropdown Menu */}
                                         <div
-                                            className="fixed inset-0 z-40"
-                                            onClick={() => setIsProfileDropdownOpen(false)}
-                                        />
-                                    )}
+                                            className={`absolute right-0 mt-2 w-56 transform origin-top-right rounded-2xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-xl ring-1 ring-black/5 transition-all duration-200 ease-out z-50 ${isProfileDropdownOpen ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}
+                                        >
+                                            <div className="p-2 space-y-1">
+                                                {/* Profile Info Header in Dropdown */}
+                                                <div className="px-3 pb-3 pt-2 mb-1 border-b border-border/50">
+                                                    <p className="text-sm font-semibold text-foreground">{user?.name || getDisplayName()}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                                                </div>
 
-                                    {/* Dropdown Menu */}
-                                    <div
-                                        className={`absolute right-0 mt-2 w-56 transform origin-top-right rounded-xl border border-border/50 bg-background/95 backdrop-blur-xl shadow-lg ring-1 ring-black/5 transition-all duration-200 ease-out z-50 ${isProfileDropdownOpen ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}
-                                    >
-                                        <div className="p-2 space-y-1">
-                                            {/* Profile Info Header in Dropdown */}
-                                            <div className="px-3 pb-3 pt-2 mb-1 border-b border-border/50">
-                                                <p className="text-sm font-medium text-foreground">{user?.name || getDisplayName()}</p>
-                                                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                                                <a
+                                                    href="/profile"
+                                                    className={`flex items-center px-3 py-2 text-sm lg:text-base rounded-xl transition-colors ${currentPath === '/profile' ? 'bg-primary/10 text-primary font-medium pointer-events-none' : 'text-foreground/80 hover:bg-muted hover:text-foreground'}`}
+                                                    onClick={(e) => {
+                                                        setIsProfileDropdownOpen(false);
+                                                        if (currentPath === '/profile') e.preventDefault();
+                                                    }}
+                                                >
+                                                    <User className="w-5 h-5 mr-3 opacity-70" />
+                                                    {t?.nav?.profile || 'Mi Perfil'}
+                                                </a>
+
+                                                <a
+                                                    href="/profile/health-progress"
+                                                    className="relative flex items-center px-3 py-2 text-sm lg:text-base rounded-xl transition-colors pointer-events-none cursor-not-allowed group"
+                                                    onClick={(e) => {
+                                                        setIsProfileDropdownOpen(false);
+                                                        e.preventDefault();
+                                                    }}
+                                                >
+                                                    <div className="flex items-center flex-1 opacity-60">
+                                                        <Activity className="w-5 h-5 mr-3" />
+                                                        <span className="flex-1">{t?.nav?.progress || 'Mi Progreso'}</span>
+                                                    </div>
+                                                    <span className="bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm ml-2 tracking-widest z-[60]">
+                                                        {t?.nav?.comingSoon || 'Soon'}
+                                                    </span>
+                                                </a>
+
+                                                <a
+                                                    href="/settings"
+                                                    className={`flex items-center px-3 py-2 text-sm lg:text-base rounded-xl transition-colors ${currentPath === '/settings' ? 'bg-primary/10 text-primary font-medium pointer-events-none' : 'text-foreground/80 hover:bg-muted hover:text-foreground'}`}
+                                                    onClick={(e) => {
+                                                        setIsProfileDropdownOpen(false);
+                                                        if (currentPath === '/settings') e.preventDefault();
+                                                    }}
+                                                >
+                                                    <Settings className="w-5 h-5 mr-3 opacity-70" />
+                                                    {t?.nav?.settings || 'Ajustes'}
+                                                </a>
+
+                                                <div className="h-px bg-border/50 my-1 mx-2" />
+
+                                                <button
+                                                    onClick={() => {
+                                                        setIsProfileDropdownOpen(false);
+                                                        logout();
+                                                    }}
+                                                    className="w-full flex items-center px-3 py-2 text-sm lg:text-base font-medium text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
+                                                >
+                                                    <LogOut className="w-5 h-5 mr-3 opacity-80" />
+                                                    {t?.nav?.logout || 'Cerrar Sesión'}
+                                                </button>
                                             </div>
-
-                                            <a
-                                                href="/profile"
-                                                className={`flex items-center px-3 py-2 text-sm rounded-md transition-colors ${currentPath === '/profile' ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/80 hover:bg-muted hover:text-foreground'}`}
-                                                onClick={(e) => {
-                                                    setIsProfileDropdownOpen(false);
-                                                    if (currentPath === '/profile') e.preventDefault();
-                                                }}
-                                            >
-                                                <User className="w-4 h-4 mr-3 opacity-70" />
-                                                Mi Perfil
-                                            </a>
-
-                                            <a
-                                                href="/pantry"
-                                                className={`flex items-center px-3 py-2 text-sm rounded-md transition-colors ${currentPath === '/pantry' ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/80 hover:bg-muted hover:text-foreground'}`}
-                                                onClick={(e) => {
-                                                    setIsProfileDropdownOpen(false);
-                                                    if (currentPath === '/pantry') e.preventDefault();
-                                                }}
-                                            >
-                                                <ShoppingBasket className="w-4 h-4 mr-3 opacity-70" />
-                                                {t?.nav?.pantry || 'Despensa'}
-                                            </a>
-
-                                            <a
-                                                href="/settings"
-                                                className={`flex items-center px-3 py-2 text-sm rounded-md transition-colors ${currentPath === '/settings' ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/80 hover:bg-muted hover:text-foreground'}`}
-                                                onClick={(e) => {
-                                                    setIsProfileDropdownOpen(false);
-                                                    if (currentPath === '/settings') e.preventDefault();
-                                                }}
-                                            >
-                                                <Settings className="w-4 h-4 mr-3 opacity-70" />
-                                                {t?.nav?.settings || 'Ajustes'}
-                                            </a>
-
-                                            <div className="h-px bg-border/50 my-1 mx-2" />
-
-                                            <button
-                                                onClick={() => {
-                                                    setIsProfileDropdownOpen(false);
-                                                    logout();
-                                                }}
-                                                className="w-full flex items-center px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-md transition-colors"
-                                            >
-                                                <LogOut className="w-4 h-4 mr-3 opacity-70" />
-                                                {t?.nav?.logout || 'Cerrar Sesión'}
-                                            </button>
                                         </div>
                                     </div>
-                                </div>
-                            </>
-                        ) : (
-                            // Guest Users
-                            <>
-                                <a
-                                    href="/login"
-                                    className="flex items-center text-sm font-medium px-4 py-2 rounded-lg text-secondary bg-secondary/10 hover:bg-secondary/20 transition-colors"
-                                >
-                                    <LogIn className="w-4 h-4 mr-2" />
-                                    {t?.nav?.login || 'Entrar'}
-                                </a>
-
-                                <a
-                                    href="/register"
-                                    className="flex items-center text-sm font-medium px-4 py-2 rounded-lg text-primary-foreground bg-primary hover:opacity-90 shadow-sm transition-colors"
-                                >
-                                    <User className="w-4 h-4 mr-2" />
-                                    {t?.nav?.register || 'Registro'}
-                                </a>
-                            </>
-                        )}
-                    </div>
-
-                    {/* Mobile Menu Button */}
-                    <div className="flex md:hidden">
-                        <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-muted focus:outline-none"
-                            aria-label="Abrir menú"
-                        >
-                            {isMobileMenuOpen ? (
-                                <X className="w-6 h-6" />
+                                </>
                             ) : (
-                                <Menu className="w-6 h-6" />
-                            )}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Mobile Menu Dropdown */}
-                <div
-                    className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-screen border-t border-border/50 opacity-100 shadow-xl bg-background/95 backdrop-blur-xl' : 'max-h-0 opacity-0 pointer-events-none'}`}
-                >
-                    <div className="px-4 py-4 space-y-2">
-                        {isAuthenticated ? (
-                            <>
-                                {/* Mobile Profile Header */}
-                                <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-xl bg-muted/50 border border-border/50">
-                                    {user?.profile_photo ? (
-                                        <img src={user.profile_photo} alt="Perfil" className="w-10 h-10 rounded-full border border-border object-cover" />
-                                    ) : (
-                                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10 text-primary">
-                                            <User className="w-5 h-5" />
-                                        </div>
-                                    )}
-                                    <div className="flex flex-col overflow-hidden">
-                                        <span className="text-sm font-semibold text-foreground truncate">{user?.name || getDisplayName()}</span>
-                                        <span className="text-xs text-muted-foreground truncate">{user?.email}</span>
-                                    </div>
-                                </div>
-
-                                <a
-                                    href="/create-recipe"
-                                    className={`flex items-center text-sm font-medium px-4 py-3 rounded-xl transition-colors ${currentPath === '/create-recipe' ? 'text-primary-foreground bg-primary pointer-events-none' : 'text-primary-foreground bg-primary hover:bg-primary/90 shadow-sm'}`}
-                                    onClick={(e) => {
-                                        if (currentPath === '/create-recipe') e.preventDefault();
-                                        else setIsMobileMenuOpen(false);
-                                    }}
-                                >
-                                    <Plus className="w-5 h-5 mr-3" />
-                                    {t?.nav?.create || 'Crear Receta'}
-                                </a>
-
-                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                // Guest Users Actions
+                                <>
                                     <a
-                                        href="/profile"
-                                        className={`flex flex-col items-center justify-center gap-2 p-3 text-sm rounded-xl transition-colors border ${currentPath === '/profile' ? 'bg-primary/10 text-primary border-primary/20 pointer-events-none' : 'text-foreground/80 hover:bg-muted border-border/50'}`}
-                                        onClick={(e) => {
-                                            setIsMobileMenuOpen(false);
-                                            if (currentPath === '/profile') e.preventDefault();
-                                        }}
+                                        href="/settings"
+                                        className="flex items-center text-muted-foreground hover:bg-muted p-2 mr-1 rounded-full transition-colors"
+                                        title={t?.nav?.settings || 'Ajustes'}
                                     >
-                                        <User className="w-5 h-5 opacity-70" />
-                                        <span className="font-medium">Mi Perfil</span>
+                                        <Settings className="w-5 h-5" />
                                     </a>
-
-                                    <a
-                                        href="/pantry"
-                                        className={`flex flex-col items-center justify-center gap-2 p-3 text-sm rounded-xl transition-colors border ${currentPath === '/pantry' ? 'bg-primary/10 text-primary border-primary/20 pointer-events-none' : 'text-foreground/80 hover:bg-muted border-border/50'}`}
-                                        onClick={(e) => {
-                                            setIsMobileMenuOpen(false);
-                                            if (currentPath === '/pantry') e.preventDefault();
-                                        }}
-                                    >
-                                        <ShoppingBasket className="w-5 h-5 opacity-70" />
-                                        <span className="font-medium">{t?.nav?.pantry || 'Despensa'}</span>
-                                    </a>
-                                </div>
-
-                                <a
-                                    href="/settings"
-                                    className={`flex items-center px-4 py-3 rounded-xl text-sm transition-colors mt-2 border ${currentPath === '/settings' ? 'bg-primary/10 text-primary border-primary/20 pointer-events-none' : 'text-foreground/80 hover:bg-muted border-transparent'}`}
-                                    onClick={(e) => {
-                                        setIsMobileMenuOpen(false);
-                                        if (currentPath === '/settings') e.preventDefault();
-                                    }}
-                                >
-                                    <Settings className="w-5 h-5 mr-3 opacity-70" />
-                                    <span className="font-medium">{t?.nav?.settings || 'Ajustes'}</span>
-                                </a>
-
-                                <button
-                                    onClick={() => {
-                                        setIsMobileMenuOpen(false);
-                                        logout();
-                                    }}
-                                    className="w-full flex items-center px-4 py-3 mt-4 text-sm font-medium text-destructive bg-destructive/5 hover:bg-destructive/10 border border-destructive/20 rounded-xl transition-colors"
-                                >
-                                    <LogOut className="w-5 h-5 mr-3 opacity-70" />
-                                    {t?.nav?.logout || 'Cerrar Sesión'}
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    <div className="w-px h-5 bg-border/50 mx-1 hidden lg:block"></div>
                                     <a
                                         href="/login"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className="flex flex-col items-center justify-center gap-2 p-3 text-sm font-medium rounded-xl text-secondary-foreground bg-secondary hover:opacity-90 transition-colors"
+                                        className="flex items-center text-sm lg:text-base font-medium px-4 lg:px-6 py-2 rounded-full text-foreground/80 hover:text-foreground hover:bg-muted/60 transition-colors"
                                     >
-                                        <LogIn className="w-5 h-5" />
                                         {t?.nav?.login || 'Entrar'}
                                     </a>
 
                                     <a
                                         href="/register"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className="flex flex-col items-center justify-center gap-2 p-3 text-sm font-medium rounded-xl text-primary-foreground bg-primary hover:opacity-90 transition-colors"
+                                        className="flex items-center text-sm lg:text-base font-medium px-6 py-2 rounded-full text-primary-foreground bg-primary hover:opacity-90 shadow-sm hover:shadow-md transition-all hover:scale-[1.02]"
                                     >
-                                        <User className="w-5 h-5" />
-                                        {t?.nav?.register || 'Registro'}
+                                        {t?.nav?.register || 'Crear Cuenta'}
                                     </a>
-                                </div>
-                            </>
-                        )}
+                                </>
+                            )}
+                        </div>
                     </div>
+                </nav>
+            </header>
+
+            {/* Mobile Top Header */}
+            <header className="fixed top-0 left-0 right-0 z-40 bg-background/95 dark:bg-card/95 backdrop-blur-md shadow-xs border-b border-border/50 md:hidden h-14 flex items-center justify-between px-4">
+                <div className="w-8"></div> {/* Spacer to center the logo */}
+                <a href="/" onClick={handleLogoClick} className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
+                    <span className="text-xl font-bold text-primary tracking-tight">Culina Smart</span>
+                </a>
+                
+                <div className="flex items-center justify-end w-8">
+                    {!isAuthenticated && (
+                        <a href="/settings" className="p-2 -mr-2 text-muted-foreground hover:bg-muted rounded-full transition-colors" aria-label="Ajustes">
+                            <Settings className="w-5 h-5" />
+                        </a>
+                    )}
+                </div>
+            </header>
+
+            {/* Mobile Bottom Navigation Bar */}
+            <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border/50 md:hidden pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+                <div className="flex w-full h-16">
+                    {/* Home */}
+                    <a href="/" onClick={handleLogoClick} className={`flex flex-1 flex-col items-center justify-center gap-1 ${getIsActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+                        <Home className="w-6 h-6 sm:w-7 sm:h-7" />
+                        <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.home || 'Inicio'}</span>
+                    </a>
+
+                    {/* Pantry */}
+                    <a href="/pantry" className={`flex flex-1 flex-col items-center justify-center gap-1 ${getIsActive('/pantry') ? 'text-primary pointer-events-none' : 'text-muted-foreground hover:text-foreground'}`}>
+                        <ShoppingBasket className="w-6 h-6 sm:w-7 sm:h-7" />
+                        <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.pantry || 'Despensa'}</span>
+                    </a>
+
+                    {/* Create Button (Center) - Only if authenticated */}
+                    {isAuthenticated ? (
+                        <div className="flex flex-1 items-end justify-center pb-2 relative pointer-events-none">
+                            <a href="/create-recipe" className={`absolute bottom-2 bg-primary text-primary-foreground p-3.5 sm:p-4 rounded-full shadow-lg border-4 border-background transition-transform flex items-center justify-center z-10 ${getIsActive('/create-recipe') ? 'pointer-events-none scale-105' : 'pointer-events-auto hover:scale-105'}`}>
+                                <Plus className="w-7 h-7 sm:w-8 sm:h-8" />
+                            </a>
+                        </div>
+                    ) : (
+                        <a href="/planner" className="relative flex flex-1 flex-col items-center justify-center gap-1 pointer-events-none cursor-not-allowed">
+                            <div className="flex flex-col items-center justify-center gap-1 opacity-60">
+                                <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
+                                <span className="text-[10px] font-medium leading-none whitespace-nowrap text-muted-foreground uppercase">{t?.nav?.plan || 'Plan'}</span>
+                            </div>
+                            <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
+                                {t?.nav?.comingSoon || 'Soon'}
+                            </span>
+                        </a>
+                    )}
+
+                    {/* Planner for authenticated users */}
+                    {isAuthenticated && (
+                        <a href="/planner" className="relative flex flex-1 flex-col items-center justify-center gap-1 pointer-events-none cursor-not-allowed">
+                            <div className="flex flex-col items-center justify-center gap-1 opacity-60">
+                                <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
+                                <span className="text-[10px] font-medium leading-none whitespace-nowrap text-muted-foreground uppercase">{t?.nav?.plan || 'Plan'}</span>
+                            </div>
+                            <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
+                                {t?.nav?.comingSoon || 'Soon'}
+                            </span>
+                        </a>
+                    )}
+
+                    {/* Menu / Profile / Login */}
+                    {isAuthenticated ? (
+                        <button onClick={() => setIsMobileMenuOpen(true)} className={`flex flex-1 flex-col items-center justify-center gap-1 ${isMobileMenuOpen ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+                            {user?.profile_photo ? (
+                                <img src={user.profile_photo} alt="Perfil" className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-transparent object-cover" />
+                            ) : (
+                                <Menu className="w-6 h-6 sm:w-7 sm:h-7" />
+                            )}
+                            <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.menu || 'Menú'}</span>
+                        </button>
+                    ) : (
+                        <a href="/login" className="flex flex-1 flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground">
+                            <LogIn className="w-6 h-6 sm:w-7 sm:h-7" />
+                            <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.login || 'Entrar'}</span>
+                        </a>
+                    )}
                 </div>
             </nav>
-        </header>
+
+            {/* Mobile Drawer (Menu) */}
+            {isMobileMenuOpen && isAuthenticated && (
+                <div className="fixed inset-0 z-[60] md:hidden">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+                    <div className="absolute top-auto bottom-0 left-0 right-0 bg-background rounded-t-2xl shadow-2xl p-4 flex flex-col slide-up-animation transition-transform">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-bold">{t?.nav?.accountMenu || 'Menú de Cuenta'}</h2>
+                            <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 rounded-full hover:bg-muted">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        
+                        <div className="flex items-center gap-3 p-3 mb-4 rounded-xl bg-muted/50 border border-border/50">
+                            {user?.profile_photo ? (
+                                <img src={user.profile_photo} alt="Perfil" className="w-12 h-12 rounded-full border border-border object-cover" />
+                            ) : (
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-primary">
+                                    <User className="w-6 h-6" />
+                                </div>
+                            )}
+                            <div className="flex flex-col overflow-hidden">
+                                <span className="text-base font-semibold text-foreground truncate">{user?.name || getDisplayName()}</span>
+                                <span className="text-sm text-muted-foreground truncate">{user?.email}</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                            <a href="/profile" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/profile') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                <User className="w-6 h-6 mr-3 opacity-70" />
+                                {t?.nav?.profile || 'Mi Perfil'}
+                            </a>
+                            <a href="/profile/health-progress" className="relative flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base pointer-events-none cursor-not-allowed overflow-hidden" onClick={() => setIsMobileMenuOpen(false)}>
+                                <div className="flex items-center flex-1 opacity-60">
+                                    <Activity className="w-6 h-6 mr-3 text-muted-foreground" />
+                                    <span className="flex-1">{t?.nav?.progress || 'Mi Progreso'}</span>
+                                </div>
+                                <span className="bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm tracking-widest z-[60]">
+                                    {t?.nav?.comingSoon || 'Soon'}
+                                </span>
+                            </a>
+                            <a href="/settings" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/settings') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                <Settings className="w-6 h-6 mr-3 opacity-70" />
+                                {t?.nav?.settings || 'Ajustes'}
+                            </a>
+                        </div>
+                        
+                        <button onClick={logout} className="w-full flex items-center justify-center px-4 py-3 mt-auto text-base font-bold text-destructive bg-destructive/5 hover:bg-destructive/10 border border-destructive/20 rounded-xl transition-colors">
+                            <LogOut className="w-6 h-6 mr-2 opacity-70" />
+                            {t?.nav?.logout || 'Cerrar Sesión'}
+                        </button>
+                    </div>
+                </div>
+            )}
+            
+            {/* Global style to animate bottom sheet */}
+            <style>{`
+                @keyframes slideUp {
+                    from { transform: translateY(100%); }
+                    to { transform: translateY(0); }
+                }
+                .slide-up-animation {
+                    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                .pb-safe {
+                    padding-bottom: env(safe-area-inset-bottom, 20px);
+                }
+                /* Add padding to body to prevent content from hiding behind bottom nav on mobile */
+                @media (max-width: 768px) {
+                    body {
+                        padding-bottom: calc(4rem + env(safe-area-inset-bottom, 20px));
+                    }
+                }
+            `}</style>
+        </>
     );
 }
