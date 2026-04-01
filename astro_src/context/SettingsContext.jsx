@@ -3,9 +3,48 @@
 import React, { useEffect } from 'react';
 import { create } from 'zustand';
 
-const translations = {
+export const translations = {
     es: {
-        nav: { home: 'Inicio', create: 'Crear Receta', settings: 'Configuración', login: 'Acceder', register: 'Registrarse', logout: 'Salir', greeting: 'Hola,', pantry: 'Despensa' },
+        about: {
+            title: 'Acerca de Culina Smart',
+            desc: 'Conoce la misión, los valores y el futuro de Culina Smart, tu asistente de cocina con Inteligencia Artificial.',
+            missionTag: 'Nuestra Misión',
+            missionTitle: 'Conectando tu despensa con el futuro de la cocina.',
+            missionDesc: 'Culina Smart nació de una necesidad simple: comer bien no debería costar tanto tiempo ni dinero. Usamos tecnología de punta para transformar tus ingredientes en la mejor comida de tu día.',
+            pillarsTitle: 'Nuestros Pilares',
+            pillarsSubtitle: 'Cada línea de código que escribimos está fundamentada en principios creados para mejorar tu vida diaria.',
+            pillar1Title: 'Sostenibilidad',
+            pillar1Desc: 'Reducimos el desperdicio de alimentos conectando exactamente lo que tienes con lo que puedes cocinar.',
+            pillar2Title: 'Innovación Activa',
+            pillar2Desc: 'La inteligencia artificial no es un truco, es tu asistente diario en la cocina para armar menús en segundos.',
+            pillar3Title: 'Salud y Economía',
+            pillar3Desc: 'Empoderamos tus decisiones nutricionales y cuidamos tu bolsillo planificando tu despensa de forma eficiente.',
+            blogTag: 'Próximamente',
+            blogTitle: 'El Diario de Culina (Blog)',
+            blogDesc: 'Creemos en la transparencia y aportación. Pronto lanzaremos un espacio donde nuestro equipo compartirá actualizaciones, recetas curadas, decisiones sobre la Inteligencia Artificial y trucos financieros para el hogar.',
+            ctaTitle: '¿Listo para cambiar tu rutina?',
+            ctaDesc: 'Únete a la comunidad de hogares inteligentes hoy mismo.',
+            ctaBtn: 'Crear mi perfil gratis'
+        },
+        nav: {
+            home: 'Inicio',
+            create: 'Crear Receta',
+            settings: 'Configuración',
+            login: 'Acceder',
+            register: 'Registrarse',
+            logout: 'Salir',
+            greeting: 'Hola,',
+            pantry: 'Despensa',
+            planner: 'Planificador',
+            plan: 'Plan',
+            profile: 'Mi Perfil',
+            progress: 'Mi Progreso',
+            progressDesc: 'Nuestra herramienta de seguimiento de salud y progreso está en desarrollo para ofrecerte las mejores métricas de tu nutrición inteligente.',
+            plannerDesc: 'Organiza tus menús semanales con facilidad y genera listas de compras automáticas.',
+            comingSoon: 'Próximamente',
+            menu: 'Menú',
+            accountMenu: 'Menú de Cuenta'
+        },
 
         landing: {
             heroTitle: 'Planificación de Comidas Inteligente',
@@ -13,7 +52,21 @@ const translations = {
             ctaStart: 'Comenzar Gratis',
             ctaExplore: 'Explorar Recetas',
             featureTitle: 'Todo lo que necesitas para cocinar mejor',
-            featureSubtitle: 'Culina Smart no es solo un recetario, es tu asistente personal de cocina.'
+            featureSubtitle: 'Culina Smart no es solo un recetario, es tu asistente personal de cocina.',
+            evolution: 'La evolución de tu cocina',
+            aiChef: 'IA Chef Integrada',
+            noCommitment: 'Tú tienes el control siempre',
+            pantryAnalysis: 'Análisis de Despensa',
+            ingredientsRecipe: '3 Ingredientes = 12 Recetas*',
+            aiCreativity: '*Los resultados varían según la creatividad de IA.'
+        },
+
+        announcement: {
+            newUpdate: 'Nueva Actualización',
+            title: '¡Descubre lo nuevo en Culina Smart!',
+            desc: 'Hemos implementado mejoras clave en el desempeño de la aplicación, el planificador semanal y en nuestras recomendaciones por inteligencia artificial. Continúa explorando para descubrir una experiencia más fluida y rápida.',
+            btn: '¡Entendido, vamos!',
+            ariaClose: 'Cerrar anuncio'
         },
 
         features: {
@@ -43,6 +96,7 @@ const translations = {
 
         common: {
             rights: 'Todos los derechos reservados.',
+            aboutLink: 'Acerca de',
             edit: 'Editar',
             delete: 'Eliminar',
             cancel: 'Cancelar',
@@ -251,15 +305,68 @@ const translations = {
         }
     },
     en: {
-        nav: { home: 'Home', create: 'New Recipe', settings: 'Settings', login: 'Log In', register: 'Sign Up', logout: 'Log Out', greeting: 'Hi,', pantry: 'Pantry' },
+        about: {
+            title: 'About Culina Smart',
+            desc: 'Learn about the mission, values, and future of Culina Smart, your AI-powered kitchen assistant.',
+            missionTag: 'Our Mission',
+            missionTitle: 'Connecting your pantry with the future of cooking.',
+            missionDesc: 'Culina Smart was born from a simple need: eating well shouldn\'t cost so much time and money. We use cutting-edge tech to turn your ingredients into the best meal of your day.',
+            pillarsTitle: 'Our Pillars',
+            pillarsSubtitle: 'Every line of code we write is grounded in principles designed to improve your daily life.',
+            pillar1Title: 'Sustainability',
+            pillar1Desc: 'We reduce food waste by connecting exactly what you have with what you can cook.',
+            pillar2Title: 'Active Innovation',
+            pillar2Desc: 'AI is not a gimmick; it is your daily kitchen assistant building menus in seconds.',
+            pillar3Title: 'Health & Economy',
+            pillar3Desc: 'We empower your nutritional decisions and take care of your wallet by efficiently planning your pantry.',
+            blogTag: 'Coming Soon',
+            blogTitle: 'The Culina Journal (Blog)',
+            blogDesc: 'We believe in transparency and contribution. Soon we will launch a space where our team will share updates, curated recipes, AI decisions, and financial household tips.',
+            ctaTitle: 'Ready to change your routine?',
+            ctaDesc: 'Join the smart household community today.',
+            ctaBtn: 'Create my free profile'
+        },
+        nav: {
+            home: 'Home',
+            create: 'New Recipe',
+            settings: 'Settings',
+            login: 'Log In',
+            register: 'Sign Up',
+            logout: 'Log Out',
+            greeting: 'Hi,',
+            pantry: 'Pantry',
+            planner: 'Planner',
+            plan: 'Plan',
+            profile: 'My Profile',
+            progress: 'My Progress',
+            progressDesc: 'Our health and progress tracking tool is under development to offer you the best metrics for your smart nutrition.',
+            plannerDesc: 'Organize your weekly menus with ease and generate automatic shopping lists.',
+            comingSoon: 'Coming Soon',
+            menu: 'Menu',
+            accountMenu: 'Account Menu'
+        },
 
         landing: {
             heroTitle: 'Smart Meal Planning',
-            heroSubtitle: 'Discover a new way to cook with AI-generated recipes, manage your pantry, and organize your weekly meals all in one place. Join our community of food lovers and transform your eating habits today.',
+            heroSubtitle: 'Transform your kitchen with AI-powered recipes, effortless pantry management, and personalized meal planning. Join our community and elevate your cooking experience today.',
             ctaStart: 'Start for Free',
             ctaExplore: 'Explore Recipes',
             featureTitle: 'Everything you need to cook better',
-            featureSubtitle: 'Culina Smart is not just a recipe book, it\'s your personal kitchen assistant.'
+            featureSubtitle: 'Culina Smart is not just a recipe book, it\'s your personal kitchen assistant.',
+            evolution: 'The evolution of your kitchen',
+            aiChef: 'Integrated AI Chef',
+            noCommitment: 'You are always in control',
+            pantryAnalysis: 'Pantry Analysis',
+            ingredientsRecipe: '3 Ingredients = 12 Recipes*',
+            aiCreativity: '*Results vary based on AI creativity.'
+        },
+
+        announcement: {
+            newUpdate: 'New Update',
+            title: 'Discover what\'s new in Culina Smart!',
+            desc: 'We have implemented key improvements in app performance, the weekly planner, and our AI recommendations. Continue exploring for a smoother and faster experience.',
+            btn: 'Got it, let\'s go!',
+            ariaClose: 'Close announcement'
         },
 
         features: {
@@ -289,6 +396,7 @@ const translations = {
 
         common: {
             rights: 'All rights reserved.',
+            aboutLink: 'About Us',
             edit: 'Edit',
             delete: 'Delete',
             cancel: 'Cancel',
@@ -497,15 +605,68 @@ const translations = {
         }
     },
     fr: {
-        nav: { home: 'Accueil', create: 'Créer Recette', settings: 'Paramètres', login: 'Connexion', register: 'S\'inscrire', logout: 'Déconnexion', greeting: 'Bonjour,', pantry: 'Garde-manger' },
+        about: {
+            title: 'À propos de Culina Smart',
+            desc: 'Découvrez la mission, les valeurs et l\'avenir de Culina Smart, votre assistant de cuisine IA.',
+            missionTag: 'Notre Mission',
+            missionTitle: 'Connecter votre garde-manger à l\'avenir de la cuisine.',
+            missionDesc: 'Culina Smart est né d\'un besoin simple : bien manger ne devrait pas coûter tant de temps ni d\'argent. Nous utilisons des technologies de pointe pour transformer vos ingrédients.',
+            pillarsTitle: 'Nos Piliers',
+            pillarsSubtitle: 'Chaque ligne de code que nous écrivons est fondée sur des principes conçus pour améliorer votre quotidien.',
+            pillar1Title: 'Durabilité',
+            pillar1Desc: 'Nous réduisons le gaspillage alimentaire en connectant exactement ce que vous avez avec ce que vous pouvez cuisiner.',
+            pillar2Title: 'Innovation Active',
+            pillar2Desc: 'L\'IA n\'est pas un gadget, c\'est votre assistant quotidien pour créer des menus en quelques secondes.',
+            pillar3Title: 'Santé et Économie',
+            pillar3Desc: 'Nous renforçons vos décisions nutritionnelles et prenons soin de votre portefeuille en planifiant efficacement.',
+            blogTag: 'Bientôt Disponible',
+            blogTitle: 'Le Journal de Culina (Blog)',
+            blogDesc: 'Nous croyons en la transparence. Bientôt, nous lancerons un espace où notre équipe partagera des mises à jour, des recettes, et des conseils.',
+            ctaTitle: 'Prêt à changer de routine ?',
+            ctaDesc: 'Rejoignez la communauté des foyers intelligents dès aujourd\'hui.',
+            ctaBtn: 'Créer mon profil gratuit'
+        },
+        nav: {
+            home: 'Accueil',
+            create: 'Créer Recette',
+            settings: 'Paramètres',
+            login: 'Connexion',
+            register: 'S\'inscrire',
+            logout: 'Déconnexion',
+            greeting: 'Bonjour,',
+            pantry: 'Garde-manger',
+            planner: 'Planificateur',
+            plan: 'Plan',
+            profile: 'Mon Profil',
+            progress: 'Mes Progrès',
+            progressDesc: 'Notre outil de suivi de santé et de progrès est en cours de développement pour vous offrir les meilleures mesures de votre nutrition intelligente.',
+            plannerDesc: 'Organisez facilement vos menus hebdomadaires et générez des listes de courses automatiques.',
+            comingSoon: 'Bientôt',
+            menu: 'Menu',
+            accountMenu: 'Menu du Compte'
+        },
 
         landing: {
             heroTitle: 'Planification de Repas Intelligente',
-            heroSubtitle: 'Découvrez une nouvelle façon de cuisiner avec des recettes générées par IA, gérez votre garde-manger et organisez vos repas hebdomadaires au même endroit. Rejoignez notre communauté et transformez votre alimentation aujourd\'hui.',
+            heroSubtitle: 'Transformez votre cuisine avec des recettes assistées par IA, une gestion simplifiée de votre garde-manger et une planification personnalisée. Rejoignez notre communauté et améliorez votre expérience culinaire dès aujourd\'hui.',
             ctaStart: 'Commencer Gratuitement',
             ctaExplore: 'Explorer Recettes',
             featureTitle: 'Tout ce dont vous avez besoin pour mieux cuisiner',
-            featureSubtitle: 'Culina Smart n\'est pas seulement un livre de recettes, c\'est votre assistant de cuisine personnel.'
+            featureSubtitle: 'Culina Smart n\'est pas seulement un livre de recettes, c\'est votre assistant de cuisine personnel.',
+            evolution: 'L\'évolution de votre cuisine',
+            aiChef: 'Chef IA Intégré',
+            noCommitment: 'Vous avez toujours le contrôle',
+            pantryAnalysis: 'Analyse du Garde-manger',
+            ingredientsRecipe: '3 Ingrédients = 12 Recettes*',
+            aiCreativity: '*Les résultats varient selon la créativité de l\'IA.'
+        },
+
+        announcement: {
+            newUpdate: 'Nouvelle Mise à Jour',
+            title: 'Découvrez les nouveautés de Culina Smart !',
+            desc: 'Nous avons implémenté des améliorations clés dans les performances de l\'application, le planificateur hebdomadaire et nos recommandations par IA. Continuez à explorer pour découvrir une expérience plus fluide et plus rapide.',
+            btn: 'Compris, allons-y !',
+            ariaClose: 'Fermer l\'annonce'
         },
 
         features: {
@@ -535,6 +696,7 @@ const translations = {
 
         common: {
             rights: 'Tous droits réservés.',
+            aboutLink: 'À propos',
             edit: 'Modifier',
             delete: 'Supprimer',
             cancel: 'Annuler',

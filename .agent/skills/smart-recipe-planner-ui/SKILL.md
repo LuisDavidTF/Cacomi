@@ -129,6 +129,19 @@ const CHART_COLORS = {
 <CartesianGrid stroke={CHART_COLORS.gridLine} />
 ```
 
+## Navigation UI Rules
+
+**CRITICAL RULE**: Whenever you create or modify navigation components (like Navbars, Sidebar menus, or Tabs):
+1. **Disable active links**: If a link's `href` matches the current active path, you MUST add `pointer-events-none` (coupled with an active state style like text color change) to prevent redundant navigation/page reloads.
+2. **Scroll to top on current page**: For the "Home" or "Logo" button, if the user is already on the homepage (`'/'`), DO NOT reload the page. Instead, smoothly scroll to top: `window.scrollTo({ top: 0, behavior: 'smooth' })`.
+
+## CRITICAL: I18N Translation Rule
+
+**ABSOLUTELY NO HARDCODED STRINGS ARE ALLOWED IN UI COMPONENTS**. 
+1. Every new or existing visible text MUST be mapped to the `SettingsContext.jsx` translation dictionary.
+2. If you are creating a new feature or button, you MUST add the translation keys to **ALL SUPPORTED LANGUAGES** (`es`, `en`, `fr`) in `SettingsContext.jsx`. Do not just add Spanish.
+3. Access translations using `const { t } = useSettings()` and utilize fallback values `t?.section?.key || 'Fallback'`. The fallback is ONLY for safety, you still MUST add the key to the context.
+
 ## Form + Validation Pattern
 
 ```typescript

@@ -56,6 +56,9 @@ Smart Recipe Planner is a modern web application for managing recipes and meal p
 | UI/App | `src/pages/`, `src/layouts/`, `ui/` | Astro 6, React 19, Tailwind 4 |
 | Skills | `.agent/skills/` | Agentic Skills Definitions |
 
+### Translation Rule (CRITICAL)
+- **Every new UI text MUST be translated**. Always add new translations to `astro_src/context/SettingsContext.jsx` for all available languages (e.g., `es`, `en`, `fr`). Do not hardcode strings in Astro or React components. For `.astro` files, use `prerender = false` and read the `culina_language` cookie to extract strings from the exported `translations` object.
+
 ---
 
 ## Commit & Pull Request Guidelines
