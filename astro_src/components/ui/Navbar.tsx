@@ -107,13 +107,13 @@ export function Navbar() {
                                 <ShoppingBasket className="w-6 h-6" />
                                 <span className="hidden lg:inline">{t?.nav?.pantry || 'Despensa'}</span>
                             </a>
-                            <a href="/planner" className="relative flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap pointer-events-none cursor-not-allowed group">
-                                <div className="flex items-center gap-2 lg:gap-3 opacity-60">
-                                    <CalendarDays className="w-6 h-6 text-muted-foreground" />
-                                    <span className="hidden lg:inline text-muted-foreground">{t?.nav?.planner || 'Planificador'}</span>
+                            <a href="/planner" className={`relative flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap group ${getIsActive('/planner') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <div className="flex items-center gap-2 lg:gap-3">
+                                    <CalendarDays className={`w-6 h-6 ${getIsActive('/planner') ? 'text-primary' : 'text-muted-foreground'}`} />
+                                    <span className={`hidden lg:inline ${getIsActive('/planner') ? 'text-primary' : 'text-muted-foreground'}`}>{t?.nav?.planner || 'Planificador'}</span>
                                 </div>
                                 <span className="absolute left-1/2 -translate-x-1/2 -top-2 bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border border-primary/20 backdrop-blur-md z-[60] whitespace-nowrap shadow-sm tracking-widest">
-                                    {t?.nav?.comingSoon || 'Soon'}
+                                    {t?.nav?.beta || 'Beta'}
                                 </span>
                             </a>
                         </div>
@@ -292,26 +292,26 @@ export function Navbar() {
                             </a>
                         </div>
                     ) : (
-                        <a href="/planner" className="relative flex flex-1 flex-col items-center justify-center gap-1 pointer-events-none cursor-not-allowed">
-                            <div className="flex flex-col items-center justify-center gap-1 opacity-60">
-                                <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
-                                <span className="text-[10px] font-medium leading-none whitespace-nowrap text-muted-foreground uppercase">{t?.nav?.plan || 'Plan'}</span>
+                        <a href="/planner" className={`relative flex flex-1 flex-col items-center justify-center gap-1 ${getIsActive('/planner') ? 'text-primary pointer-events-none' : 'text-muted-foreground hover:text-foreground'}`}>
+                            <div className="flex flex-col items-center justify-center gap-1">
+                                <CalendarDays className={`w-6 h-6 sm:w-7 sm:h-7 ${getIsActive('/planner') ? 'text-primary' : 'text-muted-foreground'}`} />
+                                <span className={`text-[10px] font-medium leading-none whitespace-nowrap uppercase ${getIsActive('/planner') ? 'text-primary' : 'text-muted-foreground'}`}>{t?.nav?.plan || 'Plan'}</span>
                             </div>
                             <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
-                                {t?.nav?.comingSoon || 'Soon'}
+                                {t?.nav?.beta || 'Beta'}
                             </span>
                         </a>
                     )}
 
                     {/* Planner for authenticated users */}
                     {isAuthenticated && (
-                        <a href="/planner" className="relative flex flex-1 flex-col items-center justify-center gap-1 pointer-events-none cursor-not-allowed">
-                            <div className="flex flex-col items-center justify-center gap-1 opacity-60">
-                                <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
-                                <span className="text-[10px] font-medium leading-none whitespace-nowrap text-muted-foreground uppercase">{t?.nav?.plan || 'Plan'}</span>
+                        <a href="/planner" className={`relative flex flex-1 flex-col items-center justify-center gap-1 ${getIsActive('/planner') ? 'text-primary pointer-events-none' : 'text-muted-foreground hover:text-foreground'}`}>
+                            <div className="flex flex-col items-center justify-center gap-1">
+                                <CalendarDays className={`w-6 h-6 sm:w-7 sm:h-7 ${getIsActive('/planner') ? 'text-primary' : 'text-muted-foreground'}`} />
+                                <span className={`text-[10px] font-medium leading-none whitespace-nowrap uppercase ${getIsActive('/planner') ? 'text-primary' : 'text-muted-foreground'}`}>{t?.nav?.plan || 'Plan'}</span>
                             </div>
                             <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
-                                {t?.nav?.comingSoon || 'Soon'}
+                                {t?.nav?.beta || 'Beta'}
                             </span>
                         </a>
                     )}

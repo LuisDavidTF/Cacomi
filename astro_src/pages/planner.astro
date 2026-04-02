@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { translations } from '../context/SettingsContext';
+import { WeeklyPlanner } from '../components/planner/WeeklyPlanner';
 
 export const prerender = false;
 
@@ -8,30 +9,6 @@ const lang = Astro.cookies.get('culina_language')?.value || 'es';
 const t = translations[lang] || translations.es;
 ---
 
-<Layout title={`${t.nav.planner} - ${t.nav.comingSoon}`}>
-  <div class="min-h-[70vh] flex flex-col items-center justify-center px-4 py-20 text-center">
-    <div class="w-24 h-24 bg-primary/10 rounded-3xl flex items-center justify-center mb-8 animate-pulse text-primary">
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-    </div>
-    
-    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-6">
-      {t.nav.planner}
-      <span class="block bg-clip-text text-transparent bg-gradient-to-r from-primary to-amber-500 pb-1">
-        {t.nav.comingSoon}
-      </span>
-    </h1>
-    
-    <p class="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-      {t.nav.plannerDesc}
-    </p>
-
-    <div class="flex flex-col sm:flex-row gap-4">
-      <a 
-        href="/" 
-        class="px-8 py-3 bg-primary text-primary-foreground rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
-      >
-        {t.notFound.backHome}
-      </a>
-    </div>
-  </div>
+<Layout title={`${t.nav.planner} - ${t.nav.beta}`}>
+  <WeeklyPlanner client:load />
 </Layout>
