@@ -1,0 +1,14 @@
+---
+import { decodeJwtPayload } from '../middleware';
+
+const token = Astro.cookies.get('auth_token')?.value;
+const payload = token ? decodeJwtPayload(token) : null;
+---
+
+<html>
+<body>
+    <h1>Debug Token</h1>
+    <p>Token exists: {!!token}</p>
+    <pre id="payload">{JSON.stringify(payload, null, 2)}</pre>
+</body>
+</html>

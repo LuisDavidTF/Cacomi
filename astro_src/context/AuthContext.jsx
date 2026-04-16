@@ -4,6 +4,15 @@ import React, { useEffect } from 'react';
 import { create } from 'zustand';
 import { CacheManager } from '@utils/cacheManager';
 
+const extractRole = (u) => {
+  // Check authorities first for elevated privileges
+  if (u.roles && Array.isArray(u.roles)) {
+      if (u.roles.some(r => r === 'ROLE_ADMIN' || r?.authority === 'ROLE_ADMIN')) return 'ADMIN';
+  }
+  if (u.role) return u.role;
+  return 'USER';
+};
+
 export const useAuth = create((set, get) => ({
   user: null,
   isLoading: true,
@@ -37,16 +46,17 @@ export const useAuth = create((set, get) => ({
       }
 
       const { user } = await res.json();
-      set({ user, isAuthenticated: true, isLoading: false });
-
+      
       const safeUser = {
         id: user.id,
         name: user.name,
         email: user.email,
         profile_photo: user.profile_photo_url || user.profile_photo,
-        role: user.role || 'USER'
+        role: extractRole(user)
       };
+      
       localStorage.setItem('culina_user_session', JSON.stringify(safeUser));
+      set({ user: safeUser, isAuthenticated: true, isLoading: false });
 
     } catch (error) {
       console.warn("Session check failed (Network/Server):", error);
@@ -81,12 +91,12 @@ export const useAuth = create((set, get) => ({
       name: data.user.name,
       email: data.user.email,
       profile_photo: data.user.profile_photo_url || data.user.profile_photo,
-      role: data.user.role || 'USER'
+      role: extractRole(data.user)
     };
     localStorage.setItem('culina_user_session', JSON.stringify(safeUser));
 
-    set({ user: data.user, isAuthenticated: true });
-    return data.user;
+    set({ user: safeUser, isAuthenticated: true });
+    return safeUser;
   },
 
   register: async (name, email, password, passwordConfirmation) => {

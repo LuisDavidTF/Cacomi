@@ -10,12 +10,7 @@ type UserSession = {
     reportsCnt: number;
 };
 
-const MOCK_USERS: UserSession[] = [
-    { id: '1', username: 'john_doe', email: 'john@example.com', role: 'USER', status: 'Active', reportsCnt: 0 },
-    { id: '2', username: 'spammer_xd', email: 'spammer@bot.com', role: 'USER', status: 'Active', reportsCnt: 12 },
-    { id: '3', username: 'master_chef', email: 'chef@culina.com', role: 'CREATOR', status: 'Active', reportsCnt: 1 },
-    { id: '4', username: 'banned_guy', email: 'bad@actor.org', role: 'USER', status: 'Suspended', reportsCnt: 5 }
-];
+const MOCK_USERS: UserSession[] = [];
 
 export const UserModerationTable = () => {
     const { t } = useSettings();

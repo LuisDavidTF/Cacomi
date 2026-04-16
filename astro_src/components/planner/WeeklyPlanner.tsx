@@ -101,74 +101,11 @@ export function WeeklyPlanner() {
     };
 
     // ─── AI Mock Generation (Concierge) ───
+    // ─── AI Generation (Service) ───
     const handleGenerateAI = () => {
-        setIsGenerating(true);
-        // Simulate a 5-second Polling/generation wait
-        setTimeout(() => {
-            setIsGenerating(false);
-            setAiChefMessage("El plan se diseñó para alcanzar tus objetivos nutricionales y reducir el desperdicio. Se priorizó el uso de ingredientes de tu alacena (huevos, cacahuates) logrando un balance económico óptimo.");
-            
-            // Generate realistic dummy meals to test the UI experience
-            const mockPlan: Record<string, any[]> = {};
-            const recipes = [
-                {
-                    breakfast: { name: "Huevos Rancheros Tradicionales", image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&q=80" },
-                    lunch:     { name: "Salmón Glaseado con Quinoa", image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=80" },
-                    dinner:    { name: "Sopa Crema de Calabaza Asada", image: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800&q=80" }
-                },
-                {
-                    breakfast: { name: "Tostada de Aguacate y Huevo", image: "https://images.unsplash.com/photo-1525351326368-efbb5cb6814d?w=800&q=80" },
-                    lunch:     { name: "Bowl de Pollo Teriyaki", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80" },
-                    dinner:    { name: "Ensalada Mediterránea Fresca", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80" }
-                },
-                {
-                    breakfast: { name: "Avena Nocturna con Frutos", image: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=800&q=80" },
-                    lunch:     { name: "Pasta al Pesto con Tomates", image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=800&q=80" },
-                    dinner:    { name: "Tacos de Pescado Baja", image: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=800&q=80" }
-                }
-            ];
-
-            weekDays.forEach((date, index) => {
-                const dateKey = date.toDateString();
-                const dailyMenu = recipes[index % 3];
-
-                // Only fill editable days to simulate the sliding window of an active plan
-                if (isDayEditable(date)) {
-                    // Simular que algunos días ya pasaron y tienen tracking
-                    const isPastDay = date < new Date(today.getTime() - 86400000); 
-
-                    mockPlan[dateKey] = [
-                        { 
-                            mealPlanRecipeId: Math.random(), 
-                            dayOfWeek: date.getDay(), 
-                            mealType: 'BREAKFAST', 
-                            recipeId: 100 + index, 
-                            portionMultiplier: 1.0, 
-                            recipe: dailyMenu.breakfast,
-                            tracking: isPastDay ? { isEaten: true, rating: 5, satietyLevel: 'SATISFIED' } : undefined
-                        },
-                        { 
-                            mealPlanRecipeId: Math.random(), 
-                            dayOfWeek: date.getDay(), 
-                            mealType: 'LUNCH', 
-                            recipeId: 200 + index, 
-                            portionMultiplier: 1.2, 
-                            recipe: dailyMenu.lunch,
-                            tracking: isPastDay ? { isEaten: false, skippedReason: 'ATE_OUT' } : undefined
-                        },
-                        { 
-                            mealPlanRecipeId: Math.random(), 
-                            dayOfWeek: date.getDay(), 
-                            mealType: 'DINNER', 
-                            recipeId: 300 + index, 
-                            portionMultiplier: 0.8, 
-                            recipe: dailyMenu.dinner 
-                        }
-                    ];
-                }
-            });
-            setPlan(mockPlan);
-        }, 5000);
+        // Mock generation removed. 
+        // Logic to be integrated with real /planner/generate API when ready.
+        console.log("AI Generation requested - Mock data generation removed.");
     };
 
     const handleSaveMealTracking = (mealPlanRecipeId: number, data: any) => {

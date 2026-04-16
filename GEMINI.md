@@ -59,6 +59,13 @@ Smart Recipe Planner is a modern web application for managing recipes and meal p
 ### Translation Rule (CRITICAL)
 - **Every new UI text MUST be translated**. Always add new translations to `astro_src/context/SettingsContext.jsx` for all available languages (e.g., `es`, `en`, `fr`). Do not hardcode strings in Astro or React components. For `.astro` files, use `prerender = false` and read the `culina_language` cookie to extract strings from the exported `translations` object.
 
+### Security Rule (CRITICAL - BFF Pattern)
+- **NEVER use `PUBLIC_` prefix for Backend URLs or Secrets**. Vite/Astro will bundle any `PUBLIC_` variable into the client-side JS.
+- **Always use the BFF (Backend For Frontend) Proxy Pattern**:
+    - Backend URLs must be private (e.g., `BACKEND_URL`).
+    - Client-side code must call local Astro API routes (e.g., `/api/proxy/*`).
+    - Sensitive validation (like PIN checks) must happen on the server (`src/pages/api/*`).
+
 ---
 
 ## Commit & Pull Request Guidelines

@@ -4,12 +4,22 @@ const getEnv = (key) => {
     return undefined;
 };
 
-export const API_BASE_URL = getEnv('PUBLIC_API_URL') || getEnv('NEXT_PUBLIC_API_URL') || 'http://localhost:8080';
-console.log('== DEBUG config.js == API_BASE_URL:', API_BASE_URL);
+// BFF Proxy Logic: 
+// On the server (SSR), we can hit the backend directly (BACKEND_URL).
+// On the client, we MUST hit our local proxy (/api/proxy) to hide the real URL.
+const isServer = typeof window === 'undefined';
+const BACKEND_URL = getEnv('BACKEND_URL');
+
+export const API_BASE_URL = isServer 
+    ? (BACKEND_URL || 'http://localhost:8080')
+    : '/api/proxy';
 
 export const API_VERSION = 'v2';
 
-// Ensure no double slashes if API_BASE_URL ends with /
+// Ensure no double slashes or absolute URL issues for client proxy
 const cleanBaseUrl = API_BASE_URL.replace(/\/$/, '');
-export const API_URL = `${cleanBaseUrl}/api/${API_VERSION}`;
-console.log('== DEBUG config.js == API_URL:', API_URL);
+export const API_URL = isServer 
+    ? `${cleanBaseUrl}/api/${API_VERSION}`
+    : cleanBaseUrl; // Local proxy already includes /api/proxy
+
+console.log(`[CONFIG] Running on ${isServer ? 'SERVER' : 'CLIENT'}. Target: ${API_URL}`);

@@ -2,32 +2,7 @@ import React from 'react';
 import { Search, Clock, Zap, Leaf, Heart, Filter } from 'lucide-react';
 import { useSettings } from '@context/SettingsContext';
 
-const MOCK_RECIPES = [
-    { 
-        name: 'Bowl Mediterráneo', 
-        time: '15 min', 
-        calories: '340 kcal', 
-        tag: 'LUNCH', 
-        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=400',
-        special: 'leaf'
-    },
-    { 
-        name: 'Ensalada de Brotes', 
-        time: '10 min', 
-        calories: '210 kcal', 
-        tag: 'LUNCH', 
-        image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&q=80&w=400',
-        special: 'heart'
-    },
-    { 
-        name: 'Salmon Bowl', 
-        time: '20 min', 
-        calories: '450 kcal', 
-        tag: 'LUNCH', 
-        image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&q=80&w=400',
-        special: 'zap'
-    }
-];
+const MOCK_RECIPES: any[] = [];
 
 interface RecipeSidebarProps {
     isMobile?: boolean;

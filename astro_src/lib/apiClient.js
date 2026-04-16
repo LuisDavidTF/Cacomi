@@ -1,6 +1,6 @@
-import { getEnv } from '@/utils/env';
+import { API_URL } from '@/lib/services/config';
 
-const API_BASE_URL = getEnv('PUBLIC_API_URL') || getEnv('NEXT_PUBLIC_API_URL') || 'http://127.0.0.1:8000/api';
+export const API_BASE_URL = API_URL;
 
 
 export class ApiClient {
@@ -63,15 +63,7 @@ export class ApiClient {
   changePassword = (data) => this._request('POST', '/users/me/password', data);
   deactivateAccount = () => this._request('DELETE', '/users/me');
 
-  // TODO: Ticket FE-02 - Remove mock data when backend is ready
-  syncPantry = async (items) => {
-    // return this._request('POST', '/pantry', { items });
-
-    // Mocking latency
-    await new Promise(resolve => setTimeout(resolve, 800));
-    console.log('[Mock API] Syncing pantry items:', items);
-    return { success: true, message: 'Pantry synced successfully (Mock)' };
-  };
+  syncPantry = (items) => this._request('POST', '/pantry', { items });
 }
 
 export const createApiClient = () => new ApiClient();

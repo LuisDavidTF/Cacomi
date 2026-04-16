@@ -9,13 +9,15 @@ const PROTECTED_ROUTE_PREFIXES = ['/create-recipe', '/edit-recipe'];
  * Safe on the server since the cookie is httpOnly and the backend
  * already validates the signature on every protected API call.
  */
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
+export function decodeJwtPayload(token: string): Record<string, unknown> | null {
     try {
         const parts = token.split('.');
         if (parts.length !== 3) return null;
+        
+        // Use Buffer instead of atob for better SSR compatibility (Node/Cloudflare)
         const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-        const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
-        return JSON.parse(atob(padded)) as Record<string, unknown>;
+        const jsonPayload = Buffer.from(base64, 'base64').toString('utf-8');
+        return JSON.parse(jsonPayload) as Record<string, unknown>;
     } catch {
         return null;
     }

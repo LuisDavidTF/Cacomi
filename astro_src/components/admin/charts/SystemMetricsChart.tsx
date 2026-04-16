@@ -2,15 +2,7 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { useSettings } from '@context/SettingsContext';
 
-const mockData = [
-  { time: '10:00', cpu: 12, ram: 45 },
-  { time: '10:05', cpu: 18, ram: 46 },
-  { time: '10:10', cpu: 65, ram: 52 },
-  { time: '10:15', cpu: 45, ram: 50 },
-  { time: '10:20', cpu: 23, ram: 48 },
-  { time: '10:25', cpu: 15, ram: 45 },
-  { time: '10:30', cpu: 14, ram: 45 }
-];
+const mockData: any[] = [];
 
 export const SystemMetricsChart = () => {
     const { t } = useSettings();
