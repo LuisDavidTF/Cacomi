@@ -1,0 +1,13 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { AdminGuard } from '@components/auth/AdminGuard';
+import { ReviewLogsBoard } from '@components/admin/ReviewLogsBoard.tsx';
+---
+
+<AdminLayout title="Review Logs - Admin Panel">
+    <AdminGuard client:only="react">
+        <div class="w-full flex justify-center mt-4">
+            <ReviewLogsBoard client:load />
+        </div>
+    </AdminGuard>
+</AdminLayout>

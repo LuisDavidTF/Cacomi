@@ -42,8 +42,81 @@ export const translations = {
             progressDesc: 'Nuestra herramienta de seguimiento de salud y progreso está en desarrollo para ofrecerte las mejores métricas de tu nutrición inteligente.',
             plannerDesc: 'Organiza tus menús semanales con facilidad y genera listas de compras automáticas.',
             comingSoon: 'Próximamente',
+            beta: 'Beta',
             menu: 'Menú',
             accountMenu: 'Menú de Cuenta'
+        },
+
+        planner: {
+            title: 'Plan Semanal',
+            generateAI: 'Generar con IA',
+            exploreRecipes: 'Explorar Recetas',
+            searchPlaceholder: 'Buscar ingredientes...',
+            nutritionalSummary: 'Resumen Nutricional',
+            proteins: 'Proteínas',
+            calories: 'Calorías diarias (promedio)',
+            dragHere: 'Arrastrar aquí',
+            breakfast: 'Desayuno',
+            lunch: 'Almuerzo',
+            dinner: 'Cena',
+            snack: 'Snack',
+            tags: {
+                healthy: 'Saludable',
+                quick: 'Rápido',
+                vegan: 'Vegano'
+            },
+            days: {
+                dom: 'DOM',
+                lun: 'LUN',
+                mar: 'MAR',
+                mie: 'MIÉ',
+                jue: 'JUE',
+                vie: 'VIE',
+                sab: 'SÁB'
+            },
+            thisWeek: 'Esta semana',
+            nextWeek: 'Siguiente',
+            lastWeek: 'Semana pasada',
+            prevWeek: 'Anterior',
+            weeks: 'semanas',
+            today: 'Hoy',
+            pastWeekNote: 'Esta semana ya pasó. Solo puedes planificar los próximos 7 días desde hoy.',
+            futureWeekNote: 'Puedes explorar semanas futuras, pero solo se puede planificar los próximos 7 días.',
+            tracking: {
+                eaten: 'Me lo comí',
+                rating: 'Calificación',
+                satiety: '¿Cómo quedaste?',
+                reason: '¿Por qué lo saltaste?',
+                satietyLevels: {
+                    veryHungry: 'Muy hambriento',
+                    satisfied: 'Satisfecho',
+                    veryFull: 'Muy lleno'
+                },
+                reasons: {
+                    noTime: 'Falta de tiempo',
+                    tooExpensive: 'Muy caro',
+                    didntLike: 'No me gustó',
+                    ateOut: 'Comí fuera',
+                    forgot: 'Lo olvidé'
+                },
+                save: 'Guardar'
+            },
+            checkin: {
+                title: '¿Cómo te sentiste esta semana?',
+                stress: 'Nivel de estrés',
+                energy: 'Nivel de energía',
+                notes: 'Notas adicionales',
+                levels: {
+                    low: 'Bajo',
+                    medium: 'Medio',
+                    high: 'Alto'
+                },
+                save: 'Completar Check-in'
+            },
+            concierge: {
+                loading: 'Nuestros chefs están diseñando tu menú. Te notificaremos cuando esté listo.',
+                noteTitle: 'Nota del Chef:'
+            }
         },
 
         landing: {
@@ -63,9 +136,9 @@ export const translations = {
 
         announcement: {
             newUpdate: 'Nueva Actualización',
-            title: '¡Descubre lo nuevo en Culina Smart!',
-            desc: 'Hemos implementado mejoras clave en el desempeño de la aplicación, el planificador semanal y en nuestras recomendaciones por inteligencia artificial. Continúa explorando para descubrir una experiencia más fluida y rápida.',
-            btn: '¡Entendido, vamos!',
+            title: '¡El Planificador Inteligente ya está aquí!',
+            desc: 'La funcionalidad más esperada ha llegado. Ahora puedes organizar tu semana, generar menús con IA y llevar un control nutricional de tus platos. Explora la pestaña de Planificador para comenzar.',
+            btn: '¡Probar Planificador!',
             ariaClose: 'Cerrar anuncio'
         },
 
@@ -302,6 +375,25 @@ export const translations = {
             viewAsMe: 'Ver como yo',
             viewAsPublic: 'Público',
             viewAs: 'Vista:'
+        },
+        admin: {
+            title: 'Panel de Administrador',
+            reviewLogs: 'Validar Planes',
+            metrics: 'Sistema',
+            logs: 'Consola',
+            jobs: 'Procesos',
+            users: 'Usuarios',
+            moderation: 'Moderación',
+            runBtn: 'Ejecutar Ahora',
+            stopBtn: 'Detener',
+            banBtn: 'Suspender',
+            unbanBtn: 'Reactivar',
+            noPermission: 'Se requiere token de elevación de privilegios...',
+            enterPin: 'Ingresa tu PIN de Administrador',
+            authBtn: 'Autorizar Elevación',
+            cpuUsage: 'Uso de CPU',
+            ramUsage: 'Uso de RAM',
+            serverLogs: 'Logs del Servidor'
         }
     },
     en: {
@@ -342,8 +434,81 @@ export const translations = {
             progressDesc: 'Our health and progress tracking tool is under development to offer you the best metrics for your smart nutrition.',
             plannerDesc: 'Organize your weekly menus with ease and generate automatic shopping lists.',
             comingSoon: 'Coming Soon',
+            beta: 'Beta',
             menu: 'Menu',
             accountMenu: 'Account Menu'
+        },
+
+        planner: {
+            title: 'Weekly Plan',
+            generateAI: 'Generate with AI',
+            exploreRecipes: 'Explore Recipes',
+            searchPlaceholder: 'Search ingredients...',
+            nutritionalSummary: 'Nutritional Summary',
+            proteins: 'Proteins',
+            calories: 'Daily calories (avg)',
+            dragHere: 'Drag here',
+            breakfast: 'Breakfast',
+            lunch: 'Lunch',
+            dinner: 'Dinner',
+            snack: 'Snack',
+            tags: {
+                healthy: 'Healthy',
+                quick: 'Quick',
+                vegan: 'Vegan'
+            },
+            days: {
+                dom: 'SUN',
+                lun: 'MON',
+                mar: 'TUE',
+                mie: 'WED',
+                jue: 'THU',
+                vie: 'FRI',
+                sab: 'SAT'
+            },
+            thisWeek: 'This week',
+            nextWeek: 'Next',
+            lastWeek: 'Last week',
+            prevWeek: 'Previous',
+            weeks: 'weeks',
+            today: 'Today',
+            pastWeekNote: 'This week has passed. You can only plan the next 7 days from today.',
+            futureWeekNote: 'You can browse future weeks, but only the next 7 days can be planned.',
+            tracking: {
+                eaten: 'I ate it',
+                rating: 'Rating',
+                satiety: 'How did you feel?',
+                reason: 'Why did you skip it?',
+                satietyLevels: {
+                    veryHungry: 'Very hungry',
+                    satisfied: 'Satisfied',
+                    veryFull: 'Very full'
+                },
+                reasons: {
+                    noTime: 'No time',
+                    tooExpensive: 'Too expensive',
+                    didntLike: 'Didn\'t like it',
+                    ateOut: 'Ate out',
+                    forgot: 'Forgot'
+                },
+                save: 'Save'
+            },
+            checkin: {
+                title: 'How did you feel this week?',
+                stress: 'Stress level',
+                energy: 'Energy level',
+                notes: 'Additional notes',
+                levels: {
+                    low: 'Low',
+                    medium: 'Medium',
+                    high: 'High'
+                },
+                save: 'Complete Check-in'
+            },
+            concierge: {
+                loading: 'Our chefs are designing your menu. We will notify you when it\'s ready.',
+                noteTitle: 'Chef\'s Note:'
+            }
         },
 
         landing: {
@@ -363,9 +528,9 @@ export const translations = {
 
         announcement: {
             newUpdate: 'New Update',
-            title: 'Discover what\'s new in Culina Smart!',
-            desc: 'We have implemented key improvements in app performance, the weekly planner, and our AI recommendations. Continue exploring for a smoother and faster experience.',
-            btn: 'Got it, let\'s go!',
+            title: 'The Smart Planner is finally here!',
+            desc: 'Our most anticipated feature has arrived. Now you can organize your week, generate menus with AI, and track your nutritional intake. Explore the Planner tab to get started.',
+            btn: 'Try Planner!',
             ariaClose: 'Close announcement'
         },
 
@@ -602,6 +767,25 @@ export const translations = {
             viewAsMe: 'View as me',
             viewAsPublic: 'Public',
             viewAs: 'View:'
+        },
+        admin: {
+            title: 'Admin Panel',
+            reviewLogs: 'Review Logs',
+            metrics: 'System',
+            logs: 'Console',
+            jobs: 'Jobs',
+            users: 'Users',
+            moderation: 'Moderation',
+            runBtn: 'Run Now',
+            stopBtn: 'Stop',
+            banBtn: 'Ban',
+            unbanBtn: 'Unban',
+            noPermission: 'Privilege elevation token required...',
+            enterPin: 'Enter your Admin PIN',
+            authBtn: 'Authorize Elevation',
+            cpuUsage: 'CPU Usage',
+            ramUsage: 'RAM Usage',
+            serverLogs: 'Server Logs'
         }
     },
     fr: {
@@ -642,8 +826,81 @@ export const translations = {
             progressDesc: 'Notre outil de suivi de santé et de progrès est en cours de développement pour vous offrir les meilleures mesures de votre nutrition intelligente.',
             plannerDesc: 'Organisez facilement vos menus hebdomadaires et générez des listes de courses automatiques.',
             comingSoon: 'Bientôt',
+            beta: 'Bêta',
             menu: 'Menu',
             accountMenu: 'Menu du Compte'
+        },
+
+        planner: {
+            title: 'Plan Hebdomadaire',
+            generateAI: 'Générer avec IA',
+            exploreRecipes: 'Explorer des Recettes',
+            searchPlaceholder: 'Rechercher des ingrédients...',
+            nutritionalSummary: 'Résumé Nutritionnel',
+            proteins: 'Protéines',
+            calories: 'Calories quotidiennes (moyenne)',
+            dragHere: 'Faire glisser ici',
+            breakfast: 'Petit-déjeuner',
+            lunch: 'Déjeuner',
+            dinner: 'Dîner',
+            snack: 'Collation',
+            tags: {
+                healthy: 'Sain',
+                quick: 'Rapide',
+                vegan: 'Végétalien'
+            },
+            days: {
+                dom: 'DIM',
+                lun: 'LUN',
+                mar: 'MAR',
+                mie: 'MER',
+                jue: 'JEU',
+                vie: 'VEN',
+                sab: 'SAM'
+            },
+            thisWeek: 'Cette semaine',
+            nextWeek: 'Suivant',
+            lastWeek: 'Semaine dernière',
+            prevWeek: 'Précédent',
+            weeks: 'semaines',
+            today: "Aujourd'hui",
+            pastWeekNote: 'Cette semaine est passée. Vous ne pouvez planifier que les 7 prochains jours.',
+            futureWeekNote: 'Vous pouvez parcourir les semaines futures, mais seuls les 7 prochains jours peuvent être planifiés.',
+            tracking: {
+                eaten: 'Je l\'ai mangé',
+                rating: 'Évaluation',
+                satiety: 'Comment vous sentez-vous ?',
+                reason: 'Pourquoi l\'avez-vous sauté ?',
+                satietyLevels: {
+                    veryHungry: 'Très faim',
+                    satisfied: 'Satisfait',
+                    veryFull: 'Très plein'
+                },
+                reasons: {
+                    noTime: 'Pas de temps',
+                    tooExpensive: 'Trop cher',
+                    didntLike: 'Je n\'ai pas aimé',
+                    ateOut: 'Mangé au restaurant',
+                    forgot: 'Oublié'
+                },
+                save: 'Enregistrer'
+            },
+            checkin: {
+                title: 'Comment vous êtes-vous senti cette semaine ?',
+                stress: 'Niveau de stress',
+                energy: 'Niveau d\'énergie',
+                notes: 'Notes supplémentaires',
+                levels: {
+                    low: 'Faible',
+                    medium: 'Moyen',
+                    high: 'Élevé'
+                },
+                save: 'Terminer le Check-in'
+            },
+            concierge: {
+                loading: 'Nos chefs conçoivent votre menu. Nous vous informerons quand il sera prêt.',
+                noteTitle: 'Note du Chef :'
+            }
         },
 
         landing: {
@@ -663,9 +920,9 @@ export const translations = {
 
         announcement: {
             newUpdate: 'Nouvelle Mise à Jour',
-            title: 'Découvrez les nouveautés de Culina Smart !',
-            desc: 'Nous avons implémenté des améliorations clés dans les performances de l\'application, le planificateur hebdomadaire et nos recommandations par IA. Continuez à explorer pour découvrir une expérience plus fluide et plus rapide.',
-            btn: 'Compris, allons-y !',
+            title: 'Le Planificateur Intelligent est enfin là !',
+            desc: 'Notre fonctionnalité la plus attendue est arrivée. Vous pouvez désormais organiser votre semaine, générer des menus avec l\'IA et suivre votre apport nutritionnel. Explorez l\'onglet Planificateur pour commencer.',
+            btn: 'Essayer le Planificateur !',
             ariaClose: 'Fermer l\'annonce'
         },
 
@@ -902,6 +1159,25 @@ export const translations = {
             viewAsMe: 'Voir comme moi',
             viewAsPublic: 'Public',
             viewAs: 'Vue :'
+        },
+        admin: {
+            title: 'Panneau d\'Administration',
+            reviewLogs: 'Valider les Plans',
+            metrics: 'Système',
+            logs: 'Console',
+            jobs: 'Processus',
+            users: 'Utilisateurs',
+            moderation: 'Modération',
+            runBtn: 'Exécuter',
+            stopBtn: 'Arrêter',
+            banBtn: 'Bannir',
+            unbanBtn: 'Débannir',
+            noPermission: 'Jeton d\'élévation de privilèges requis...',
+            enterPin: 'Saisissez votre code PIN Admin',
+            authBtn: 'Autoriser l\'élévation',
+            cpuUsage: 'Utilisation du processeur',
+            ramUsage: 'Utilisation de la RAM',
+            serverLogs: 'Journaux du serveur'
         }
     }
 };

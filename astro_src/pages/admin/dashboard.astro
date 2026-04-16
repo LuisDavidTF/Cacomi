@@ -1,0 +1,31 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { AdminGuard } from '@components/auth/AdminGuard';
+import { SystemMetricsChart } from '@components/admin/charts/SystemMetricsChart';
+import { UserReportsChart } from '@components/admin/charts/UserReportsChart';
+---
+
+<AdminLayout title="Dashboard - Admin Panel">
+    <AdminGuard client:only="react">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
+            <p class="text-slate-500 mt-2">Overview of the system health and moderation queues.</p>
+        </div>
+
+        <SystemMetricsChart client:only="react" />
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <UserReportsChart client:only="react" />
+            
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm flex flex-col justify-center items-center h-full min-h-[300px]">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-500 rounded-full flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">All Systems Operational</h3>
+                <p class="text-slate-500 text-center mt-2 max-w-sm">
+                    Database, background workers and external APIs are functioning correctly.
+                </p>
+            </div>
+        </div>
+    </AdminGuard>
+</AdminLayout>

@@ -46,10 +46,14 @@ export function Navbar() {
         };
     }, [isProfileDropdownOpen]);
     const [currentPath, setCurrentPath] = useState('');
+    // Secret admin path — injected server-side into body[data-admin-path], never in JS bundle
+    const [adminPath, setAdminPath] = useState('/admin/dashboard');
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
             setCurrentPath(window.location.pathname);
+            const prefix = document.body.dataset.adminPath ?? '/admin';
+            setAdminPath(`${prefix}/dashboard`);
         }
     }, []);
 
@@ -107,13 +111,17 @@ export function Navbar() {
                                 <ShoppingBasket className="w-6 h-6" />
                                 <span className="hidden lg:inline">{t?.nav?.pantry || 'Despensa'}</span>
                             </a>
-                            <a href="/planner" className="relative flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap pointer-events-none cursor-not-allowed group">
-                                <div className="flex items-center gap-2 lg:gap-3 opacity-60">
+                            <a 
+                                href="#" 
+                                onClick={(e) => e.preventDefault()}
+                                className={`relative flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap opacity-60 cursor-not-allowed pointer-events-none group`}
+                            >
+                                <div className="flex items-center gap-2 lg:gap-3">
                                     <CalendarDays className="w-6 h-6 text-muted-foreground" />
                                     <span className="hidden lg:inline text-muted-foreground">{t?.nav?.planner || 'Planificador'}</span>
                                 </div>
-                                <span className="absolute left-1/2 -translate-x-1/2 -top-2 bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border border-primary/20 backdrop-blur-md z-[60] whitespace-nowrap shadow-sm tracking-widest">
-                                    {t?.nav?.comingSoon || 'Soon'}
+                                <span className="absolute left-1/2 -translate-x-1/2 -top-2 bg-muted text-muted-foreground text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border border-border backdrop-blur-md z-[60] whitespace-nowrap shadow-sm tracking-widest">
+                                    {t?.nav?.soon || t?.nav?.comingSoon || 'Soon'}
                                 </span>
                             </a>
                         </div>
@@ -206,6 +214,18 @@ export function Navbar() {
                                                     {t?.nav?.settings || 'Ajustes'}
                                                 </a>
 
+                                                {(user?.role === 'ADMIN') && (
+                                                    <a
+                                                        data-astro-reload
+                                                        href={adminPath}
+                                                        className="flex items-center px-3 py-2 text-sm lg:text-base rounded-xl transition-colors text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 font-medium"
+                                                        onClick={() => setIsProfileDropdownOpen(false)}
+                                                    >
+                                                        <Settings className="w-5 h-5 mr-3 opacity-80" />
+                                                        Admin Panel
+                                                    </a>
+                                                )}
+
                                                 <div className="h-px bg-border/50 my-1 mx-2" />
 
                                                 <button
@@ -292,26 +312,34 @@ export function Navbar() {
                             </a>
                         </div>
                     ) : (
-                        <a href="/planner" className="relative flex flex-1 flex-col items-center justify-center gap-1 pointer-events-none cursor-not-allowed">
-                            <div className="flex flex-col items-center justify-center gap-1 opacity-60">
+                        <a 
+                            href="#" 
+                            onClick={(e) => e.preventDefault()}
+                            className="relative flex flex-1 flex-col items-center justify-center gap-1 opacity-60 cursor-not-allowed pointer-events-none"
+                        >
+                            <div className="flex flex-col items-center justify-center gap-1">
                                 <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
-                                <span className="text-[10px] font-medium leading-none whitespace-nowrap text-muted-foreground uppercase">{t?.nav?.plan || 'Plan'}</span>
+                                <span className="text-[10px] font-medium leading-none whitespace-nowrap uppercase text-muted-foreground">{t?.nav?.plan || 'Plan'}</span>
                             </div>
-                            <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
-                                {t?.nav?.comingSoon || 'Soon'}
+                            <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-muted text-muted-foreground text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-border backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
+                                {t?.nav?.soon || t?.nav?.comingSoon || 'Soon'}
                             </span>
                         </a>
                     )}
 
                     {/* Planner for authenticated users */}
                     {isAuthenticated && (
-                        <a href="/planner" className="relative flex flex-1 flex-col items-center justify-center gap-1 pointer-events-none cursor-not-allowed">
-                            <div className="flex flex-col items-center justify-center gap-1 opacity-60">
+                        <a 
+                            href="#" 
+                            onClick={(e) => e.preventDefault()}
+                            className="relative flex flex-1 flex-col items-center justify-center gap-1 opacity-60 cursor-not-allowed pointer-events-none"
+                        >
+                            <div className="flex flex-col items-center justify-center gap-1">
                                 <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
-                                <span className="text-[10px] font-medium leading-none whitespace-nowrap text-muted-foreground uppercase">{t?.nav?.plan || 'Plan'}</span>
+                                <span className="text-[10px] font-medium leading-none whitespace-nowrap uppercase text-muted-foreground">{t?.nav?.plan || 'Plan'}</span>
                             </div>
-                            <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
-                                {t?.nav?.comingSoon || 'Soon'}
+                            <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-muted text-muted-foreground text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-border backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
+                                {t?.nav?.soon || t?.nav?.comingSoon || 'Soon'}
                             </span>
                         </a>
                     )}
@@ -379,6 +407,18 @@ export function Navbar() {
                                 <Settings className="w-6 h-6 mr-3 opacity-70" />
                                 {t?.nav?.settings || 'Ajustes'}
                             </a>
+
+                            {(user?.role === 'ADMIN') && (
+                                <a
+                                    data-astro-reload
+                                    href={adminPath}
+                                    className="flex items-center px-4 py-3 rounded-xl border border-indigo-200 dark:border-indigo-800/30 transition-colors text-base text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 font-bold mt-2"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    <Settings className="w-6 h-6 mr-3 opacity-80" />
+                                    Admin Panel
+                                </a>
+                            )}
                         </div>
                         
                         <button onClick={logout} className="w-full flex items-center justify-center px-4 py-3 mt-auto text-base font-bold text-destructive bg-destructive/5 hover:bg-destructive/10 border border-destructive/20 rounded-xl transition-colors">

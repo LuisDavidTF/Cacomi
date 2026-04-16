@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             maxAge: MAX_AGE,
             path: '/',
             sameSite: 'lax',
-        } as any);
+        });
 
         return new Response(JSON.stringify({ user }), {
             status: 200,

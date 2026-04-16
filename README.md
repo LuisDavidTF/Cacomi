@@ -7,7 +7,9 @@ Culina Smart es una aplicación web moderna e inteligente para planificar comida
 - **🤖 IA Generativa de Recetas** — Genera recetas personalizadas usando Google Gemini (vía API propia en Koyeb).
 - **📦 Gestión de Despensa (Pantry)** — Agrega, edita y elimina ingredientes con sincronización en tiempo real. Funciona offline con IndexedDB (Dexie.js) y sincroniza automáticamente al recuperar conexión.
 - **📋 CRUD de Recetas** — Crea, edita, consulta y elimina tus recetas favoritas.
-- **🔐 Autenticación** — Registro e inicio de sesión seguros con sesiones basadas en cookies JWT (httpOnly).
+- **🔐 Autenticación** — Registro e inicio de sesión seguros con sesiones basadas en cookies JWT (httpOnly) y autorización basada en roles (`ROLE_ADMIN`).
+- **🛡️ Panel de Admin (Stealth Mode)** — Gestión administrativa oculta tras una ruta secreta, accesible solo para usuarios con privilegios elevados.
+- **📅 Planificador Semanal** — (En Desarrollo) Organiza tus menús semanales de forma inteligente (Próximamente).
 - **📱 PWA** — Instalable en móvil y escritorio. Soporte offline con Service Worker.
 - **🌙 Modo Oscuro** — Tema claro/oscuro con persistencia de preferencia.
 - **⚡ SSR + Edge Ready** — Renderizado en servidor con Astro 6, deployable en Cloudflare Pages o Vercel.
@@ -158,6 +160,8 @@ smart-recipe-planner/
 ## 🔒 Seguridad
 
 - Sesiones con cookies `httpOnly` + `SameSite=Strict`.
+- Autorización robusta basada en roles (Claims de JWT) para acceso administrativo.
+- **Stealth URLs**: Rutas administrativas protegidas por prefijos dinámicos y secretos definidos en variables de entorno.
 - Headers de seguridad aplicados en middleware: `X-Frame-Options`, `X-Content-Type-Options`, `X-XSS-Protection`, `Referrer-Policy`, `Content-Security-Policy`.
 - Protección básica CSRF en rutas API para mutaciones.
 
