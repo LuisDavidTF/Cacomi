@@ -4,6 +4,7 @@ import { useSettings } from '@context/SettingsContext';
 
 export interface MealTrackingData {
     mealPlanRecipeId: number;
+    recipeId: number;
     recipe: any;
     portionMultiplier: number;
     dayOfWeek: string;
