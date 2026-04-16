@@ -7,6 +7,7 @@ interface PlannerDayProps {
     date: Date;
     meals: any[];
     isEditable?: boolean;
+    onMealClick?: (meal: any) => void;
 }
 
 // Snack divider between meals:
@@ -61,7 +62,7 @@ function SnackDivider({ isEditable }: { isEditable: boolean }) {
     );
 }
 
-export function PlannerDay({ date, meals, isEditable = true }: PlannerDayProps) {
+export function PlannerDay({ date, meals, isEditable = true, onMealClick }: PlannerDayProps) {
     const { t } = useSettings();
     const dayName = date.toLocaleDateString('es-ES', { weekday: 'short' }).toUpperCase();
     const dayNumber = date.getDate();
@@ -108,11 +109,32 @@ export function PlannerDay({ date, meals, isEditable = true }: PlannerDayProps) 
 
             {/* Meal Slots with Snack Dividers between them */}
             <div className="relative z-10 w-full space-y-1">
-                <PlannerSlot type="breakfast" label={t.planner?.breakfast} time="08:30" isEditable={isEditable} />
+                <PlannerSlot 
+                    type="breakfast" 
+                    label={t.planner?.breakfast} 
+                    time="08:30" 
+                    isEditable={isEditable} 
+                    recipe={meals.find((m: any) => m.mealType === 'BREAKFAST')}
+                    onClick={() => onMealClick?.(meals.find((m: any) => m.mealType === 'BREAKFAST'))}
+                />
                 <SnackDivider isEditable={isEditable} />
-                <PlannerSlot type="lunch"     label={t.planner?.lunch}     time="14:00" isEditable={isEditable} />
+                <PlannerSlot 
+                    type="lunch"     
+                    label={t.planner?.lunch}     
+                    time="14:00" 
+                    isEditable={isEditable} 
+                    recipe={meals.find((m: any) => m.mealType === 'LUNCH')}
+                    onClick={() => onMealClick?.(meals.find((m: any) => m.mealType === 'LUNCH'))}
+                />
                 <SnackDivider isEditable={isEditable} />
-                <PlannerSlot type="dinner"    label={t.planner?.dinner}    time="20:30" isEditable={isEditable} />
+                <PlannerSlot 
+                    type="dinner"    
+                    label={t.planner?.dinner}    
+                    time="20:30" 
+                    isEditable={isEditable} 
+                    recipe={meals.find((m: any) => m.mealType === 'DINNER')}
+                    onClick={() => onMealClick?.(meals.find((m: any) => m.mealType === 'DINNER'))}
+                />
             </div>
         </div>
     );

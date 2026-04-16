@@ -43,7 +43,8 @@ export const useAuth = create((set, get) => ({
         id: user.id,
         name: user.name,
         email: user.email,
-        profile_photo: user.profile_photo_url || user.profile_photo
+        profile_photo: user.profile_photo_url || user.profile_photo,
+        role: user.role || 'USER'
       };
       localStorage.setItem('culina_user_session', JSON.stringify(safeUser));
 
@@ -79,7 +80,8 @@ export const useAuth = create((set, get) => ({
       id: data.user.id,
       name: data.user.name,
       email: data.user.email,
-      profile_photo: data.user.profile_photo_url || data.user.profile_photo
+      profile_photo: data.user.profile_photo_url || data.user.profile_photo,
+      role: data.user.role || 'USER'
     };
     localStorage.setItem('culina_user_session', JSON.stringify(safeUser));
 

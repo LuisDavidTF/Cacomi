@@ -1,0 +1,16 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { AdminGuard } from '@components/auth/AdminGuard';
+import { ServerLogViewer } from '@components/admin/infrastructure/ServerLogViewer';
+---
+
+<AdminLayout title="Server Logs - Admin Panel">
+    <AdminGuard client:only="react">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Server & Infrastructure Logs</h1>
+            <p class="text-slate-500 mt-2">Real-time trailing of Koyeb proxy backend outputs.</p>
+        </div>
+
+        <ServerLogViewer client:only="react" />
+    </AdminGuard>
+</AdminLayout>

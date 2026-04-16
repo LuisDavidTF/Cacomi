@@ -23,7 +23,7 @@ const seenFeaturesVersion = Astro.cookies.get('seen_features_version')?.value;
 
 // Business Logic
 const isNewUser = !hasEverLoggedIn && visitCount < 3;
-const hasNewFeatures = !isNewUser && seenFeaturesVersion !== CURRENT_APP_VERSION;
+const hasNewFeatures = false; // Planificador en desarrollo - ocultar banner
 
 // Server-side Cookie Setting
 if (!hasEverLoggedIn && !isAuthenticated) {

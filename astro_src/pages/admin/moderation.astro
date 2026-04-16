@@ -1,0 +1,16 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { AdminGuard } from '@components/auth/AdminGuard';
+import { UserModerationTable } from '@components/admin/users/UserModerationTable';
+---
+
+<AdminLayout title="Moderation - Admin Panel">
+    <AdminGuard client:only="react">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">User Moderation</h1>
+            <p class="text-slate-500 mt-2">Control platform integrity, apply suspensions, and respond to deletion requests.</p>
+        </div>
+
+        <UserModerationTable client:only="react" />
+    </AdminGuard>
+</AdminLayout>

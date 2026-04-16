@@ -80,9 +80,17 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                     <a
                         href="/"
                         onClick={(e) => {
-                            if (typeof window !== 'undefined' && window.history.length > 1) {
-                                e.preventDefault();
-                                window.history.back();
+                            if (typeof window !== 'undefined') {
+                                // Check if Astro View Transitions has a previous session history
+                                const isInternalHistory = window.history.state && window.history.state.index > 0;
+                                // Fallback for browsers
+                                const hasBrowserHistory = window.history.length > 2;
+                                
+                                if (isInternalHistory || hasBrowserHistory) {
+                                    e.preventDefault();
+                                    window.history.back();
+                                }
+                                // Otherwise letting the <a> tag handle it goes cleanly to href="/"
                             }
                         }}
                         className="inline-flex items-center bg-black/40 hover:bg-black/60 backdrop-blur-lg text-white border border-white/20 px-3 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 shadow-xl group"
@@ -93,19 +101,21 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                 </div>
 
                 {/* Hero Header with Image and Overlay Information */}
-                <div className="relative w-full h-72 sm:h-[450px] bg-gray-100 overflow-hidden">
+                <div className="relative w-full h-[380px] sm:h-[450px] lg:h-[500px] bg-gray-100 overflow-hidden">
                     <SmartImage
                         src={imageUrl}
                         alt={recipe.name}
                         className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end">
-                        <div className="p-6 md:p-12 text-white w-full">
-                            {/* Category Tag */}
+                        <div className="p-6 md:p-12 text-white w-full mt-16 relative">
+                            {/* Category Tag - Absolute Bottom Right */}
                             {recipe.type && (
-                                <span className="inline-block bg-primary px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-4">
-                                    {recipe.type}
-                                </span>
+                                <div className="absolute bottom-6 right-6 md:bottom-12 md:right-12 z-20">
+                                    <span className="inline-block bg-primary px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-lg">
+                                        {recipe.type}
+                                    </span>
+                                </div>
                             )}
 
                             <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 lg:mb-6 leading-tight drop-shadow-md">

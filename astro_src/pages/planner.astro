@@ -5,6 +5,9 @@ import { WeeklyPlanner } from '../components/planner/WeeklyPlanner';
 
 export const prerender = false;
 
+// Planificador en desarrollo - Redirigir al inicio para el lanzamiento de mantenimiento
+return Astro.redirect('/');
+
 const lang = Astro.cookies.get('culina_language')?.value || 'es';
 const t = translations[lang] || translations.es;
 ---

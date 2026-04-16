@@ -191,3 +191,30 @@ useEffect(() => {
 > **AVOID** using non-empty deps arrays in `useEffect` whose cleanup sets permanent flags like `isUnmounting = true` or unregisters listeners meant to last the full component lifetime.
 > **BECAUSE** React runs that cleanup function not only on unmount but **before every re-run** of the effect. Any side effect in the cleanup (like setting a boolean flag) will execute on every dependency change, permanently polluting state.
 > **CORRECT APPROACH**: Use `[]` for effects whose cleanup should only run on unmount. Inside the cleanup, access dynamic values via **stable refs** (updated by separate `useEffect([dep])` calls) rather than including them in the deps of the outer effect.
+
+---
+
+## Observables and Conditionally Rendered DOM Nodes (REQUIRED)
+
+When attaching generic observers (like `IntersectionObserver`, `ResizeObserver`) to a DOM ref inside a `useEffect`, you must ensure that the observer is re-attached if the DOM element mounts or unmounts conditionally.
+
+```typescript
+// ❌ BUG: Observer breaks if `isLoading` unmounts the node, and it remounts when `false`.
+// The effect won't re-run to re-attach the observer because `isLoading` is missing from deps.
+useEffect(() => {
+    if (status !== 'success') return;
+    const observer = new IntersectionObserver(() => { /* ... */ });
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+}, [status]); // Missing `isLoading`
+
+// ✅ CORRECT: Add `isLoading` to track the lifecycle of the conditional node
+useEffect(() => {
+    // ...
+}, [status, isLoading]);
+```
+
+> [!CAUTION]
+> **AVOID** omitting state variables (like `isLoading`) from `useEffect` dependencies if those variables govern the conditional rendering of the DOM node you are trying to observe.
+> **BECAUSE** when the condition hides and then restores the node, the DOM element is destroyed and recreated. If the effect doesn't re-run, React will not attach the observer to the newly created element, breaking interactions like infinite scrolling.
+> **CORRECT APPROACH**: Include any state variable that causes the target DOM node to mount/unmount in the dependency array of the `useEffect` that initializes the observer.

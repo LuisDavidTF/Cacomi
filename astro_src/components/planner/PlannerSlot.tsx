@@ -8,6 +8,7 @@ interface PlannerSlotProps {
     time: string;
     recipe?: any;
     isEditable?: boolean;
+    onClick?: () => void;
 }
 
 const mealIcon = {
@@ -16,12 +17,17 @@ const mealIcon = {
     dinner: Moon,
 };
 
-export function PlannerSlot({ type, label, time, recipe, isEditable = true }: PlannerSlotProps) {
+export function PlannerSlot({ type, label, time, recipe, isEditable = true, onClick }: PlannerSlotProps) {
     const { t } = useSettings();
     const Icon = mealIcon[type];
 
+    const hasTracking = recipe?.tracking !== undefined;
+
     return (
-        <div className={`w-full ${isEditable ? 'group/slot cursor-pointer' : 'cursor-not-allowed'}`}>
+        <div 
+            onClick={onClick}
+            className={`w-full ${isEditable || recipe ? 'group/slot cursor-pointer' : 'cursor-not-allowed'}`}
+        >
             {/* Label row */}
             <div className="flex items-center justify-between mb-1.5 px-0.5">
                 <div className="flex items-center gap-1.5">
@@ -39,7 +45,24 @@ export function PlannerSlot({ type, label, time, recipe, isEditable = true }: Pl
                                 group-hover/slot:scale-[1.02] group-hover/slot:shadow-md active:scale-[0.98] transition-all">
                     <img src={recipe.image || '/placeholder.jpg'} alt={recipe.name} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent
-                                    flex items-end p-2.5">
+                                    flex flex-col justify-end p-2.5">
+                        
+                        {/* Tracking indicator */}
+                        {hasTracking && (
+                            <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded-lg flex items-center gap-1 border border-white/10">
+                                {recipe.tracking.isEaten ? (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                                ) : (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-destructive shadow-[0_0_8px_rgba(248,113,113,0.8)]" />
+                                )}
+                            </div>
+                        )}
+
+                        {recipe.portionMultiplier && recipe.portionMultiplier !== 1.0 && (
+                            <span className="text-white/80 text-[8px] font-bold uppercase tracking-wider mb-0.5">
+                                {recipe.portionMultiplier}x
+                            </span>
+                        )}
                         <span className="text-white text-[9px] font-bold leading-tight line-clamp-1">{recipe.name}</span>
                     </div>
                 </div>

@@ -1,0 +1,125 @@
+---
+import { AppProviders } from '@components/providers/AppProviders';
+import { LegalsConsent } from '@components/ui/LegalsConsent';
+import { ViewTransitions } from 'astro:transitions';
+import { translations } from '@context/SettingsContext';
+import '../layouts/globals.css';
+
+interface Props {
+	title?: string;
+}
+
+const { 
+	title = 'Admin Panel - Culina Smart',
+} = Astro.props;
+
+const langCookie = Astro.cookies.get('culina_language')?.value || 'es';
+const t = translations[langCookie as keyof typeof translations] || translations.es;
+// After context.rewrite(), Astro.url.pathname reflects the internal /admin/* path
+const currentPath = Astro.url.pathname.replace(/\/$/, "");
+// Secret prefix for public-facing nav links
+const adminPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
+const ap = `/${adminPrefix}`; // e.g. /ctrl-x7q2
+
+const getLinkStyle = (path: string) => {
+    return currentPath === path 
+        ? "transition-colors text-indigo-600 dark:text-indigo-400 font-bold border-b-2 border-indigo-600 dark:border-indigo-400 pt-5 pb-4" 
+        : "transition-colors hover:text-indigo-600 dark:hover:text-indigo-400 text-slate-500 dark:text-slate-400 pt-5 pb-4 border-b-2 border-transparent";
+};
+---
+
+<!doctype html>
+<html lang={langCookie}>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+		<link rel="icon" type="image/png" href="/icon.png" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		
+		<!-- Open Graph / Meta prevent indexing -->
+        <meta name="robots" content="noindex, nofollow" />
+		
+		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8fafc" />
+		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#020617" />
+		
+		<!-- Google Fonts: Inter -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+		
+		<style>
+			html {
+				font-family: 'Inter', sans-serif;
+			}
+		</style>
+		
+		<ViewTransitions />
+	</head>
+	<body class="min-h-screen font-sans antialiased text-slate-800 dark:text-slate-200 transition-colors duration-300 bg-slate-50 dark:bg-[#0B1120]">
+		<AppProviders client:load>
+			<div class="flex flex-col min-h-screen">
+				<!-- Custom compact Navbar for Admin -->
+				<header class="sticky top-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 shadow-sm">
+					<div class="container px-4">
+						<div class="flex flex-col md:flex-row md:items-center justify-between w-full">
+                            <div class="flex items-center justify-between w-full md:w-auto py-3 md:py-0 md:border-r border-slate-300 dark:border-slate-700 md:pr-6 md:mr-4">
+                                <a class="flex items-center space-x-2" href="/">
+                                    <span class="font-bold inline-block text-lg md:text-base">Culina Smart <span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded ml-1.5 align-middle">ADMIN</span></span>
+                                </a>
+                                
+                                {/* Mobile Menu Toggle */}
+                                <button id="admin-menu-toggle" class="md:hidden p-2 -mr-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors" aria-label="Toggle navigation">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <nav id="admin-mobile-nav" class="hidden md:flex flex-col md:flex-row items-start md:items-center gap-x-6 gap-y-2 w-full md:w-auto absolute md:static top-full left-0 bg-white dark:bg-[#0B1120] md:bg-transparent px-6 md:px-0 py-4 md:py-0 border-b md:border-0 border-slate-200 dark:border-slate-800 shadow-xl md:shadow-none z-50">
+                                <a data-astro-reload href={`${ap}/dashboard`} class={getLinkStyle('/admin/dashboard')}>{t.admin?.title || 'Dashboard'}</a>
+                                <a data-astro-reload href={`${ap}/review-logs`} class={getLinkStyle('/admin/review-logs')}>{t.admin?.reviewLogs || 'Review Logs'}</a>
+                                <a data-astro-reload href={`${ap}/logs`} class={getLinkStyle('/admin/logs')}>{t.admin?.logs || 'Logs'}</a>
+                                <a data-astro-reload href={`${ap}/jobs`} class={getLinkStyle('/admin/jobs')}>{t.admin?.jobs || 'Jobs'}</a>
+                                <a data-astro-reload href={`${ap}/moderation`} class={getLinkStyle('/admin/moderation')}>{t.admin?.moderation || 'Moderation'}</a>
+                            </nav>
+						</div>
+					</div>
+				</header>
+
+				<main id="main-content" class="flex-grow pt-6 md:pt-8 pb-16 px-4 md:px-8 container mx-auto">
+					<slot />
+				</main>
+			</div>
+
+			<LegalsConsent client:load />
+
+            <script>
+                document.addEventListener('astro:page-load', () => {
+                    const btn = document.getElementById('admin-menu-toggle');
+                    const nav = document.getElementById('admin-mobile-nav');
+                    
+                    if (btn && nav) {
+                        // Toggle Logic
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            nav.classList.toggle('hidden');
+                            nav.classList.toggle('flex');
+                        });
+
+                        // Close when clicking outside
+                        document.addEventListener('click', (e) => {
+                            if (!nav.classList.contains('hidden')) {
+                                const target = e.target as HTMLElement;
+                                if (!nav.contains(target) && !btn.contains(target)) {
+                                    nav.classList.add('hidden');
+                                    nav.classList.remove('flex');
+                                }
+                            }
+                        });
+                    }
+                });
+            </script>
+		</AppProviders>
+	</body>
+</html>

@@ -10,6 +10,9 @@ import {
 } from 'lucide-react';
 import { useSettings } from '@context/SettingsContext';
 import { RecipeSidebar } from './RecipeSidebar';
+import { ChefNoteCard } from './ChefNoteCard';
+import { MealTrackingModal, type MealTrackingData } from './MealTrackingModal';
+import { WeeklyCheckinModal } from './WeeklyCheckinModal';
 import { PlannerDay } from './PlannerDay';
 import { NutritionalSummary } from './NutritionalSummary';
 
@@ -49,6 +52,12 @@ export function WeeklyPlanner() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [scrollProgress, setScrollProgress] = useState(0);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    // AI & Tracking States
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [aiChefMessage, setAiChefMessage] = useState<string | null>(null);
+    const [selectedMeal, setSelectedMeal] = useState<MealTrackingData | null>(null);
+    const [isCheckinOpen, setIsCheckinOpen] = useState(false);
 
     useEffect(() => {
         const hasSeenPlannerGuide = document.cookie.includes('seen_planner_guide=true');
@@ -91,6 +100,88 @@ export function WeeklyPlanner() {
         return `${weekDays[0].toLocaleDateString(undefined, opts)} – ${weekDays[6].toLocaleDateString(undefined, yearOpts)}`;
     };
 
+    // ─── AI Mock Generation (Concierge) ───
+    const handleGenerateAI = () => {
+        setIsGenerating(true);
+        // Simulate a 5-second Polling/generation wait
+        setTimeout(() => {
+            setIsGenerating(false);
+            setAiChefMessage("El plan se diseñó para alcanzar tus objetivos nutricionales y reducir el desperdicio. Se priorizó el uso de ingredientes de tu alacena (huevos, cacahuates) logrando un balance económico óptimo.");
+            
+            // Generate realistic dummy meals to test the UI experience
+            const mockPlan: Record<string, any[]> = {};
+            const recipes = [
+                {
+                    breakfast: { name: "Huevos Rancheros Tradicionales", image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&q=80" },
+                    lunch:     { name: "Salmón Glaseado con Quinoa", image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=80" },
+                    dinner:    { name: "Sopa Crema de Calabaza Asada", image: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800&q=80" }
+                },
+                {
+                    breakfast: { name: "Tostada de Aguacate y Huevo", image: "https://images.unsplash.com/photo-1525351326368-efbb5cb6814d?w=800&q=80" },
+                    lunch:     { name: "Bowl de Pollo Teriyaki", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80" },
+                    dinner:    { name: "Ensalada Mediterránea Fresca", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80" }
+                },
+                {
+                    breakfast: { name: "Avena Nocturna con Frutos", image: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=800&q=80" },
+                    lunch:     { name: "Pasta al Pesto con Tomates", image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=800&q=80" },
+                    dinner:    { name: "Tacos de Pescado Baja", image: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=800&q=80" }
+                }
+            ];
+
+            weekDays.forEach((date, index) => {
+                const dateKey = date.toDateString();
+                const dailyMenu = recipes[index % 3];
+
+                // Only fill editable days to simulate the sliding window of an active plan
+                if (isDayEditable(date)) {
+                    // Simular que algunos días ya pasaron y tienen tracking
+                    const isPastDay = date < new Date(today.getTime() - 86400000); 
+
+                    mockPlan[dateKey] = [
+                        { 
+                            mealPlanRecipeId: Math.random(), 
+                            dayOfWeek: date.getDay(), 
+                            mealType: 'BREAKFAST', 
+                            recipeId: 100 + index, 
+                            portionMultiplier: 1.0, 
+                            recipe: dailyMenu.breakfast,
+                            tracking: isPastDay ? { isEaten: true, rating: 5, satietyLevel: 'SATISFIED' } : undefined
+                        },
+                        { 
+                            mealPlanRecipeId: Math.random(), 
+                            dayOfWeek: date.getDay(), 
+                            mealType: 'LUNCH', 
+                            recipeId: 200 + index, 
+                            portionMultiplier: 1.2, 
+                            recipe: dailyMenu.lunch,
+                            tracking: isPastDay ? { isEaten: false, skippedReason: 'ATE_OUT' } : undefined
+                        },
+                        { 
+                            mealPlanRecipeId: Math.random(), 
+                            dayOfWeek: date.getDay(), 
+                            mealType: 'DINNER', 
+                            recipeId: 300 + index, 
+                            portionMultiplier: 0.8, 
+                            recipe: dailyMenu.dinner 
+                        }
+                    ];
+                }
+            });
+            setPlan(mockPlan);
+        }, 5000);
+    };
+
+    const handleSaveMealTracking = (mealPlanRecipeId: number, data: any) => {
+        console.log("Tracking Guardado (PATCH API):", mealPlanRecipeId, data);
+        // In a real app, optimistically update the `plan` state
+        setSelectedMeal(null);
+    };
+
+    const handleSaveCheckin = (data: any) => {
+        console.log("Check-in Guardado (POST API):", data);
+        setIsCheckinOpen(false);
+    };
+
     const formatWeekLabel = () => {
         if (weekOffset === 0) return t.planner?.thisWeek || 'Esta semana';
         if (weekOffset === 1) return t.planner?.nextWeek || 'Próxima semana';
@@ -108,8 +199,26 @@ export function WeeklyPlanner() {
                 <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-secondary/5 rounded-full blur-[100px]" />
             </div>
 
+            {/* ── CONCIERGE LOADING SCREEN ── */}
+            {isGenerating && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-background/95 backdrop-blur-xl animate-in fade-in duration-300">
+                    <div className="flex flex-col items-center max-w-sm text-center">
+                        <div className="relative mb-8">
+                            <div className="w-20 h-20 bg-primary/20 rounded-full animate-ping absolute inset-0 mx-auto" />
+                            <div className="w-20 h-20 bg-primary rounded-full shadow-2xl shadow-primary/40 flex items-center justify-center relative z-10 animate-pulse">
+                                <Sparkles className="w-10 h-10 text-primary-foreground" />
+                            </div>
+                        </div>
+                        <h2 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-400">
+                            {t.planner?.concierge?.loading || 'Nuestros chefs están diseñando tu menú...'}
+                        </h2>
+                        <p className="text-muted-foreground">Por favor espera un momento mientras procesamos tus preferencias.</p>
+                    </div>
+                </div>
+            )}
+
             {/* ── ONBOARDING ── */}
-            {showOnboarding && (
+            {showOnboarding && !isGenerating && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
                     <div className="bg-background border border-border/50 shadow-2xl rounded-3xl p-10 max-w-md w-full relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
@@ -197,7 +306,8 @@ export function WeeklyPlanner() {
 
                             {/* AI Button — disabled on locked weeks */}
                             <button
-                                disabled={!weekHasEditableDays}
+                                onClick={handleGenerateAI}
+                                disabled={!weekHasEditableDays || isGenerating}
                                 className="inline-flex items-center gap-2.5
                                            px-6 py-3
                                            bg-primary text-primary-foreground
@@ -273,6 +383,9 @@ export function WeeklyPlanner() {
                         </div>
                     )}
 
+                    {/* ─── Chef Note ─── */}
+                    {aiChefMessage && <ChefNoteCard message={aiChefMessage} />}
+
                     {/* ─── Weekly Grid ─── */}
                     <div className="relative group/cal">
                         <button onClick={() => scroll('left')}
@@ -313,6 +426,7 @@ export function WeeklyPlanner() {
                                     date={date}
                                     meals={plan[date.toDateString()] || []}
                                     isEditable={isDayEditable(date)}
+                                    onMealClick={(md) => setSelectedMeal(md)}
                                 />
                             ))}
                         </div>
@@ -337,11 +451,32 @@ export function WeeklyPlanner() {
                     <RecipeSidebar />
                 </aside>
 
+                <button
+                    onClick={() => setIsCheckinOpen(true)}
+                    className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 p-4 bg-foreground text-background rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-transform"
+                >
+                    <Sparkles className="w-6 h-6" />
+                </button>
+
             <style dangerouslySetInnerHTML={{ __html: `
                 .scrollbar-hide::-webkit-scrollbar { display: none; }
                 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
             `}} />
             </div>
+
+            {/* ── MODALS ── */}
+            <MealTrackingModal
+                isOpen={!!selectedMeal}
+                onClose={() => setSelectedMeal(null)}
+                mealData={selectedMeal}
+                onSave={handleSaveMealTracking}
+            />
+
+            <WeeklyCheckinModal
+                isOpen={isCheckinOpen}
+                onClose={() => setIsCheckinOpen(false)}
+                onSave={handleSaveCheckin}
+            />
         </div>
     );
 }

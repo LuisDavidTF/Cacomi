@@ -81,7 +81,42 @@ export const translations = {
             weeks: 'semanas',
             today: 'Hoy',
             pastWeekNote: 'Esta semana ya pasó. Solo puedes planificar los próximos 7 días desde hoy.',
-            futureWeekNote: 'Puedes explorar semanas futuras, pero solo se puede planificar los próximos 7 días.'
+            futureWeekNote: 'Puedes explorar semanas futuras, pero solo se puede planificar los próximos 7 días.',
+            tracking: {
+                eaten: 'Me lo comí',
+                rating: 'Calificación',
+                satiety: '¿Cómo quedaste?',
+                reason: '¿Por qué lo saltaste?',
+                satietyLevels: {
+                    veryHungry: 'Muy hambriento',
+                    satisfied: 'Satisfecho',
+                    veryFull: 'Muy lleno'
+                },
+                reasons: {
+                    noTime: 'Falta de tiempo',
+                    tooExpensive: 'Muy caro',
+                    didntLike: 'No me gustó',
+                    ateOut: 'Comí fuera',
+                    forgot: 'Lo olvidé'
+                },
+                save: 'Guardar'
+            },
+            checkin: {
+                title: '¿Cómo te sentiste esta semana?',
+                stress: 'Nivel de estrés',
+                energy: 'Nivel de energía',
+                notes: 'Notas adicionales',
+                levels: {
+                    low: 'Bajo',
+                    medium: 'Medio',
+                    high: 'Alto'
+                },
+                save: 'Completar Check-in'
+            },
+            concierge: {
+                loading: 'Nuestros chefs están diseñando tu menú. Te notificaremos cuando esté listo.',
+                noteTitle: 'Nota del Chef:'
+            }
         },
 
         landing: {
@@ -340,6 +375,25 @@ export const translations = {
             viewAsMe: 'Ver como yo',
             viewAsPublic: 'Público',
             viewAs: 'Vista:'
+        },
+        admin: {
+            title: 'Panel de Administrador',
+            reviewLogs: 'Validar Planes',
+            metrics: 'Sistema',
+            logs: 'Consola',
+            jobs: 'Procesos',
+            users: 'Usuarios',
+            moderation: 'Moderación',
+            runBtn: 'Ejecutar Ahora',
+            stopBtn: 'Detener',
+            banBtn: 'Suspender',
+            unbanBtn: 'Reactivar',
+            noPermission: 'Se requiere token de elevación de privilegios...',
+            enterPin: 'Ingresa tu PIN de Administrador',
+            authBtn: 'Autorizar Elevación',
+            cpuUsage: 'Uso de CPU',
+            ramUsage: 'Uso de RAM',
+            serverLogs: 'Logs del Servidor'
         }
     },
     en: {
@@ -419,7 +473,42 @@ export const translations = {
             weeks: 'weeks',
             today: 'Today',
             pastWeekNote: 'This week has passed. You can only plan the next 7 days from today.',
-            futureWeekNote: 'You can browse future weeks, but only the next 7 days can be planned.'
+            futureWeekNote: 'You can browse future weeks, but only the next 7 days can be planned.',
+            tracking: {
+                eaten: 'I ate it',
+                rating: 'Rating',
+                satiety: 'How did you feel?',
+                reason: 'Why did you skip it?',
+                satietyLevels: {
+                    veryHungry: 'Very hungry',
+                    satisfied: 'Satisfied',
+                    veryFull: 'Very full'
+                },
+                reasons: {
+                    noTime: 'No time',
+                    tooExpensive: 'Too expensive',
+                    didntLike: 'Didn\'t like it',
+                    ateOut: 'Ate out',
+                    forgot: 'Forgot'
+                },
+                save: 'Save'
+            },
+            checkin: {
+                title: 'How did you feel this week?',
+                stress: 'Stress level',
+                energy: 'Energy level',
+                notes: 'Additional notes',
+                levels: {
+                    low: 'Low',
+                    medium: 'Medium',
+                    high: 'High'
+                },
+                save: 'Complete Check-in'
+            },
+            concierge: {
+                loading: 'Our chefs are designing your menu. We will notify you when it\'s ready.',
+                noteTitle: 'Chef\'s Note:'
+            }
         },
 
         landing: {
@@ -678,6 +767,25 @@ export const translations = {
             viewAsMe: 'View as me',
             viewAsPublic: 'Public',
             viewAs: 'View:'
+        },
+        admin: {
+            title: 'Admin Panel',
+            reviewLogs: 'Review Logs',
+            metrics: 'System',
+            logs: 'Console',
+            jobs: 'Jobs',
+            users: 'Users',
+            moderation: 'Moderation',
+            runBtn: 'Run Now',
+            stopBtn: 'Stop',
+            banBtn: 'Ban',
+            unbanBtn: 'Unban',
+            noPermission: 'Privilege elevation token required...',
+            enterPin: 'Enter your Admin PIN',
+            authBtn: 'Authorize Elevation',
+            cpuUsage: 'CPU Usage',
+            ramUsage: 'RAM Usage',
+            serverLogs: 'Server Logs'
         }
     },
     fr: {
@@ -757,7 +865,42 @@ export const translations = {
             weeks: 'semaines',
             today: "Aujourd'hui",
             pastWeekNote: 'Cette semaine est passée. Vous ne pouvez planifier que les 7 prochains jours.',
-            futureWeekNote: 'Vous pouvez parcourir les semaines futures, mais seuls les 7 prochains jours peuvent être planifiés.'
+            futureWeekNote: 'Vous pouvez parcourir les semaines futures, mais seuls les 7 prochains jours peuvent être planifiés.',
+            tracking: {
+                eaten: 'Je l\'ai mangé',
+                rating: 'Évaluation',
+                satiety: 'Comment vous sentez-vous ?',
+                reason: 'Pourquoi l\'avez-vous sauté ?',
+                satietyLevels: {
+                    veryHungry: 'Très faim',
+                    satisfied: 'Satisfait',
+                    veryFull: 'Très plein'
+                },
+                reasons: {
+                    noTime: 'Pas de temps',
+                    tooExpensive: 'Trop cher',
+                    didntLike: 'Je n\'ai pas aimé',
+                    ateOut: 'Mangé au restaurant',
+                    forgot: 'Oublié'
+                },
+                save: 'Enregistrer'
+            },
+            checkin: {
+                title: 'Comment vous êtes-vous senti cette semaine ?',
+                stress: 'Niveau de stress',
+                energy: 'Niveau d\'énergie',
+                notes: 'Notes supplémentaires',
+                levels: {
+                    low: 'Faible',
+                    medium: 'Moyen',
+                    high: 'Élevé'
+                },
+                save: 'Terminer le Check-in'
+            },
+            concierge: {
+                loading: 'Nos chefs conçoivent votre menu. Nous vous informerons quand il sera prêt.',
+                noteTitle: 'Note du Chef :'
+            }
         },
 
         landing: {
@@ -1016,6 +1159,25 @@ export const translations = {
             viewAsMe: 'Voir comme moi',
             viewAsPublic: 'Public',
             viewAs: 'Vue :'
+        },
+        admin: {
+            title: 'Panneau d\'Administration',
+            reviewLogs: 'Valider les Plans',
+            metrics: 'Système',
+            logs: 'Console',
+            jobs: 'Processus',
+            users: 'Utilisateurs',
+            moderation: 'Modération',
+            runBtn: 'Exécuter',
+            stopBtn: 'Arrêter',
+            banBtn: 'Bannir',
+            unbanBtn: 'Débannir',
+            noPermission: 'Jeton d\'élévation de privilèges requis...',
+            enterPin: 'Saisissez votre code PIN Admin',
+            authBtn: 'Autoriser l\'élévation',
+            cpuUsage: 'Utilisation du processeur',
+            ramUsage: 'Utilisation de la RAM',
+            serverLogs: 'Journaux du serveur'
         }
     }
 };

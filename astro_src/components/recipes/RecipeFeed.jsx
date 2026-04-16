@@ -40,6 +40,45 @@ export function RecipeFeed({ initialData = null }) {
   const { showToast } = useToast();
   const { t } = useSettings();
 
+  // Global scroll listener removed to prevent Astro View Transition bugs.
+  // We rely exclusively on the explicit click-based save in RecipeCard.
+
+  // Scroll Restoration Logic
+  useEffect(() => {
+    if (status === 'success' && recipes.length > 0) {
+      const savedScroll = sessionStorage.getItem('culina_feed_scroll');
+      const targetScroll = parseInt(savedScroll, 10);
+      
+      // Ensure we have a valid numeric target before attempting to manipulate scroll
+      if (savedScroll && !isNaN(targetScroll) && targetScroll > 0) {
+        let attempts = 0;
+
+        const tryScroll = () => {
+          const docHeight = Math.max(
+            document.body.scrollHeight, document.documentElement.scrollHeight,
+            document.body.offsetHeight, document.documentElement.offsetHeight,
+            document.documentElement.clientHeight
+          );
+          const maxScrollable = docHeight - window.innerHeight;
+          console.log(`[Scroll Restore] Attempt ${attempts}: Target=${targetScroll}, MaxScrollable=${maxScrollable}, DocHeight=${docHeight}`);
+          
+          if (maxScrollable >= targetScroll || attempts > 15) {
+            window.scrollTo({ top: targetScroll, behavior: 'instant' });
+            console.log(`[Scroll Restore] Scrolled to ${targetScroll}`);
+            sessionStorage.removeItem('culina_feed_scroll');
+          } else {
+            attempts++;
+            setTimeout(tryScroll, 100);
+          }
+        };
+        
+        // Wait 250ms before even attempting, giving Astro's View Transitions time to finish any default behavior
+        setTimeout(tryScroll, 250);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, recipes]); // Depend on recipes so it fires again after merge from cache
+
   // Intersection Observer for Infinite Scroll
   const observer = useRef(null);
   const sentinelRef = useRef(null);
@@ -62,7 +101,7 @@ export function RecipeFeed({ initialData = null }) {
     return () => {
       if (observer.current && currentSentinel) observer.current.unobserve(currentSentinel);
     };
-  }, [status, hasMore, fetchMoreRecipes, isErrorLoadingMore]);
+  }, [status, hasMore, fetchMoreRecipes, isErrorLoadingMore, isLoadingMore]);
 
   // Actions
   const handleEdit = (recipe) => window.location.href = `/edit-recipe/${recipe.id}`;
