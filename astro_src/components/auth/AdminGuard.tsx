@@ -13,39 +13,45 @@ export const AdminGuard = ({ children }: { children: React.ReactNode }) => {
     const [error, setError] = useState(false);
     const { t } = useSettings();
 
-    // Check if the short-lived session token exists in sessionStorage (mock setup)
+    // Check if the server-side elevation cookie exists (verifying via API)
     useEffect(() => {
-        const adminSession = sessionStorage.getItem('culina_admin_token');
-        if (adminSession) {
-            const tokenData = JSON.parse(adminSession);
-            // Verify if it hasn't expired (e.g. 30 minutes life)
-            if (Date.now() - tokenData.timestamp < 30 * 60 * 1000) {
-                setIsAuthorized(true);
-            } else {
-                sessionStorage.removeItem('culina_admin_token');
+        const checkStatus = async () => {
+            try {
+                const response = await fetch('/api/admin/elevate');
+                const data = await response.json();
+                if (data.elevated) {
+                    setIsAuthorized(true);
+                }
+            } catch (err) {
+                console.error("[AdminGuard] Fallo al verificar elevación:", err);
             }
-        }
+        };
+        checkStatus();
     }, []);
 
-    const handleElevate = (e: React.FormEvent) => {
+    const handleElevate = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError(false);
         
-        // Mock API call to backend /api/admin/elevate
-        setTimeout(() => {
-            if (pin === '2024') { // Mock PIN validation
-                const tokenData = {
-                    token: 'mock_short_lived_token_38fje29x',
-                    timestamp: Date.now()
-                };
-                sessionStorage.setItem('culina_admin_token', JSON.stringify(tokenData));
+        try {
+            // Send PIN to server for validation (BFF pattern)
+            const response = await fetch('/api/admin/elevate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin })
+            });
+
+            if (response.ok) {
                 setIsAuthorized(true);
             } else {
                 setError(true);
             }
+        } catch (err) {
+            setError(true);
+        } finally {
             setIsLoading(false);
-        }, 800);
+        }
     };
 
     if (isAuthorized) {
@@ -61,10 +67,10 @@ export const AdminGuard = ({ children }: { children: React.ReactNode }) => {
                     </div>
                 </div>
                 <h2 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">
-                    {t.admin?.noPermission || 'Restricted Area'}
+                    {t.admin?.noPermission || 'Área Restringida'}
                 </h2>
                 <p className="text-sm text-center text-slate-500 dark:text-slate-400 mb-6">
-                    {t.admin?.enterPin || 'Please elevate your privileges by entering your Admin PIN.'}
+                    {t.admin?.enterPin || 'Por favor, introduce el PIN de Administrador para continuar.'}
                 </p>
 
                 <form onSubmit={handleElevate} className="space-y-4">
@@ -80,7 +86,7 @@ export const AdminGuard = ({ children }: { children: React.ReactNode }) => {
                             autoComplete="off"
                         />
                         {error && (
-                            <p className="text-xs text-red-500 mt-2 text-center animate-in slide-in-from-top-1">Invalid PIN. Try '2024'</p>
+                            <p className="text-xs text-red-500 mt-2 text-center animate-in slide-in-from-top-1">PIN Incorrecto</p>
                         )}
                     </div>
                     <button 

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { AuthService } from '@/lib/services/auth';
+import { decodeJwtPayload } from '../../middleware';
 
 const TOKEN_NAME = 'auth_token';
 
@@ -17,6 +18,18 @@ export const GET: APIRoute = async ({ cookies }) => {
 
     try {
         const user = await AuthService.me(token);
+
+        // Merge JWT Claims (roles/authorities) into the user object
+        const payload = decodeJwtPayload(token);
+        console.log('[API/ME] JWT Payload:', payload);
+        
+        if (payload) {
+            user.roles = payload.roles || payload.authorities || [];
+            if (payload.role) user.role = payload.role;
+        }
+
+        console.log('[API/ME] Final User Object:', user);
+
         return new Response(JSON.stringify({ user }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }

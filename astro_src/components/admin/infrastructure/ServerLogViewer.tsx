@@ -11,16 +11,7 @@ export const ServerLogViewer = () => {
     const [isPaused, setIsPaused] = useState(false);
     const endOfLogsRef = useRef<HTMLDivElement>(null);
 
-    const mockLogLines = [
-        '[INFO] Application started successfully on port 8080',
-        '[WARN] Memory usage approaching 70%',
-        '[INFO] Database connection pool initialized with 10 connections',
-        '[DEBUG] Triggered cleanup job for expired sessions',
-        '[INFO] Incoming request to /api/v1/recipes',
-        '[ERROR] Failed to fetch external recipe data (timeout)',
-        '[INFO] User luisedgar authenticated successfully',
-        '[INFO] Worker thread #3 finished processing background tasks'
-    ];
+    const mockLogLines: string[] = [];
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
