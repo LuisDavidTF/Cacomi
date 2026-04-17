@@ -111,6 +111,7 @@ export const ReviewLogsBoard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [globalAuditText, setGlobalAuditText] = useState("");
+    const [error, setError] = useState<string | null>(null);
     
     // UI states
     const [statusBanner, setStatusBanner] = useState<{msg: string, type: 'success' | 'error'} | null>(null);
@@ -151,6 +152,7 @@ export const ReviewLogsBoard = () => {
 
     const fetchPlans = async () => {
         setIsLoading(true);
+        setError(null);
         try {
             const response = await ManualTrainingService.getPlans(token);
             // The backend ManualTrainingResponse has a "plan" field which is List<TrainingLogsWeekResponse>
@@ -171,8 +173,9 @@ export const ReviewLogsBoard = () => {
                 }
             }));
             setPlans(mappedPlans);
-        } catch (error) {
+        } catch (error: any) {
             console.error('[ReviewLogs] Failed to fetch plans:', error);
+            setError(error.message || 'Error de conexión con el servidor');
             showBanner('Error al cargar planes del servidor', 'error');
         } finally {
             setIsLoading(false);
@@ -277,6 +280,26 @@ export const ReviewLogsBoard = () => {
             <div className="flex flex-col items-center justify-center py-40">
                 <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
                 <p className="text-slate-500 font-medium">Cargando tanda de entrenamiento...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="bg-red-100 dark:bg-red-900/40 p-6 rounded-full mb-6">
+                    <AlertOctagon className="w-16 h-16 text-red-600 dark:text-red-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Error de Conexión</h2>
+                <p className="text-slate-500 dark:text-slate-400 max-w-md mb-6">
+                    {error}
+                </p>
+                <button 
+                    onClick={fetchPlans}
+                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all"
+                >
+                    <RefreshCw className="w-4 h-4" /> Reintentar
+                </button>
             </div>
         );
     }

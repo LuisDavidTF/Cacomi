@@ -9,11 +9,13 @@ export const ManualTrainingService = {
      * Corresponds to GET /admin/manual-training (ManualTrainingResponse)
      */
     getPlans: async (token) => {
+        const headers = {};
+        if (token && token !== 'undefined') {
+            headers.Authorization = `Bearer ${token}`;
+        }
         return ApiService.request('/admin/manual-training', {
             method: 'GET',
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers,
         });
     },
 
@@ -22,12 +24,14 @@ export const ManualTrainingService = {
      * Corresponds to POST /admin/manual-training (TrainingLogsWeekRequest)
      */
     updatePlan: async (payload, token) => {
+        const headers = {};
+        if (token && token !== 'undefined') {
+            headers.Authorization = `Bearer ${token}`;
+        }
         return ApiService.request('/admin/manual-training', {
             method: 'POST',
             body: payload,
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers,
         });
     },
 };

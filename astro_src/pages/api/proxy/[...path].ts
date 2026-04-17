@@ -3,8 +3,12 @@ import { BACKEND_URL as ENV_BACKEND_URL } from 'astro:env/server';
 
 const normalizeBackendUrl = (url: string | undefined): string => {
     if (!url) return 'http://localhost:8080';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return `https://${url}`;
+    let normalized = url.trim();
+    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+        normalized = `https://${normalized}`;
+    }
+    // Remove trailing slashes to avoid double-slashes when joining paths
+    return normalized.replace(/\/+$/, '');
 };
 
 const TOKEN_NAME = 'auth_token';
@@ -19,11 +23,16 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
         return new Response(JSON.stringify({ error: 'Ruta no válida' }), { status: 400 });
     }
 
-    // Resolve backend URL inside the handler for Cloudflare runtime compatibility
-    const BACKEND_URL = normalizeBackendUrl(ENV_BACKEND_URL || import.meta.env.BACKEND_URL);
+    // Resolve backend URL with multi-layer fallback for Cloudflare/Vite/Node compatibility
+    const rawEnvUrl = ENV_BACKEND_URL || import.meta.env.BACKEND_URL || (typeof process !== 'undefined' ? process.env.BACKEND_URL : undefined);
+    const BACKEND_URL = normalizeBackendUrl(rawEnvUrl);
 
-    // Reconstruct the backend URL
+    // Reconstruct the backend URL (ensuring clean slashes)
     const targetUrl = new URL(`${BACKEND_URL}/api/v2/${path}${url.search}`);
+    
+    if (BACKEND_URL === 'http://localhost:8080' && import.meta.env.PROD) {
+        console.warn(`[PROXY WARNING] BACKEND_URL not found, falling back to localhost in PROD!`);
+    }
     
     // Clone headers but remove those that might interfere (like host)
     const headers = new Headers(request.headers);
@@ -33,7 +42,7 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
 
     // Inject Auth Token from HttpOnly cookie on the server
     const token = cookies.get(TOKEN_NAME)?.value;
-    if (token) {
+    if (token && token !== 'undefined') {
         headers.set('Authorization', `Bearer ${token}`);
     }
 
@@ -61,9 +70,15 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
 
     } catch (error: any) {
         console.error(`[PROXY ERROR] path: ${path} ->`, error);
+        
+        // Differentiate between configuration and connection errors
+        const isConfigError = !rawEnvUrl || rawEnvUrl === 'http://localhost:8080';
+        
         return new Response(JSON.stringify({ 
-            error: 'Error de comunicación con el servidor', 
-            details: error.message 
+            error: isConfigError ? 'Error de configuración del servidor' : 'Error de comunicación con el backend', 
+            details: error.message,
+            path: path,
+            target: targetUrl.origin // Only return origin for safety
         }), { 
             status: 502,
             headers: { 'Content-Type': 'application/json' }

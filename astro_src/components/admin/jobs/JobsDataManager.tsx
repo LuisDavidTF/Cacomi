@@ -46,24 +46,20 @@ export const JobsDataManager = () => {
         if (action === 'resume') path += '/resume';
         
         try {
-            const adminSession = sessionStorage.getItem('culina_admin_token');
             const headers: HeadersInit = {
                 'Content-Type': 'application/json'
             };
-            if (adminSession) {
-                const parsed = JSON.parse(adminSession);
-                if (parsed.token) {
-                    headers['Authorization'] = `Bearer ${parsed.token}`;
-                }
-            }
+            
+            // Note: We rely on the BFF proxy to inject the auth_token from cookies.
+            // No need to manually manage admin tokens in sessionStorage unless explicitly required.
 
             // Según la documentación de backend la ruta base debería ser /admin/jobs
             const url = `${API_URL}/admin/jobs${path}`;
             
             const res = await fetch(url, {
                 method: 'POST',
-                headers,
-                credentials: 'omit' // Se usa Token o por defecto Auth si es necesario
+                headers
+                // Removed credentials: 'omit' to allow the auth_token cookie to be sent to the proxy
             });
             
             const text = await res.text();
@@ -78,9 +74,9 @@ export const JobsDataManager = () => {
             } else {
                 alert(`Error al ejecutar la acción: ${res.statusText}\n${text}`);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert(`Error de red al intentar conectar con el backend.`);
+            alert(`Error de red al intentar conectar con el backend: ${error.message || 'Error desconocido'}`);
         } finally {
             setIsLoading(null);
         }
