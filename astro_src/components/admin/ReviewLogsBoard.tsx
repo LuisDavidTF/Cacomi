@@ -14,8 +14,8 @@ interface TrainingLogsDayResponse {
     logId: number;
     recipeId: number;
     recipeName: string;
-    dayOfWeek: string;    // "LUNES", "MARTES", etc.
-    mealType: string;     // "BREAKFAST", "LUNCH", "DINNER"
+    dayOfWeek: string;
+    mealType: string;
     portionMultiplier: number;
     proteinGrams: number;
     calories: number;
@@ -23,6 +23,14 @@ interface TrainingLogsDayResponse {
     pantryUsage: number;
     selectionLogicCode: SelectionLogicCode;
     aiReasoning: string;
+}
+
+interface PantryItem {
+    ingredientId: number;
+    ingredientName: string;
+    quantity: number;
+    unitType: string;
+    expirationDate: string | null;
 }
 
 interface UserProfile {
@@ -35,13 +43,14 @@ interface UserProfile {
     targetCalories: number;
     targetWeight: number;
     targetProtein: number;
-    weeklyBudget: number;
+    weeklyBudget: number | null;
 }
 
 interface TrainingLogsWeekResponse {
     planId: number;
-    profile: UserProfile; // We'll map the flat profile fields into this nested object for UI cleaness
-    days: TrainingLogsDayResponse[]; // Flat list from backend
+    profile: UserProfile; 
+    days: TrainingLogsDayResponse[];
+    pantry: { items: PantryItem[] };
     aiPrompt: string;
     globalPlanAudit: string;
 }
@@ -69,18 +78,34 @@ interface TrainingLogsWeekRequest {
 /** 
  * Groups flat training logs into a weekly summary for the grid UI.
  */
+const DAY_MAP: Record<string, string> = {
+    'MONDAY': 'LUNES',
+    'TUESDAY': 'MARTES',
+    'WEDNESDAY': 'MIÉRCOLES',
+    'THURSDAY': 'JUEVES',
+    'FRIDAY': 'VIERNES',
+    'SATURDAY': 'SÁBADO',
+    'SUNDAY': 'DOMINGO'
+};
+
+/** 
+ * Groups flat training logs into a weekly summary for the grid UI.
+ */
 const groupLogsByDay = (logs: TrainingLogsDayResponse[]): DaySummary[] => {
     const dayOrder = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
     const groups: Record<string, TrainingLogsDayResponse[]> = {};
     
     logs.forEach(log => {
-        const day = log.dayOfWeek.toUpperCase();
+        let day = log.dayOfWeek.toUpperCase();
+        // Harmonize English vs Spanish day names from backend
+        day = DAY_MAP[day] || day;
+
         if (!groups[day]) groups[day] = [];
         groups[day].push(log);
     });
 
     return dayOrder.map(day => ({
-        name: day.substring(0, 3), // "LUN", "MAR"...
+        name: day.substring(0, 3).toUpperCase(), // "LUN", "MAR"...
         meals: groups[day] || []
     })).filter(d => d.meals.length > 0);
 };
@@ -92,9 +117,9 @@ const calculateMetrics = (logs: TrainingLogsDayResponse[]) => {
     let weeklyProtein = 0;
     
     logs.forEach(m => {
-        weeklyCost += m.estimatedCost * m.portionMultiplier;
-        weeklyCalories += m.calories * m.portionMultiplier;
-        weeklyProtein += m.proteinGrams * m.portionMultiplier;
+        weeklyCost += (m.estimatedCost || 0) * (m.portionMultiplier || 1);
+        weeklyCalories += (m.calories || 0) * (m.portionMultiplier || 1);
+        weeklyProtein += (m.proteinGrams || 0) * (m.portionMultiplier || 1);
     });
 
     return {
@@ -105,12 +130,31 @@ const calculateMetrics = (logs: TrainingLogsDayResponse[]) => {
     };
 };
 
+const calculateAge = (birthDate: string) => {
+    if (!birthDate) return 'N/A';
+    try {
+        const birth = new Date(birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        return age;
+    } catch (e) {
+        return 'N/A';
+    }
+};
+
 export const ReviewLogsBoard = () => {
     const { token } = useAuth();
     const [plans, setPlans] = useState<TrainingLogsWeekResponse[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [processedIds, setProcessedIds] = useState<Set<number>>(new Set());
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [globalAuditText, setGlobalAuditText] = useState("");
+    const [isPantryOpen, setIsPantryOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     
     // UI states
@@ -138,7 +182,9 @@ export const ReviewLogsBoard = () => {
         return [];
     }, [searchQuery]);
 
-    const currentPlan = plans[0];
+    const currentPlan = plans[currentIndex];
+    const isProcessed = currentPlan ? processedIds.has(currentPlan.planId) : false;
+
     const daySummaries = useMemo(() => {
         return currentPlan ? groupLogsByDay(currentPlan.days) : [];
     }, [currentPlan]);
@@ -169,8 +215,13 @@ export const ReviewLogsBoard = () => {
                     targetCalories: p.targetCalories,
                     targetWeight: p.targetWeight,
                     targetProtein: p.targetProtein,
-                    weeklyBudget: p.weeklyBudget
-                }
+                    weeklyBudget: p.weeklyBudget ?? null
+                },
+                days: (p.days || []).map((d: any) => ({
+                    ...d,
+                    portionMultiplier: d.portionMultiplier ?? d.portion_multiplier ?? 1.0
+                })),
+                pantry: p.pantry || { items: [] }
             }));
             setPlans(mappedPlans);
         } catch (error: any) {
@@ -184,38 +235,59 @@ export const ReviewLogsBoard = () => {
 
     useEffect(() => {
         if (currentPlan) {
-            setGlobalAuditText(currentPlan.globalPlanAudit || currentPlan.aiPrompt);
+            setGlobalAuditText(currentPlan.globalPlanAudit || "");
         }
     }, [currentPlan]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (plans.length === 0 || isSubmitting) return;
+            if (plans.length === 0 || isSubmitting || currentIndex >= plans.length) return;
             if (replaceTx) return; 
 
-            if (e.key === 'Enter' && !isEditing) {
+            if (e.key === 'Enter' && !isEditing && !isProcessed) {
                 e.preventDefault();
                 handleApprove();
-            } else if ((e.key === ' ' || e.key === 'Delete') && !isEditing) {
+            } else if ((e.key === ' ' || e.key === 'Delete') && !isEditing && !isProcessed) {
                 e.preventDefault();
                 handleReject();
+            } else if (e.key === 'ArrowLeft' && !isEditing) {
+                handleBack();
+            } else if (e.key === 'ArrowRight' && !isEditing) {
+                handleNext();
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [plans, isEditing, replaceTx, isSubmitting]);
+    }, [plans, isEditing, replaceTx, isSubmitting, currentIndex, isProcessed]);
 
     const showBanner = (msg: string, type: 'success' | 'error') => {
         setStatusBanner({ msg, type });
         setTimeout(() => setStatusBanner(null), 3000);
     };
 
-    const nextPlan = () => {
-        setPlans(prev => prev.slice(1));
+    const handleNext = () => {
+        if (currentIndex < plans.length - 1) {
+            setCurrentIndex(prev => prev + 1);
+            resetStates();
+        }
+    };
+
+    const handleBack = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+            resetStates();
+        }
+    };
+
+    const resetStates = () => {
         setIsEditing(false);
         setPreviewRecipe(null);
         setReplaceTx(null);
+    };
+
+    const markProcessed = (planId: number) => {
+        setProcessedIds(prev => new Set(prev).add(planId));
     };
 
     const handleAction = async (isValid: boolean) => {
@@ -238,8 +310,12 @@ export const ReviewLogsBoard = () => {
             };
 
             await ManualTrainingService.updatePlan(payload, token);
+            markProcessed(currentPlan.planId);
             showBanner(isValid ? `Plan ${currentPlan.planId} Aprobado 🟢` : `Plan ${currentPlan.planId} Rechazado 🔴`, isValid ? 'success' : 'error');
-            nextPlan();
+            
+            if (currentIndex < plans.length - 1) {
+                handleNext();
+            }
         } catch (error) {
             console.error('[ReviewLogs] Action failed:', error);
             showBanner('Error al guardar decisión en el servidor', 'error');
@@ -256,7 +332,7 @@ export const ReviewLogsBoard = () => {
         if (!replaceTx || !replaceReasonLogic || replaceAiReasoningText.length < 10) return;
         
         const updatedPlans = [...plans];
-        const targetMeal = updatedPlans[0].days.find(d => d.logId === replaceTx.logId);
+        const targetMeal = updatedPlans[currentIndex].days.find(d => d.logId === replaceTx.logId);
 
         if (targetMeal) {
             targetMeal.selectionLogicCode = replaceReasonLogic as SelectionLogicCode;
@@ -304,7 +380,7 @@ export const ReviewLogsBoard = () => {
         );
     }
 
-    if (plans.length === 0) {
+    if (plans.length === 0 || currentIndex >= plans.length) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="bg-indigo-100 dark:bg-indigo-900/40 p-6 rounded-full mb-6">
@@ -312,8 +388,14 @@ export const ReviewLogsBoard = () => {
                 </div>
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">¡Todo validado!</h2>
                 <p className="text-slate-500 dark:text-slate-400 max-w-md">
-                    Has revisado toda la tanda de planes. Revisa la consola para ver los Payloads (JSON).
+                    Has revisado toda la tanda de planes ({plans.length} planes).
                 </p>
+                <button 
+                    onClick={() => setCurrentIndex(0)}
+                    className="mt-6 text-indigo-600 hover:text-indigo-800 font-bold"
+                >
+                    Volver al primer plan
+                </button>
             </div>
         );
     }
@@ -329,7 +411,27 @@ export const ReviewLogsBoard = () => {
                     <div className="flex items-center justify-between px-2">
                         <div>
                             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Auditoría Integral</h1>
-                            <p className="text-slate-500 dark:text-slate-400">Verificando Plan ID-{currentPlan.planId} ({plans.length} en cola)</p>
+                            <div className="flex items-center gap-3">
+                                <p className="text-slate-500 dark:text-slate-400 font-medium">Plan {currentIndex + 1} de {plans.length}</p>
+                                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                                    <button 
+                                        onClick={handleBack}
+                                        disabled={currentIndex === 0}
+                                        className="p-1 px-2 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 rounded-md transition-all text-slate-600 dark:text-slate-400"
+                                        title="Anterior (ArrowLeft)"
+                                    >
+                                        <ChevronRight className="w-4 h-4 rotate-180" />
+                                    </button>
+                                    <button 
+                                        onClick={handleNext}
+                                        disabled={currentIndex === plans.length - 1}
+                                        className="p-1 px-2 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 rounded-md transition-all text-slate-600 dark:text-slate-400 flex items-center gap-1 text-[10px] font-bold uppercase"
+                                        title="Omitir/Siguiente (ArrowRight)"
+                                    >
+                                        OMITIR <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         {statusBanner && (
                             <div className={`px-4 py-2 rounded-lg font-medium text-sm animate-in fade-in slide-in-from-top-4 ${statusBanner.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'}`}>
@@ -345,7 +447,12 @@ export const ReviewLogsBoard = () => {
                         <div className="px-2 xl:px-4">
                             <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 flex items-center gap-1"><Info className="w-3 h-3"/> Perfil Usuario</span>
                             <div className="font-semibold text-sm text-slate-800 dark:text-slate-200 line-clamp-1" title={currentPlan.profile.goal}>{currentPlan.profile.goal}</div>
-                            <div className="text-xs text-slate-500 mt-1">{currentPlan.profile.gender} • {currentPlan.profile.currentWeight}kg • {currentPlan.profile.heightCm}cm</div>
+                            <div className="text-xs text-slate-500 mt-1">
+                                {currentPlan.profile.gender === 'MALE' ? 'Hombre' : currentPlan.profile.gender === 'FEMALE' ? 'Mujer' : currentPlan.profile.gender} • {currentPlan.profile.heightCm || '?'}cm • {calculateAge(currentPlan.profile.birthDate)} años
+                            </div>
+                            <div className="text-xs font-medium text-indigo-600 dark:text-indigo-400 mt-0.5">
+                                {currentPlan.profile.currentWeight}kg → {currentPlan.profile.targetWeight || '?'}kg
+                            </div>
                         </div>
                         
                         {/* Budget Tracker */}
@@ -353,13 +460,13 @@ export const ReviewLogsBoard = () => {
                             <div className="flex items-center justify-between mb-1">
                                 <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1"><DollarSign className="w-3 h-3"/> Presupuesto (Semanal)</span>
                                 <span className="text-xs font-mono font-medium text-slate-600 dark:text-slate-300">
-                                    ${tracking.weeklyCost.toFixed(0)} / ${weeklyBudgetLimit.toFixed(0)}
+                                    ${tracking.weeklyCost.toFixed(0)} / {weeklyBudgetLimit > 0 ? `$${weeklyBudgetLimit.toFixed(0)}` : 'Sin presupuesto asignado'}
                                 </span>
                             </div>
                             <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-2">
                                 <div 
-                                    className={`h-1.5 rounded-full transition-all ${tracking.weeklyCost > weeklyBudgetLimit ? 'bg-red-500' : tracking.weeklyCost > (weeklyBudgetLimit*0.8) ? 'bg-amber-500' : 'bg-emerald-500'}`} 
-                                    style={{ width: `${Math.min(100, (tracking.weeklyCost / weeklyBudgetLimit) * 100)}%` }}
+                                    className={`h-1.5 rounded-full transition-all ${weeklyBudgetLimit > 0 && tracking.weeklyCost > weeklyBudgetLimit ? 'bg-red-500' : weeklyBudgetLimit > 0 && tracking.weeklyCost > (weeklyBudgetLimit*0.8) ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                                    style={{ width: `${weeklyBudgetLimit > 0 ? Math.min(100, (tracking.weeklyCost / weeklyBudgetLimit) * 100) : 100}%` }}
                                 ></div>
                             </div>
                         </div>
@@ -368,7 +475,7 @@ export const ReviewLogsBoard = () => {
                         <div className="px-2 xl:px-4">
                             <div className="flex items-center justify-between mb-1">
                                 <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1"><Flame className="w-3 h-3"/> Kcal Diarias (Promedio)</span>
-                                <span className="text-[10px] text-slate-500">Meta: {currentPlan.profile.targetCalories}</span>
+                                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded">Objetivo: {currentPlan.profile.targetCalories} kcal</span>
                             </div>
                             <div className="font-bold text-base text-slate-800 dark:text-slate-200">
                                 {tracking.avgDailyCalories.toFixed(0)} <span className="text-xs font-normal text-slate-500">kcal/día</span>
@@ -394,29 +501,75 @@ export const ReviewLogsBoard = () => {
                 {/* Main Stack */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden transition-all duration-300 flex flex-col">
                     
-                    <div className="p-4 bg-slate-50 dark:bg-slate-950/30 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800">
-                        {isEditing && (
-                            <span className="bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-bold px-2 py-1 rounded flex items-center gap-1 animate-pulse">
-                                <Edit3 className="w-3 h-3" /> MODO EDICIÓN INDIRECTA
+                    <div className="p-4 bg-slate-50 dark:bg-slate-950/30 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                            {isSubmitting && (
+                                <span className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+                                    <Loader2 className="w-3 h-3 animate-spin" /> PROCESANDO...
+                                </span>
+                            )}
+                            {isProcessed && (
+                                <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+                                    <CheckCircle className="w-3 h-3" /> YA ENVIADO
+                                </span>
+                            )}
+                            {isEditing && (
+                                <span className="bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-bold px-2 py-1 rounded flex items-center gap-1 animate-pulse">
+                                    <Edit3 className="w-3 h-3" /> MODO EDICIÓN INDIRECTA
+                                </span>
+                            )}
+                            <span className="bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded">
+                                NIVEL: {currentPlan.profile.activityLevel}
                             </span>
-                        )}
-                        <span className="bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded">
-                            NIVEL: {currentPlan.profile.activityLevel}
-                        </span>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400">ID: {currentPlan.planId}</span>
                     </div>
                     
                     {/* View mode prompt */}
                     {!isEditing && (
+                        <>
                         <div className="mx-4 md:mx-6 mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl">
                              <div className="flex items-center gap-2 mb-1">
                                 <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                 <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400">Auditoría Global (Prompt AI Semanal)</h4>
                              </div>
                              <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80 italic">"{currentPlan.aiPrompt}"</p>
+                             
+                             {/* Pantry Context Summary */}
+                             {currentPlan.pantry?.items?.length > 0 && (
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    <span className="text-[9px] font-bold uppercase text-indigo-400 self-center">Contexto Despensa:</span>
+                                    {currentPlan.pantry.items.slice(0, 5).map((item, idx) => (
+                                        <span key={idx} className="text-[10px] bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-200/50 dark:border-indigo-700/30">
+                                            {item.ingredientName} ({item.quantity}{item.unitType})
+                                        </span>
+                                    ))}
+                                    {currentPlan.pantry.items.length > 5 && (
+                                        <button 
+                                            onClick={() => setIsPantryOpen(true)}
+                                            className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors underline cursor-pointer self-center"
+                                        >
+                                            +{currentPlan.pantry.items.length - 5} más
+                                        </button>
+                                    )}
+                                </div>
+                             )}
                         </div>
-                    )}
 
-                    <div className="p-4 md:p-6 overflow-y-auto max-h-[60vh]">
+                        {/* Reasoning Display (NEW SECTION) */}
+                        <div className="mx-4 md:mx-6 mt-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-xl">
+                             <div className="flex items-center gap-2 mb-1">
+                                <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">Razonamiento Global de la IA (Audit Feedback)</h4>
+                             </div>
+                             <p className="text-sm text-emerald-900/80 dark:text-emerald-300/80 italic">
+                                {currentPlan.globalPlanAudit || "No se proporcionó razonamiento global para este plan."}
+                             </p>
+                        </div>
+                    </>
+                )}
+
+                <div className="p-4 md:p-6 overflow-y-auto max-h-[60vh]">
                         <div className="space-y-6 md:space-y-4">
                             {daySummaries.map((day, dIdx) => (
                                 <div key={day.name} className="flex flex-col xl:flex-row gap-2 xl:gap-4 border-b border-slate-100 dark:border-slate-800 pb-6 xl:pb-4 last:border-0 last:pb-0">
@@ -425,7 +578,7 @@ export const ReviewLogsBoard = () => {
                                         <span className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 xl:bg-transparent xl:dark:bg-transparent px-3 py-1 xl:px-0 xl:py-0 rounded-full xl:rounded-none">{day.name}</span>
                                     </div>
                                     
-                                    <div className="flex-grow flex xl:grid xl:grid-cols-3 gap-3 overflow-x-auto pb-2 xl:pb-0 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 xl:mx-0 xl:px-0">
+                                    <div className="flex-grow flex xl:grid xl:grid-cols-3 gap-3 overflow-x-auto pb-4 xl:pb-0 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 xl:mx-0 xl:px-0">
                                         {day.meals.map((meal, mIdx) => (
                                             <div 
                                                 key={meal.logId} 
@@ -434,7 +587,10 @@ export const ReviewLogsBoard = () => {
                                             >
                                                 {/* Header ID/Type */}
                                                 <div className="flex items-start justify-between mb-1">
-                                                    <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded">{meal.type}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded">{meal.mealType}</span>
+                                                        <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded">x{meal.portionMultiplier}</span>
+                                                    </div>
                                                     <span className="text-[10px] text-slate-300 dark:text-slate-500 font-mono">#{meal.logId}</span>
                                                 </div>
                                                 
@@ -504,14 +660,26 @@ export const ReviewLogsBoard = () => {
                     <div className="p-4 md:p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 grid grid-cols-2 lg:flex lg:justify-between items-center gap-3">
                         {!isEditing ? (
                             <>
-                                <button onClick={handleReject} className="col-span-1 lg:w-auto flex justify-center items-center gap-2 px-4 py-3 lg:px-6 lg:py-3 rounded-xl hover:bg-red-50 text-slate-500 hover:text-red-600 dark:hover:bg-red-900/20 transition  text-xs font-bold uppercase tracking-wider">
-                                    <Trash2 className="w-4 h-4" /> Rechazar
+                                <button 
+                                    onClick={handleReject} 
+                                    disabled={isProcessed || isSubmitting}
+                                    className="col-span-1 lg:w-auto flex justify-center items-center gap-2 px-4 py-3 lg:px-6 lg:py-3 rounded-xl hover:bg-red-50 text-slate-500 hover:text-red-600 dark:hover:bg-red-900/20 transition text-xs font-bold uppercase tracking-wider disabled:opacity-40 disabled:hover:bg-transparent"
+                                >
+                                    <Trash2 className="w-4 h-4" /> {isProcessed ? 'Rechazado' : 'Rechazar'}
                                 </button>
-                                <button onClick={() => setIsEditing(true)} className="col-span-1 lg:w-auto flex justify-center items-center gap-2 px-4 py-3 lg:px-6 lg:py-3 rounded-xl hover:bg-amber-50 text-slate-500 hover:text-amber-600 dark:hover:bg-amber-900/20 transition text-xs font-bold uppercase tracking-wider">
+                                <button 
+                                    onClick={() => !isProcessed && setIsEditing(true)} 
+                                    disabled={isProcessed}
+                                    className="col-span-1 lg:w-auto flex justify-center items-center gap-2 px-4 py-3 lg:px-6 lg:py-3 rounded-xl hover:bg-amber-50 text-slate-500 hover:text-amber-600 dark:hover:bg-amber-900/20 transition text-xs font-bold uppercase tracking-wider disabled:opacity-40"
+                                >
                                     <Edit3 className="w-4 h-4" /> Editar
                                 </button>
-                                <button onClick={handleApprove} className="col-span-2 lg:w-auto flex justify-center items-center gap-2 px-4 py-3 lg:px-8 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition text-xs font-bold uppercase tracking-wider rounded-xl">
-                                    <Check className="w-4 h-4" /> Aprobar Plan
+                                <button 
+                                    onClick={handleApprove} 
+                                    disabled={isProcessed || isSubmitting}
+                                    className="col-span-2 lg:w-auto flex justify-center items-center gap-2 px-4 py-3 lg:px-8 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition text-xs font-bold uppercase tracking-wider rounded-xl disabled:opacity-40"
+                                >
+                                    <Check className="w-4 h-4" /> {isProcessed ? 'Enviado' : 'Aprobar Plan'}
                                 </button>
                             </>
                         ) : (
@@ -567,6 +735,12 @@ export const ReviewLogsBoard = () => {
                                     <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Impacto Alacena</div>
                                     <div className="text-lg font-bold text-amber-600 dark:text-amber-400">
                                         {(previewRecipe.pantryUsage * 100).toFixed(0)}% Utilizado
+                                    </div>
+                                </div>
+                                <div className="col-span-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-3 border border-indigo-100 dark:border-indigo-800/50 flex justify-between items-center">
+                                    <div className="text-[10px] uppercase font-bold text-indigo-400">Multiplicador de Porción</div>
+                                    <div className="text-lg font-bold text-indigo-600 dark:text-indigo-300">
+                                        x{previewRecipe.portionMultiplier}
                                     </div>
                                 </div>
                             </div>
@@ -645,6 +819,12 @@ export const ReviewLogsBoard = () => {
                                     <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Impacto Alacena</div>
                                     <div className="text-lg font-bold text-amber-600 dark:text-amber-400">
                                         {(previewRecipe.pantryUsage * 100).toFixed(0)}% Utilizado
+                                    </div>
+                                </div>
+                                <div className="col-span-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-3 border border-indigo-100 dark:border-indigo-800/50 flex justify-between items-center">
+                                    <div className="text-[10px] uppercase font-bold text-indigo-400">Multiplicador de Porción</div>
+                                    <div className="text-lg font-bold text-indigo-600 dark:text-indigo-300">
+                                        x{previewRecipe.portionMultiplier}
                                     </div>
                                 </div>
                             </div>
@@ -775,6 +955,39 @@ export const ReviewLogsBoard = () => {
                                     Fijar Ajustes
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* PANTRY MODAL (NEW) */}
+            {isPantryOpen && currentPlan && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsPantryOpen(false)}></div>
+                    <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                            <div>
+                                <h3 className="text-xl font-bold dark:text-white">Inventario Completo (Alacena)</h3>
+                                <p className="text-sm text-slate-500">Estado de insumos al momento de generar este plan</p>
+                            </div>
+                            <button onClick={() => setIsPantryOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-500 transition-colors">
+                                <X className="w-5 h-5"/>
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50/50 dark:bg-slate-950/20">
+                            {currentPlan.pantry.items.map((item, idx) => (
+                                <div key={idx} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-3 rounded-xl shadow-sm flex justify-between items-center">
+                                    <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 capitalize">{item.ingredientName}</div>
+                                    <div className="text-sm font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded-md">
+                                        {item.quantity} <span className="text-xs uppercase font-sans text-slate-500">{item.unitType}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-6 border-t border-slate-100 dark:border-slate-800 text-center">
+                             <button onClick={() => setIsPantryOpen(false)} className="px-8 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20">
+                                Entendido
+                             </button>
                         </div>
                     </div>
                 </div>
