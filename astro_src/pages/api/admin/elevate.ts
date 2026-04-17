@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
+import { ADMIN_PIN as ENV_ADMIN_PIN } from 'astro:env/server';
 
-const ADMIN_PIN = import.meta.env.ADMIN_PIN;
+const ADMIN_PIN = ENV_ADMIN_PIN || import.meta.env.ADMIN_PIN;
 const ELEVATION_COOKIE = 'culina_admin_elevated';
 
 export const POST: APIRoute = async ({ request, cookies }) => {

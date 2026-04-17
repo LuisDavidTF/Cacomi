@@ -14,7 +14,11 @@ const normalizeBackendUrl = (url) => {
     return `https://${url}`;
 };
 
-const BACKEND_URL = normalizeBackendUrl(getEnv('BACKEND_URL'));
+// Try to get from astro:env if possible (Astro 5+)
+// This is handled at runtime to avoid breaking client-side imports
+let envBackendUrl = getEnv('BACKEND_URL');
+
+const BACKEND_URL = normalizeBackendUrl(envBackendUrl);
 
 export const API_BASE_URL = isServer 
     ? (BACKEND_URL || 'http://localhost:8080')

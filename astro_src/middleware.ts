@@ -1,4 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
+import { ADMIN_PATH_PREFIX } from 'astro:env/server';
 
 const AUTH_COOKIE_NAME = 'auth_token';
 const PUBLIC_AUTH_ROUTES = ['/login', '/register'];
@@ -47,7 +48,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const pathname = url.pathname;
 
     // Read the secret admin path prefix (server-side only, never PUBLIC_)
-    const adminPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
+    const adminPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
     const secretAdminPrefix = `/${adminPrefix}`;
     const internalAdminPrefix = '/admin';
 

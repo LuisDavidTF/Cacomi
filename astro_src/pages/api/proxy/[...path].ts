@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { BACKEND_URL as ENV_BACKEND_URL } from 'astro:env/server';
 
 const normalizeBackendUrl = (url: string | undefined): string => {
     if (!url) return 'http://localhost:8080';
@@ -6,7 +7,7 @@ const normalizeBackendUrl = (url: string | undefined): string => {
     return `https://${url}`;
 };
 
-const BACKEND_URL = normalizeBackendUrl(import.meta.env.BACKEND_URL);
+const BACKEND_URL = normalizeBackendUrl(ENV_BACKEND_URL || import.meta.env.BACKEND_URL);
 const TOKEN_NAME = 'auth_token';
 
 /**

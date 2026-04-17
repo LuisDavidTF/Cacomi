@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig, envField } from 'astro/config';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import AstroPWA from '@vite-pwa/astro';
@@ -24,6 +24,13 @@ export default defineConfig({
     output: 'server',
     site: process.env.PUBLIC_SITE_URL || 'https://smart-recipe-planner.com',
     adapter,
+    env: {
+        schema: {
+            BACKEND_URL: envField.string({ context: 'server', access: 'secret', optional: true }),
+            ADMIN_PATH_PREFIX: envField.string({ context: 'server', access: 'secret', optional: true }),
+            ADMIN_PIN: envField.string({ context: 'server', access: 'secret', optional: true }),
+        }
+    },
     vite: {
         plugins: [tailwindcss()],
         resolve: {
