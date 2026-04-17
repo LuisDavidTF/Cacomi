@@ -8,7 +8,13 @@ const getEnv = (key) => {
 // On the server (SSR), we can hit the backend directly (BACKEND_URL).
 // On the client, we MUST hit our local proxy (/api/proxy) to hide the real URL.
 const isServer = typeof window === 'undefined';
-const BACKEND_URL = getEnv('BACKEND_URL');
+const normalizeBackendUrl = (url) => {
+    if (!url) return undefined;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `https://${url}`;
+};
+
+const BACKEND_URL = normalizeBackendUrl(getEnv('BACKEND_URL'));
 
 export const API_BASE_URL = isServer 
     ? (BACKEND_URL || 'http://localhost:8080')
