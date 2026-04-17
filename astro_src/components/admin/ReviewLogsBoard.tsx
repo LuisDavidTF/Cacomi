@@ -401,9 +401,62 @@ export const ReviewLogsBoard = () => {
     }
 
     return (
-        <div className="max-w-[90rem] mx-auto w-full flex flex-col lg:flex-row gap-6 relative items-start">
+        <div className="max-w-[102rem] mx-auto w-full flex flex-col xl:flex-row gap-6 relative items-start px-4">
             
-            {/* LEFT AREA: Cards Flow */}
+            {/* LEFT SIDEBAR: AI Audit Panel (Desktop XL only) */}
+            <div className="hidden xl:flex w-[320px] 2xl:w-[380px] flex-shrink-0 sticky top-10 flex-col gap-6 h-[calc(100vh-100px)] overflow-y-auto pr-2 custom-scrollbar">
+                
+                {/* AI Prompt Block */}
+                <div className="p-5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400">Auditoría Global</h4>
+                    </div>
+                    <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80 italic leading-relaxed">"{currentPlan.aiPrompt}"</p>
+                    
+                    {currentPlan.pantry?.items?.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-indigo-100 dark:border-indigo-800/50">
+                            <h5 className="text-[10px] font-bold uppercase text-indigo-400 mb-2">Contexto de Despensa:</h5>
+                            <div className="flex flex-wrap gap-1.5">
+                                {currentPlan.pantry.items.slice(0, 8).map((item, idx) => (
+                                    <span key={idx} className="text-[10px] bg-white/60 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded border border-indigo-200/50 dark:border-indigo-700/30">
+                                        {item.ingredientName}
+                                    </span>
+                                ))}
+                                {currentPlan.pantry.items.length > 8 && (
+                                    <button onClick={() => setIsPantryOpen(true)} className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 underline px-1">+{currentPlan.pantry.items.length - 8} más</button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* AI Reasoning Block */}
+                <div className="p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                        <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">Feedback de la IA</h4>
+                    </div>
+                    <p className="text-sm text-emerald-900/80 dark:text-emerald-300/80 italic leading-relaxed">
+                        {currentPlan.globalPlanAudit || "No hay razonamiento disponible."}
+                    </p>
+                </div>
+
+                {/* Global Audit Editor (XL Only) */}
+                {isEditing && (
+                    <div className="p-5 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/50 rounded-2xl shadow-sm animate-in fade-in slide-in-from-left-4">
+                        <label className="block text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest mb-3">Editar Auditoría Global</label>
+                        <textarea 
+                            className="w-full bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3 text-sm text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/50 min-h-[120px] resize-none"
+                            placeholder="Añade tus observaciones aquí..."
+                            value={globalAuditText}
+                            onChange={e => setGlobalAuditText(e.target.value)}
+                        />
+                    </div>
+                )}
+            </div>
+            
+            {/* CENTER AREA: Cards Flow */}
             <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col gap-6">
                 
                 {/* Header & Metric Compliance Tracker */}
@@ -525,49 +578,48 @@ export const ReviewLogsBoard = () => {
                         <span className="text-[10px] font-mono text-slate-400">ID: {currentPlan.planId}</span>
                     </div>
                     
-                    {/* View mode prompt */}
+                    {/* View mode prompt (Responsive: Hidden on XL) */}
                     {!isEditing && (
-                        <>
-                        <div className="mx-4 md:mx-6 mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl">
-                             <div className="flex items-center gap-2 mb-1">
-                                <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400">Auditoría Global (Prompt AI Semanal)</h4>
-                             </div>
-                             <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80 italic">"{currentPlan.aiPrompt}"</p>
-                             
-                             {/* Pantry Context Summary */}
-                             {currentPlan.pantry?.items?.length > 0 && (
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                    <span className="text-[9px] font-bold uppercase text-indigo-400 self-center">Contexto Despensa:</span>
-                                    {currentPlan.pantry.items.slice(0, 5).map((item, idx) => (
-                                        <span key={idx} className="text-[10px] bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-200/50 dark:border-indigo-700/30">
-                                            {item.ingredientName} ({item.quantity}{item.unitType})
-                                        </span>
-                                    ))}
-                                    {currentPlan.pantry.items.length > 5 && (
-                                        <button 
-                                            onClick={() => setIsPantryOpen(true)}
-                                            className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors underline cursor-pointer self-center"
-                                        >
-                                            +{currentPlan.pantry.items.length - 5} más
-                                        </button>
-                                    )}
+                        <div className="xl:hidden">
+                            <div className="mx-4 md:mx-6 mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400">Auditoría Global (Prompt AI Semanal)</h4>
                                 </div>
-                             )}
-                        </div>
+                                <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80 italic">"{currentPlan.aiPrompt}"</p>
+                                
+                                {currentPlan.pantry?.items?.length > 0 && (
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        <span className="text-[9px] font-bold uppercase text-indigo-400 self-center">Contexto Despensa:</span>
+                                        {currentPlan.pantry.items.slice(0, 5).map((item, idx) => (
+                                            <span key={idx} className="text-[10px] bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-200/50 dark:border-indigo-700/30">
+                                                {item.ingredientName} ({item.quantity}{item.unitType})
+                                            </span>
+                                        ))}
+                                        {currentPlan.pantry.items.length > 5 && (
+                                            <button 
+                                                onClick={() => setIsPantryOpen(true)}
+                                                className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors underline cursor-pointer self-center"
+                                            >
+                                                +{currentPlan.pantry.items.length - 5} más
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
 
-                        {/* Reasoning Display (NEW SECTION) */}
-                        <div className="mx-4 md:mx-6 mt-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-xl">
-                             <div className="flex items-center gap-2 mb-1">
-                                <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">Razonamiento Global de la IA (Audit Feedback)</h4>
-                             </div>
-                             <p className="text-sm text-emerald-900/80 dark:text-emerald-300/80 italic">
-                                {currentPlan.globalPlanAudit || "No se proporcionó razonamiento global para este plan."}
-                             </p>
+                            {/* Reasoning Display */}
+                            <div className="mx-4 md:mx-6 mt-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-xl">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">Razonamiento Global de la IA (Audit Feedback)</h4>
+                                </div>
+                                <p className="text-sm text-emerald-900/80 dark:text-emerald-300/80 italic">
+                                    {currentPlan.globalPlanAudit || "No se proporcionó razonamiento global para este plan."}
+                                </p>
+                            </div>
                         </div>
-                    </>
-                )}
+                    )}
 
                 <div className="p-4 md:p-6 overflow-y-auto max-h-[60vh]">
                         <div className="space-y-6 md:space-y-4">
@@ -646,7 +698,7 @@ export const ReviewLogsBoard = () => {
                     </div>
 
                     {isEditing && (
-                        <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-950/30 border-t border-slate-100 dark:border-slate-800">
+                        <div className="xl:hidden p-4 md:p-6 bg-slate-50 dark:bg-slate-950/30 border-t border-slate-100 dark:border-slate-800">
                              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Auditoría Global de la Semana (globalPlanAudit)</label>
                              <textarea 
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500/50"
