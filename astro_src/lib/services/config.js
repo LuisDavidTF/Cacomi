@@ -14,22 +14,32 @@ const normalizeBackendUrl = (url) => {
     return `https://${url}`;
 };
 
-// Try to get from astro:env if possible (Astro 5+)
-// This is handled at runtime to avoid breaking client-side imports
-let envBackendUrl = getEnv('BACKEND_URL');
-
-const BACKEND_URL = normalizeBackendUrl(envBackendUrl);
-
-export const API_BASE_URL = isServer 
-    ? (BACKEND_URL || 'http://localhost:8080')
-    : '/api/proxy';
+export const getBackendUrl = () => {
+    if (!isServer) return undefined;
+    const url = getEnv('BACKEND_URL');
+    return normalizeBackendUrl(url) || 'http://localhost:8080';
+};
 
 export const API_VERSION = 'v2';
 
-// Ensure no double slashes or absolute URL issues for client proxy
+export const getApiUrl = () => {
+    if (!isServer) return '/api/proxy';
+    const baseUrl = getBackendUrl().replace(/\/$/, '');
+    return `${baseUrl}/api/${API_VERSION}`;
+};
+
+// Legacy constant (will use the first resolved value or fallback)
+export const API_BASE_URL = isServer 
+    ? (getBackendUrl() || 'http://localhost:8080')
+    : '/api/proxy';
+
 const cleanBaseUrl = API_BASE_URL.replace(/\/$/, '');
 export const API_URL = isServer 
     ? `${cleanBaseUrl}/api/${API_VERSION}`
-    : cleanBaseUrl; // Local proxy already includes /api/proxy
+    : cleanBaseUrl;
 
-console.log(`[CONFIG] Running on ${isServer ? 'SERVER' : 'CLIENT'}. Target: ${API_URL}`);
+if (isServer) {
+    console.log(`[CONFIG] Server-side API Target: ${getApiUrl()}`);
+} else {
+    console.log(`[CONFIG] Client-side API Proxy: ${API_URL}`);
+}

@@ -1,4 +1,4 @@
-import { API_URL } from '@/lib/services/config';
+import { API_URL, getApiUrl } from '@/lib/services/config';
 
 export const API_BASE_URL = API_URL;
 
@@ -16,7 +16,8 @@ export class ApiClient {
   }
 
   async _request(method, path, body = null) {
-    const url = `${API_BASE_URL}${path}`;
+    const baseUrl = typeof getApiUrl === 'function' ? getApiUrl() : API_URL;
+    const url = `${baseUrl}${path}`;
     const options = {
       method,
       headers: this.headers,

@@ -1,8 +1,9 @@
-import { API_URL } from './config';
+import { API_URL, getApiUrl } from './config';
 
 export class ApiService {
     static async request(endpoint, options = {}) {
-        const url = `${API_URL}${endpoint}`;
+        const baseUrl = typeof getApiUrl === 'function' ? getApiUrl() : API_URL;
+        const url = `${baseUrl}${endpoint}`;
 
         const headers = {
             'Content-Type': 'application/json',

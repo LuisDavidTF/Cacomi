@@ -7,7 +7,6 @@ const normalizeBackendUrl = (url: string | undefined): string => {
     return `https://${url}`;
 };
 
-const BACKEND_URL = normalizeBackendUrl(ENV_BACKEND_URL || import.meta.env.BACKEND_URL);
 const TOKEN_NAME = 'auth_token';
 
 /**
@@ -19,6 +18,9 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
     if (!path) {
         return new Response(JSON.stringify({ error: 'Ruta no válida' }), { status: 400 });
     }
+
+    // Resolve backend URL inside the handler for Cloudflare runtime compatibility
+    const BACKEND_URL = normalizeBackendUrl(ENV_BACKEND_URL || import.meta.env.BACKEND_URL);
 
     // Reconstruct the backend URL
     const targetUrl = new URL(`${BACKEND_URL}/api/v2/${path}${url.search}`);
