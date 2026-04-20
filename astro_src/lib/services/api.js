@@ -28,7 +28,16 @@ export class ApiService {
                 return null;
             }
 
-            const data = await response.json();
+            // Read as text first to handle both JSON and plain text safely
+            const rawBody = await response.text();
+            let data;
+
+            try {
+                data = rawBody ? JSON.parse(rawBody) : {};
+            } catch (e) {
+                // Not JSON, wrap the raw text in a message property
+                data = { message: rawBody };
+            }
 
             if (!response.ok) {
                 throw {

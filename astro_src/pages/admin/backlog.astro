@@ -1,0 +1,20 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { AdminGuard } from '@components/auth/AdminGuard';
+import { BacklogImporter } from '@components/admin/BacklogImporter';
+import { translations } from '@context/SettingsContext';
+
+const langCookie = Astro.cookies.get('culina_language')?.value || 'es';
+const t = translations[langCookie as keyof typeof translations] || translations.es;
+---
+
+<AdminLayout title={`${t.admin?.backlog || 'Backlog'} - Admin Panel`}>
+    <AdminGuard client:only="react">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">{t.admin?.backlog || 'Backlog'}</h1>
+            <p class="text-slate-500 mt-2">Bulk upload items to the recipe generation backlog. Paste your JSON array below.</p>
+        </div>
+
+        <BacklogImporter client:only="react" />
+    </AdminGuard>
+</AdminLayout>
