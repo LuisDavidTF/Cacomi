@@ -70,6 +70,14 @@ gh pr status
 # Create PR
 gh pr create --title "feat(user): add profile page" --body-file description.md
 
+```bash
 # View current PR
 gh pr view --web
 ```
+
+## Mandatory Deployment Protocol
+
+> [!IMPORTANT]
+> **NEVER push to the `main` branch or perform any production deployment unless the user explicitly types the command: "Despliega cambios".**
+> 
+> This rule is strict and must be followed regardless of the task completion status. No automatic deployments are allowed.

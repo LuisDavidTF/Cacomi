@@ -1,5 +1,7 @@
-import { Modal } from '@components/ui/Modal';
-import { EyeIcon } from '@components/ui/Icons';
+import React, { useState, useEffect } from 'react';
+import { EyeIcon, XIcon } from '@components/ui/Icons';
+import { BacklogService } from '@/lib/services/admin';
+import { translations } from '@context/SettingsContext';
 
 const CATEGORY_MAP: Record<string, string> = {
     // --- Mapeos Descriptivos ---
@@ -26,21 +28,28 @@ const CATEGORY_MAP: Record<string, string> = {
 export const BacklogImporter: React.FC = () => {
     const [jsonInput, setJsonInput] = useState('');
     const [transformedData, setTransformedData] = useState<any>(null);
-    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [errorLine, setErrorLine] = useState<number | null>(null);
+    const [errorPosition, setErrorPosition] = useState<number | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
+    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+    const gutterRef = React.useRef<HTMLDivElement>(null);
+    const highlightRef = React.useRef<HTMLDivElement>(null);
+    const decorationRef = React.useRef<HTMLDivElement>(null);
+
+    const lineCount = jsonInput.split('\n').length;
 
     // Auto-transform on input change
     useEffect(() => {
         if (!jsonInput.trim()) {
             setTransformedData(null);
             setError(null);
-            setSuccessMessage(null);
             return;
         }
 
-        // Only clear success message if the user is actually typing something new
+        // Clear success message when starting to type new data
         setSuccessMessage(null);
 
         try {
@@ -58,8 +67,61 @@ export const BacklogImporter: React.FC = () => {
 
             setTransformedData({ items: mappedItems });
             setError(null);
+            setErrorLine(null);
+            setErrorPosition(null);
         } catch (e: any) {
-            setError(e.message || 'Invalid JSON format');
+            let msg = e.message || 'Error de formato JSON';
+            let line: number | null = null;
+            let pos: number | null = null;
+
+            // 1. SMART HEURISTICS (Before relying on browser message)
+            // Trailing Comma detection: , followed by closure
+            const trailingCommaMatch = jsonInput.match(/,[\s\n]*[}\]]/);
+            // Missing Comma detection: } followed by {
+            const missingCommaMatch = jsonInput.match(/\}[ \n\t]*\{/);
+            // Unbalanced detection
+            const openBraces = (jsonInput.match(/{/g) || []).length;
+            const closeBraces = (jsonInput.match(/}/g) || []).length;
+
+            if (trailingCommaMatch) {
+                msg = "Se encontró una coma sobrante antes de un cierre (}, o ],). El JSON estándar no permite comas al final.";
+                pos = trailingCommaMatch.index! + 1; // Highlight the comma
+            } else if (missingCommaMatch) {
+                msg = "Falta una coma entre objetos del array.";
+                pos = missingCommaMatch.index! + 1; // Highlight the closing brace of first object
+            } else if (openBraces > closeBraces) {
+                msg = "Falta cerrar una o más llaves '{'.";
+                pos = jsonInput.lastIndexOf('{');
+            } else if (closeBraces > openBraces) {
+                msg = "Hay llaves '}' de cierre sobrantes.";
+                pos = jsonInput.lastIndexOf('}');
+            } else {
+                // FALLBACK: Browser native position detection
+                const positionMatch = msg.match(/at position (\d+)/);
+                if (positionMatch) {
+                    pos = parseInt(positionMatch[1], 10);
+                } else {
+                    const lineMatch = msg.match(/line (\d+)/);
+                    if (lineMatch) {
+                        line = parseInt(lineMatch[1], 10);
+                    }
+                }
+            }
+
+            // Sync line from position if not set
+            if (pos !== null && line === null) {
+                line = jsonInput.substring(0, pos).split('\n').length;
+            }
+
+            if (line) {
+                setErrorLine(line);
+                setErrorPosition(pos);
+                setError(`[Línea ${line}] ${msg}`);
+            } else {
+                setError(msg);
+                setErrorLine(null);
+                setErrorPosition(null);
+            }
             setTransformedData(null);
         }
     }, [jsonInput]);
@@ -87,7 +149,7 @@ export const BacklogImporter: React.FC = () => {
             <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between">
                 <span>Preview (Transformed Data)</span>
                 {transformedData?.items && (
-                    <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] px-2 py-0.5 rounded-full">
+                    <span className="bg-indigo-600 text-white dark:bg-indigo-500 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
                         {transformedData.items.length} items
                     </span>
                 )}
@@ -127,12 +189,69 @@ export const BacklogImporter: React.FC = () => {
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Raw JSON Input
                                 </label>
-                                <textarea
-                                    value={jsonInput}
-                                    onChange={(e) => setJsonInput(e.target.value)}
-                                    placeholder='[{"title": "Recipe Name", "category": "Verduras y Guarniciones"}]'
-                                    className="w-full h-96 lg:h-[30rem] p-4 font-mono text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                                />
+                                
+                                <div className="relative flex border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 transition-all bg-slate-50 dark:bg-slate-950">
+                                    {/* Line Numbers Gutter */}
+                                    <div 
+                                        className="w-12 shrink-0 bg-slate-100/50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 font-mono text-xs sm:text-sm text-slate-400 py-4 text-center select-none overflow-hidden relative h-96 lg:h-[30rem]"
+                                    >
+                                        <div 
+                                            ref={gutterRef}
+                                            className="absolute inset-0 overflow-hidden py-4"
+                                        >
+                                            {Array.from({ length: Math.max(1, lineCount) }).map((_, i) => (
+                                                <div 
+                                                    key={i} 
+                                                    className={`h-6 leading-6 ${errorLine === i + 1 ? 'text-red-500 font-bold bg-red-500/10' : ''}`}
+                                                >
+                                                    {i + 1}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Scrollable Decoration Layer (Behind Textarea for squigglies) */}
+                                    <div 
+                                        className="absolute left-12 right-0 top-0 bottom-0 pointer-events-none overflow-hidden py-4"
+                                    >
+                                        <div 
+                                            ref={decorationRef}
+                                            className="w-full h-full relative font-mono text-xs sm:text-sm leading-6 px-4 whitespace-pre text-transparent transition-all"
+                                        >
+                                            {errorPosition !== null ? (
+                                                <>
+                                                    {jsonInput.substring(0, errorPosition)}
+                                                    <span className="border-b-4 border-red-500 bg-red-500/30 font-bold">
+                                                        {jsonInput.substring(errorPosition, errorPosition + 1) || ' '}
+                                                    </span>
+                                                    {jsonInput.substring(errorPosition + 1)}
+                                                </>
+                                            ) : (
+                                                jsonInput
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Textarea wrapped for scroll sync */}
+                                    <textarea
+                                        ref={textareaRef}
+                                        value={jsonInput}
+                                        onChange={(e) => setJsonInput(e.target.value)}
+                                        onScroll={(e) => {
+                                            const scrollTop = e.currentTarget.scrollTop;
+                                            const scrollLeft = e.currentTarget.scrollLeft;
+                                            if (gutterRef.current) gutterRef.current.scrollTop = scrollTop;
+                                            if (highlightRef.current) highlightRef.current.scrollTop = scrollTop;
+                                            if (decorationRef.current) {
+                                                decorationRef.current.scrollTop = scrollTop;
+                                                decorationRef.current.scrollLeft = scrollLeft;
+                                            }
+                                        }}
+                                        placeholder='[{"title": "Recipe Name", "category": "Verduras y Guarniciones"}]'
+                                        spellCheck={false}
+                                        className="w-full h-96 lg:h-[30rem] px-4 py-4 font-mono text-xs sm:text-sm bg-transparent border-0 focus:ring-0 transition-all outline-none resize-none leading-6 overflow-auto whitespace-pre relative z-10 text-slate-800 dark:text-slate-200"
+                                    />
+                                </div>
                             </div>
 
                             {error && (
@@ -187,16 +306,51 @@ export const BacklogImporter: React.FC = () => {
                 </div>
             </div>
 
-            {/* Mobile Preview Modal */}
-            <Modal 
-                isOpen={isMobilePreviewOpen} 
-                onClose={() => setIsMobilePreviewOpen(false)}
-                title="Transformed Preview"
-            >
-                <div className="h-[70vh]">
-                    <PreviewContent />
+            {/* Mobile Preview Bottom Sheet (Pattern from ReviewLogsBoard) */}
+            {isMobilePreviewOpen && (
+                <div className="fixed inset-0 z-[100] flex flex-col justify-end lg:hidden">
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300" 
+                        onClick={() => setIsMobilePreviewOpen(false)}
+                    ></div>
+                    
+                    {/* Sheet Container */}
+                    <div className="relative w-full bg-white dark:bg-slate-900 h-[85vh] rounded-t-3xl shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300 overflow-hidden">
+                        {/* Drag Handle */}
+                        <div 
+                            className="w-full h-8 flex justify-center items-start pt-3 shrink-0 cursor-pointer" 
+                            onClick={() => setIsMobilePreviewOpen(false)}
+                        >
+                            <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                        </div>
+
+                        {/* Modal Header */}
+                        <div className="px-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Transformed Preview</h3>
+                                <p className="text-xs text-slate-500 mt-1">Bulk Importer Verification</p>
+                            </div>
+                            <button 
+                                onClick={() => setIsMobilePreviewOpen(false)}
+                                className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full text-slate-500 transition-colors"
+                            >
+                                <XIcon className="w-5 h-5"/>
+                            </button>
+                        </div>
+
+                        {/* Scrollable Content Area */}
+                        <div className="flex-grow overflow-y-auto custom-scrollbar">
+                            <div className="p-6">
+                                <PreviewContent />
+                            </div>
+                        </div>
+                        
+                        {/* Footer Spacer (Optional, helps on iOS Safari) */}
+                        <div className="h-4 shrink-0"></div>
+                    </div>
                 </div>
-            </Modal>
+            )}
         </div>
     );
 };
