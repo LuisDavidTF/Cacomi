@@ -76,14 +76,14 @@ export const AdminGuard = ({ children }: { children: React.ReactNode }) => {
                 <form onSubmit={handleElevate} className="space-y-4">
                     <div>
                         <input 
-                            type="password" 
-                            name="pin"
+                            type="tel" 
+                            autoComplete="one-time-code"
                             value={pin}
                             onChange={(e) => setPin(e.target.value)}
                             placeholder="****"
                             className="w-full text-center tracking-[0.5em] text-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg p-3 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
+                            style={{ WebkitTextSecurity: 'disc' } as any}
                             maxLength={4}
-                            autoComplete="off"
                         />
                         {error && (
                             <p className="text-xs text-red-500 mt-2 text-center animate-in slide-in-from-top-1">PIN Incorrecto</p>

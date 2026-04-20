@@ -35,3 +35,24 @@ export const ManualTrainingService = {
         });
     },
 };
+
+/**
+ * Service for managing the recipe backlog.
+ */
+export const BacklogService = {
+    /**
+     * Uploads multiple backlog items at once.
+     * Corresponds to POST /admin/backlog/bulk
+     */
+    bulkUpload: async (payload, token) => {
+        const headers = {};
+        if (token && token !== 'undefined') {
+            headers.Authorization = `Bearer ${token}`;
+        }
+        return ApiService.request('/admin/backlog/bulk', {
+            method: 'POST',
+            body: payload,
+            headers,
+        });
+    },
+};
