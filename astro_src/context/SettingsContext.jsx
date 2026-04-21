@@ -394,7 +394,21 @@ export const translations = {
             authBtn: 'Autorizar Elevación',
             cpuUsage: 'Uso de CPU',
             ramUsage: 'Uso de RAM',
-            serverLogs: 'Logs del Servidor'
+            serverLogs: 'Logs del Servidor',
+            audit: {
+                userGoals: 'Objetivos del Usuario',
+                recipeCatalog: 'Catálogo de Recetas',
+                pantry: 'Contexto de Despensa',
+                pinnedMeals: 'Comidas Forzadas',
+                viewFullCatalog: 'Ver Catálogo Completo',
+                viewCatalogDesc: 'Explora todas las recetas disponibles para esta generación',
+                noData: 'No hay datos de auditoría estructurados',
+                budget: 'Presupuesto Semanal',
+                calories: 'Calorías Objetivo',
+                protein: 'Proteína Objetivo',
+                weight: 'Peso Objetivo',
+                activity: 'Nivel de Actividad'
+            }
         }
     },
     en: {
@@ -787,7 +801,21 @@ export const translations = {
             authBtn: 'Authorize Elevation',
             cpuUsage: 'CPU Usage',
             ramUsage: 'RAM Usage',
-            serverLogs: 'Server Logs'
+            serverLogs: 'Server Logs',
+            audit: {
+                userGoals: 'User Goals',
+                recipeCatalog: 'Recipe Catalog',
+                pantry: 'Pantry Context',
+                pinnedMeals: 'Pinned Meals',
+                viewFullCatalog: 'View Full Catalog',
+                viewCatalogDesc: 'Explore all available recipes for this generation',
+                noData: 'No structured audit data available',
+                budget: 'Weekly Budget',
+                calories: 'Target Calories',
+                protein: 'Target Protein',
+                weight: 'Target Weight',
+                activity: 'Activity Level'
+            }
         }
     },
     fr: {

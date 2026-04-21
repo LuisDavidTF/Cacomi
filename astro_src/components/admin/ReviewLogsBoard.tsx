@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-    CheckCircle, Edit3, Trash2, Check, X, AlertOctagon, 
-    Search, FileText, ChevronRight, RefreshCw, Info, 
-    DollarSign, Dumbbell, Flame, TrendingUp, Loader2
+import {
+    Search, FileText, ChevronRight, RefreshCw, Info,
+    DollarSign, Dumbbell, Flame, TrendingUp, Loader2, Keyboard,
+    AlertOctagon, CheckCircle, Check, Trash2, Edit3, X,
+    Database, Utensils, Zap, Sparkles, Scale, Activity
 } from 'lucide-react';
+import { GlobalAuditView } from './GlobalAuditView';
 import { SELECTION_LOGIC, SELECTION_LOGIC_LABELS, type SelectionLogicCode } from '../../constants/training';
 import { ManualTrainingService } from '../../lib/services/admin';
 import { useAuth } from '../../context/AuthContext';
+import { useSettings } from '../../context/SettingsContext';
+import {
+    Dialog, DialogContent, DialogHeader,
+    DialogTitle, DialogDescription, DialogTrigger
+} from '../shadcn/dialog';
 
 // --- Backend Models (Aligning with Java Records) ---
 
@@ -48,7 +55,7 @@ interface UserProfile {
 
 interface TrainingLogsWeekResponse {
     planId: number;
-    profile: UserProfile; 
+    profile: UserProfile;
     days: TrainingLogsDayResponse[];
     pantry: { items: PantryItem[] };
     aiPrompt: string;
@@ -94,7 +101,7 @@ const DAY_MAP: Record<string, string> = {
 const groupLogsByDay = (logs: TrainingLogsDayResponse[]): DaySummary[] => {
     const dayOrder = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
     const groups: Record<string, TrainingLogsDayResponse[]> = {};
-    
+
     logs.forEach(log => {
         let day = log.dayOfWeek.toUpperCase();
         // Harmonize English vs Spanish day names from backend
@@ -115,11 +122,13 @@ const calculateMetrics = (logs: TrainingLogsDayResponse[]) => {
     let weeklyCost = 0;
     let weeklyCalories = 0;
     let weeklyProtein = 0;
-    
+
     logs.forEach(m => {
-        weeklyCost += (m.estimatedCost || 0) * (m.portionMultiplier || 1);
-        weeklyCalories += (m.calories || 0) * (m.portionMultiplier || 1);
-        weeklyProtein += (m.proteinGrams || 0) * (m.portionMultiplier || 1);
+        // Backend already scales macros/cost by portionMultiplier
+        const cost = m.estimatedCost || 0;
+        weeklyCost += (cost || 0);
+        weeklyCalories += (m.calories || 0);
+        weeklyProtein += (m.proteinGrams || 0);
     });
 
     return {
@@ -156,14 +165,43 @@ export const ReviewLogsBoard = () => {
     const [globalAuditText, setGlobalAuditText] = useState("");
     const [isPantryOpen, setIsPantryOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     // UI states
-    const [statusBanner, setStatusBanner] = useState<{msg: string, type: 'success' | 'error'} | null>(null);
+    const [statusBanner, setStatusBanner] = useState<{ msg: string, type: 'success' | 'error' } | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // Modal & Flyout tracking
-    const [previewRecipe, setPreviewRecipe] = useState<TrainingLogsDayResponse | null>(null);
-    
+    const [previewRecipe, setPreviewRecipe] = useState<any | null>(null);
+
+    const currentPlan = plans[currentIndex];
+
+    // --- Phase 4: Enriched Data Lookup (Audit JSON) ---
+    const auditData = useMemo(() => {
+        try {
+            if (currentPlan?.aiPrompt && (currentPlan.aiPrompt.trim().startsWith('{') || currentPlan.aiPrompt.trim().startsWith('['))) {
+                return JSON.parse(currentPlan.aiPrompt);
+            }
+        } catch (e) {
+            console.warn('Failed to parse Audit JSON in ReviewBoard:', e);
+        }
+        return null;
+    }, [currentPlan?.aiPrompt]);
+
+    const getCatalogRecipe = (recipeId: number) => {
+        return auditData?.baseRecipePlanRequestList?.find((r: any) => r.id === recipeId);
+    };
+
+    const handleSelectMeal = (meal: any) => {
+        // If the incoming meal doesn't have the enriched data, look it up
+        if (meal && !meal.catalogRecipe && meal.recipeId) {
+            const enriched = getCatalogRecipe(meal.recipeId);
+            if (enriched) {
+                meal = { ...meal, catalogRecipe: enriched };
+            }
+        }
+        setPreviewRecipe(meal);
+    };
+
     interface ReplaceTx {
         logId: number;
         originalRecipeName: string;
@@ -182,13 +220,12 @@ export const ReviewLogsBoard = () => {
         return [];
     }, [searchQuery]);
 
-    const currentPlan = plans[currentIndex];
     const isProcessed = currentPlan ? processedIds.has(currentPlan.planId) : false;
 
     const daySummaries = useMemo(() => {
         return currentPlan ? groupLogsByDay(currentPlan.days) : [];
     }, [currentPlan]);
-    
+
     const tracking = currentPlan ? calculateMetrics(currentPlan.days) : null;
     const weeklyBudgetLimit = currentPlan ? (currentPlan.profile.weeklyBudget) : 0;
 
@@ -242,7 +279,13 @@ export const ReviewLogsBoard = () => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (plans.length === 0 || isSubmitting || currentIndex >= plans.length) return;
-            if (replaceTx) return; 
+            if (replaceTx) return;
+
+            // Prevent shortcut if user is typing in an input or textarea
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+                return;
+            }
 
             if (e.key === 'Enter' && !isEditing && !isProcessed) {
                 e.preventDefault();
@@ -292,7 +335,7 @@ export const ReviewLogsBoard = () => {
 
     const handleAction = async (isValid: boolean) => {
         if (!currentPlan || isSubmitting) return;
-        
+
         setIsSubmitting(true);
         try {
             const updatedLogs = currentPlan.days.map(meal => ({
@@ -312,7 +355,7 @@ export const ReviewLogsBoard = () => {
             await ManualTrainingService.updatePlan(payload, token);
             markProcessed(currentPlan.planId);
             showBanner(isValid ? `Plan ${currentPlan.planId} Aprobado 🟢` : `Plan ${currentPlan.planId} Rechazado 🔴`, isValid ? 'success' : 'error');
-            
+
             if (currentIndex < plans.length - 1) {
                 handleNext();
             }
@@ -330,7 +373,7 @@ export const ReviewLogsBoard = () => {
 
     const confirmReplacement = () => {
         if (!replaceTx || !replaceReasonLogic || replaceAiReasoningText.length < 10) return;
-        
+
         const updatedPlans = [...plans];
         const targetMeal = updatedPlans[currentIndex].days.find(d => d.logId === replaceTx.logId);
 
@@ -338,7 +381,7 @@ export const ReviewLogsBoard = () => {
             targetMeal.selectionLogicCode = replaceReasonLogic as SelectionLogicCode;
             targetMeal.portionMultiplier = parseFloat(replacePortion) || 1.0;
             targetMeal.aiReasoning = replaceAiReasoningText;
-            
+
             // Note: Recipe swapping is disabled until real backend search is integrated
         }
 
@@ -370,7 +413,7 @@ export const ReviewLogsBoard = () => {
                 <p className="text-slate-500 dark:text-slate-400 max-w-md mb-6">
                     {error}
                 </p>
-                <button 
+                <button
                     onClick={fetchPlans}
                     className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all"
                 >
@@ -390,7 +433,7 @@ export const ReviewLogsBoard = () => {
                 <p className="text-slate-500 dark:text-slate-400 max-w-md">
                     Has revisado toda la tanda de planes ({plans.length} planes).
                 </p>
-                <button 
+                <button
                     onClick={() => setCurrentIndex(0)}
                     className="mt-6 text-indigo-600 hover:text-indigo-800 font-bold"
                 >
@@ -402,22 +445,29 @@ export const ReviewLogsBoard = () => {
 
     return (
         <div className="max-w-[102rem] mx-auto w-full flex flex-col xl:flex-row gap-6 relative items-start px-4">
-            
+
             {/* LEFT SIDEBAR: AI Audit Panel (Desktop XL only) */}
             <div className="hidden xl:flex w-[320px] 2xl:w-[380px] flex-shrink-0 sticky top-10 flex-col gap-6 h-[calc(100vh-100px)] overflow-y-auto pr-2 custom-scrollbar">
-                
+
                 {/* AI Prompt Block */}
-                <div className="p-5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl shadow-sm">
-                    <div className="flex items-center gap-2 mb-3">
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2 px-2">
                         <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                         <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400">Auditoría Global</h4>
                     </div>
-                    <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80 italic leading-relaxed">"{currentPlan.aiPrompt}"</p>
-                    
-                    {currentPlan.pantry?.items?.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-indigo-100 dark:border-indigo-800/50">
-                            <h5 className="text-[10px] font-bold uppercase text-indigo-400 mb-2">Contexto de Despensa:</h5>
-                            <div className="flex flex-wrap gap-1.5">
+
+                    <GlobalAuditView
+                        rawAudit={currentPlan.aiPrompt}
+                        globalPlanAudit={currentPlan.globalPlanAudit}
+                        planDays={currentPlan.days}
+                        onSelectMeal={(meal) => handleSelectMeal(meal)}
+                    />
+
+                    {/* Old Pantry shortcut (Optional, keeping for compatibility if currentPlan.pantry has different info) */}
+                    {currentPlan.pantry?.items?.length > 0 && !currentPlan.aiPrompt?.startsWith('{') && (
+                        <div className="mt-2 pt-4 border-t border-indigo-100 dark:border-indigo-800/50">
+                            <h5 className="text-[10px] font-bold uppercase text-indigo-400 mb-2">Contexto de Despensa (Modelo):</h5>
+                            <div className="flex flex-wrap gap-1.5 px-1">
                                 {currentPlan.pantry.items.slice(0, 8).map((item, idx) => (
                                     <span key={idx} className="text-[10px] bg-white/60 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded border border-indigo-200/50 dark:border-indigo-700/30">
                                         {item.ingredientName}
@@ -431,22 +481,13 @@ export const ReviewLogsBoard = () => {
                     )}
                 </div>
 
-                {/* AI Reasoning Block */}
-                <div className="p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl shadow-sm">
-                    <div className="flex items-center gap-2 mb-3">
-                        <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">Feedback de la IA</h4>
-                    </div>
-                    <p className="text-sm text-emerald-900/80 dark:text-emerald-300/80 italic leading-relaxed">
-                        {currentPlan.globalPlanAudit || "No hay razonamiento disponible."}
-                    </p>
-                </div>
+
 
                 {/* Global Audit Editor (XL Only) */}
                 {isEditing && (
                     <div className="p-5 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/50 rounded-2xl shadow-sm animate-in fade-in slide-in-from-left-4">
                         <label className="block text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest mb-3">Editar Auditoría Global</label>
-                        <textarea 
+                        <textarea
                             className="w-full bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3 text-sm text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/50 min-h-[120px] resize-none"
                             placeholder="Añade tus observaciones aquí..."
                             value={globalAuditText}
@@ -455,10 +496,10 @@ export const ReviewLogsBoard = () => {
                     </div>
                 )}
             </div>
-            
+
             {/* CENTER AREA: Cards Flow */}
             <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col gap-6">
-                
+
                 {/* Header & Metric Compliance Tracker */}
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between px-2">
@@ -467,7 +508,7 @@ export const ReviewLogsBoard = () => {
                             <div className="flex items-center gap-3">
                                 <p className="text-slate-500 dark:text-slate-400 font-medium">Plan {currentIndex + 1} de {plans.length}</p>
                                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-                                    <button 
+                                    <button
                                         onClick={handleBack}
                                         disabled={currentIndex === 0}
                                         className="p-1 px-2 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 rounded-md transition-all text-slate-600 dark:text-slate-400"
@@ -475,7 +516,7 @@ export const ReviewLogsBoard = () => {
                                     >
                                         <ChevronRight className="w-4 h-4 rotate-180" />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={handleNext}
                                         disabled={currentIndex === plans.length - 1}
                                         className="p-1 px-2 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 rounded-md transition-all text-slate-600 dark:text-slate-400 flex items-center gap-1 text-[10px] font-bold uppercase"
@@ -486,19 +527,30 @@ export const ReviewLogsBoard = () => {
                                 </div>
                             </div>
                         </div>
-                        {statusBanner && (
-                            <div className={`px-4 py-2 rounded-lg font-medium text-sm animate-in fade-in slide-in-from-top-4 ${statusBanner.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'}`}>
-                                {statusBanner.msg}
-                            </div>
-                        )}
-                    </div>
 
-                    {/* COMPLIANCE TRACKER STRIP */}
-                    {tracking && currentPlan && (
+                        {/* Keyboard Shortcuts Legend (Desktop) */}
+                        <div className="hidden md:flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-800/50 self-end md:self-auto">
+                            <Keyboard className="w-4 h-4 text-slate-400" />
+                            <div className="flex items-center gap-3 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                                <span className="flex items-center gap-1"><kbd className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-1 rounded shadow-sm">← / →</kbd> Navegar</span>
+                                <span className="flex items-center gap-1"><kbd className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-1 rounded shadow-sm">Enter</kbd> Aprobar</span>
+                                <span className="flex items-center gap-1"><kbd className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-1 rounded shadow-sm">Espacio / Del</kbd> Rechazar</span>
+                            </div>
+                        </div>
+                    </div>
+                    {statusBanner && (
+                        <div className={`px-4 py-2 rounded-lg font-medium text-sm animate-in fade-in slide-in-from-top-4 ${statusBanner.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'}`}>
+                            {statusBanner.msg}
+                        </div>
+                    )}
+                </div>
+
+                {/* COMPLIANCE TRACKER STRIP */}
+                {tracking && currentPlan && (
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4 grid grid-cols-2 md:grid-cols-4 gap-4 divide-x divide-slate-100 dark:divide-slate-800">
                         {/* Profile Info */}
                         <div className="px-2 xl:px-4">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 flex items-center gap-1"><Info className="w-3 h-3"/> Perfil Usuario</span>
+                            <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 flex items-center gap-1"><Info className="w-3 h-3" /> Perfil Usuario</span>
                             <div className="font-semibold text-sm text-slate-800 dark:text-slate-200 line-clamp-1" title={currentPlan.profile.goal}>{currentPlan.profile.goal}</div>
                             <div className="text-xs text-slate-500 mt-1">
                                 {currentPlan.profile.gender === 'MALE' ? 'Hombre' : currentPlan.profile.gender === 'FEMALE' ? 'Mujer' : currentPlan.profile.gender} • {currentPlan.profile.heightCm || '?'}cm • {calculateAge(currentPlan.profile.birthDate)} años
@@ -507,18 +559,18 @@ export const ReviewLogsBoard = () => {
                                 {currentPlan.profile.currentWeight}kg → {currentPlan.profile.targetWeight || '?'}kg
                             </div>
                         </div>
-                        
+
                         {/* Budget Tracker */}
                         <div className="px-2 xl:px-4">
                             <div className="flex items-center justify-between mb-1">
-                                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1"><DollarSign className="w-3 h-3"/> Presupuesto (Semanal)</span>
+                                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1"><DollarSign className="w-3 h-3" /> Presupuesto (Semanal)</span>
                                 <span className="text-xs font-mono font-medium text-slate-600 dark:text-slate-300">
                                     ${tracking.weeklyCost.toFixed(0)} / {weeklyBudgetLimit > 0 ? `$${weeklyBudgetLimit.toFixed(0)}` : 'Sin presupuesto asignado'}
                                 </span>
                             </div>
                             <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-2">
-                                <div 
-                                    className={`h-1.5 rounded-full transition-all ${weeklyBudgetLimit > 0 && tracking.weeklyCost > weeklyBudgetLimit ? 'bg-red-500' : weeklyBudgetLimit > 0 && tracking.weeklyCost > (weeklyBudgetLimit*0.8) ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                                <div
+                                    className={`h-1.5 rounded-full transition-all ${weeklyBudgetLimit > 0 && tracking.weeklyCost > weeklyBudgetLimit ? 'bg-red-500' : weeklyBudgetLimit > 0 && tracking.weeklyCost > (weeklyBudgetLimit * 0.8) ? 'bg-amber-500' : 'bg-emerald-500'}`}
                                     style={{ width: `${weeklyBudgetLimit > 0 ? Math.min(100, (tracking.weeklyCost / weeklyBudgetLimit) * 100) : 100}%` }}
                                 ></div>
                             </div>
@@ -527,7 +579,7 @@ export const ReviewLogsBoard = () => {
                         {/* Calories Average */}
                         <div className="px-2 xl:px-4">
                             <div className="flex items-center justify-between mb-1">
-                                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1"><Flame className="w-3 h-3"/> Kcal Diarias (Promedio)</span>
+                                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1"><Flame className="w-3 h-3" /> Kcal Diarias (Promedio)</span>
                                 <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded">Objetivo: {currentPlan.profile.targetCalories} kcal</span>
                             </div>
                             <div className="font-bold text-base text-slate-800 dark:text-slate-200">
@@ -538,7 +590,7 @@ export const ReviewLogsBoard = () => {
                         {/* Protein Average */}
                         <div className="px-2 xl:px-4">
                             <div className="flex items-center justify-between mb-1">
-                                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1"><Dumbbell className="w-3 h-3"/> Prot. Diaria (Promedio)</span>
+                                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1"><Dumbbell className="w-3 h-3" /> Prot. Diaria (Promedio)</span>
                             </div>
                             <div className="flex items-center gap-2 mt-1">
                                 <span className={`text-base font-bold ${tracking.avgDailyProtein < currentPlan.profile.targetProtein ? 'text-amber-500' : 'text-emerald-500'}`}>
@@ -548,12 +600,12 @@ export const ReviewLogsBoard = () => {
                             </div>
                         </div>
                     </div>
-                    )}
-                </div>
+                )}
+
 
                 {/* Main Stack */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden transition-all duration-300 flex flex-col">
-                    
+
                     <div className="p-4 bg-slate-50 dark:bg-slate-950/30 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
                         <div className="flex items-center gap-3">
                             {isSubmitting && (
@@ -577,65 +629,34 @@ export const ReviewLogsBoard = () => {
                         </div>
                         <span className="text-[10px] font-mono text-slate-400">ID: {currentPlan.planId}</span>
                     </div>
-                    
+
                     {/* View mode prompt (Responsive: Hidden on XL) */}
                     {!isEditing && (
-                        <div className="xl:hidden">
-                            <div className="mx-4 md:mx-6 mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400">Auditoría Global (Prompt AI Semanal)</h4>
-                                </div>
-                                <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80 italic">"{currentPlan.aiPrompt}"</p>
-                                
-                                {currentPlan.pantry?.items?.length > 0 && (
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                        <span className="text-[9px] font-bold uppercase text-indigo-400 self-center">Contexto Despensa:</span>
-                                        {currentPlan.pantry.items.slice(0, 5).map((item, idx) => (
-                                            <span key={idx} className="text-[10px] bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-200/50 dark:border-indigo-700/30">
-                                                {item.ingredientName} ({item.quantity}{item.unitType})
-                                            </span>
-                                        ))}
-                                        {currentPlan.pantry.items.length > 5 && (
-                                            <button 
-                                                onClick={() => setIsPantryOpen(true)}
-                                                className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors underline cursor-pointer self-center"
-                                            >
-                                                +{currentPlan.pantry.items.length - 5} más
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Reasoning Display */}
-                            <div className="mx-4 md:mx-6 mt-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-xl">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">Razonamiento Global de la IA (Audit Feedback)</h4>
-                                </div>
-                                <p className="text-sm text-emerald-900/80 dark:text-emerald-300/80 italic">
-                                    {currentPlan.globalPlanAudit || "No se proporcionó razonamiento global para este plan."}
-                                </p>
-                            </div>
+                        <div className="xl:hidden px-4 md:px-6">
+                            <GlobalAuditView
+                                rawAudit={currentPlan.aiPrompt}
+                                globalPlanAudit={currentPlan.globalPlanAudit}
+                                planDays={currentPlan.days}
+                                onSelectMeal={(meal) => handleSelectMeal(meal)}
+                            />
                         </div>
                     )}
 
-                <div className="p-4 md:p-6 overflow-y-auto max-h-[60vh]">
+                    <div className="p-4 md:p-6 overflow-y-auto max-h-[60vh]">
                         <div className="space-y-6 md:space-y-4">
                             {daySummaries.map((day, dIdx) => (
                                 <div key={day.name} className="flex flex-col xl:flex-row gap-2 xl:gap-4 border-b border-slate-100 dark:border-slate-800 pb-6 xl:pb-4 last:border-0 last:pb-0">
-                                    
+
                                     <div className="xl:w-16 flex-shrink-0 flex items-center xl:items-start gap-2 pt-1 xl:pt-2">
                                         <span className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 xl:bg-transparent xl:dark:bg-transparent px-3 py-1 xl:px-0 xl:py-0 rounded-full xl:rounded-none">{day.name}</span>
                                     </div>
-                                    
+
                                     <div className="flex-grow flex xl:grid xl:grid-cols-3 gap-3 overflow-x-auto pb-4 xl:pb-0 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 xl:mx-0 xl:px-0">
                                         {day.meals.map((meal, mIdx) => (
-                                            <div 
-                                                key={meal.logId} 
+                                            <div
+                                                key={meal.logId}
                                                 className={`w-[85%] sm:w-[300px] xl:w-auto flex-shrink-0 snap-center xl:snap-align-none group relative bg-white dark:bg-slate-800 border-2 rounded-xl p-3 shadow-sm transition-all flex flex-col gap-1 cursor-pointer overflow-hidden ${previewRecipe?.logId === meal.logId ? 'border-indigo-500 shadow-indigo-500/20' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300 hover:shadow-md'}`}
-                                                onClick={() => !isEditing && setPreviewRecipe(meal)}
+                                                onClick={() => !isEditing && handleSelectMeal(meal)}
                                             >
                                                 {/* Header ID/Type */}
                                                 <div className="flex items-start justify-between mb-1">
@@ -645,22 +666,22 @@ export const ReviewLogsBoard = () => {
                                                     </div>
                                                     <span className="text-[10px] text-slate-300 dark:text-slate-500 font-mono">#{meal.logId}</span>
                                                 </div>
-                                                
+
                                                 {/* Name */}
                                                 <p className="font-semibold text-sm text-slate-800 dark:text-slate-200 leading-tight line-clamp-2 xl:mt-1">
                                                     {meal.recipeName}
                                                 </p>
-                                                
+
                                                 {/* Macros & Price Compact Row */}
                                                 <div className="flex items-center gap-2 mt-2">
                                                     <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 px-1.5 py-0.5 rounded">
-                                                        ${(meal.estimatedCost * meal.portionMultiplier).toFixed(2)}
+                                                        ${(meal.estimatedCost || 0).toFixed(2)}
                                                     </span>
                                                     <span className="text-[10px] font-medium text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded">
-                                                        {(meal.proteinGrams * meal.portionMultiplier).toFixed(0)}g Prot
+                                                        {(meal.proteinGrams || 0).toFixed(0)}g Prot
                                                     </span>
                                                     <span className="text-[10px] font-medium text-slate-500 bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                                                        {(meal.calories * meal.portionMultiplier).toFixed(0)} kcal
+                                                        {meal.calories.toFixed(0)} kcal
                                                     </span>
                                                 </div>
 
@@ -669,13 +690,13 @@ export const ReviewLogsBoard = () => {
                                                         {SELECTION_LOGIC_LABELS[meal.selectionLogicCode]}
                                                     </div>
                                                     {isEditing && (
-                                                        <button 
-                                                            onClick={(e) => { 
-                                                                e.stopPropagation(); 
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
                                                                 setReplaceTx({
                                                                     logId: meal.logId,
-                                                                    originalRecipeName: meal.recipeName, 
-                                                                    currentLogic: meal.selectionLogicCode, 
+                                                                    originalRecipeName: meal.recipeName,
+                                                                    currentLogic: meal.selectionLogicCode,
                                                                     currentPortion: meal.portionMultiplier
                                                                 });
                                                                 setReplaceReasonLogic(meal.selectionLogicCode);
@@ -699,35 +720,35 @@ export const ReviewLogsBoard = () => {
 
                     {isEditing && (
                         <div className="xl:hidden p-4 md:p-6 bg-slate-50 dark:bg-slate-950/30 border-t border-slate-100 dark:border-slate-800">
-                             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Auditoría Global de la Semana (globalPlanAudit)</label>
-                             <textarea 
+                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Auditoría Global de la Semana (globalPlanAudit)</label>
+                            <textarea
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500/50"
                                 rows={2}
                                 value={globalAuditText}
                                 onChange={e => setGlobalAuditText(e.target.value)}
-                             />
+                            />
                         </div>
                     )}
 
                     <div className="p-4 md:p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 grid grid-cols-2 lg:flex lg:justify-between items-center gap-3">
                         {!isEditing ? (
                             <>
-                                <button 
-                                    onClick={handleReject} 
+                                <button
+                                    onClick={handleReject}
                                     disabled={isProcessed || isSubmitting}
                                     className="col-span-1 lg:w-auto flex justify-center items-center gap-2 px-4 py-3 lg:px-6 lg:py-3 rounded-xl hover:bg-red-50 text-slate-500 hover:text-red-600 dark:hover:bg-red-900/20 transition text-xs font-bold uppercase tracking-wider disabled:opacity-40 disabled:hover:bg-transparent"
                                 >
                                     <Trash2 className="w-4 h-4" /> {isProcessed ? 'Rechazado' : 'Rechazar'}
                                 </button>
-                                <button 
-                                    onClick={() => !isProcessed && setIsEditing(true)} 
+                                <button
+                                    onClick={() => !isProcessed && setIsEditing(true)}
                                     disabled={isProcessed}
                                     className="col-span-1 lg:w-auto flex justify-center items-center gap-2 px-4 py-3 lg:px-6 lg:py-3 rounded-xl hover:bg-amber-50 text-slate-500 hover:text-amber-600 dark:hover:bg-amber-900/20 transition text-xs font-bold uppercase tracking-wider disabled:opacity-40"
                                 >
                                     <Edit3 className="w-4 h-4" /> Editar
                                 </button>
-                                <button 
-                                    onClick={handleApprove} 
+                                <button
+                                    onClick={handleApprove}
                                     disabled={isProcessed || isSubmitting}
                                     className="col-span-2 lg:w-auto flex justify-center items-center gap-2 px-4 py-3 lg:px-8 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition text-xs font-bold uppercase tracking-wider rounded-xl disabled:opacity-40"
                                 >
@@ -759,61 +780,99 @@ export const ReviewLogsBoard = () => {
                                 <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1 font-mono">{previewRecipe.recipeId}</div>
                             </div>
                             <button onClick={() => setPreviewRecipe(null)} className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full text-slate-500 transition-colors">
-                                <X className="w-5 h-5"/>
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
-                            <div className="p-6 flex-grow overflow-y-auto">
-                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl mb-6 border border-indigo-100 dark:border-indigo-900/50">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400 mb-2 flex items-center gap-2">
-                                    <TrendingUp className="w-3 h-3"/> Razonamiento del Modelo
-                                </h4>
-                                {previewRecipe.aiReasoning && (
-                                    <div className="mt-1">
-                                        <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80">"{previewRecipe.aiReasoning}"</p>
-                                    </div>
-                                )}
-                            </div>
-                            
-                            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 px-1">Distribución Numérica</h4>
-                            
+                        <div className="p-6 flex-grow overflow-y-auto custom-scrollbar">
+                            {/* Candidate Label if not in plan */}
+                            {!previewRecipe.logId && (
+                                <div className="mb-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2">
+                                    <Search className="w-3.5 h-3.5 text-slate-400" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Vista Previa de Candidato</span>
+                                </div>
+                            )}
+
+                            {previewRecipe.aiReasoning && (
+                                <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl mb-6 border border-indigo-100 dark:border-indigo-900/50">
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400 mb-2 flex items-center gap-2">
+                                        <TrendingUp className="w-3 h-3" /> Razonamiento del Modelo
+                                    </h4>
+                                    <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80">"{previewRecipe.aiReasoning}"</p>
+                                </div>
+                            )}
+
+                            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 px-1">Distribución Numérica</h4>
+
                             <div className="grid grid-cols-2 gap-3 mb-6 px-1">
                                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
-                                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Costo Unitario</div>
+                                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Costo Est.</div>
                                     <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                                        ${(previewRecipe.estimatedCost * previewRecipe.portionMultiplier).toFixed(2)}
+                                        ${(previewRecipe.estimatedCost || 0).toFixed(2)}
                                     </div>
                                 </div>
                                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
-                                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Impacto Alacena</div>
+                                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Alacena</div>
                                     <div className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                                        {(previewRecipe.pantryUsage * 100).toFixed(0)}% Utilizado
+                                        {((previewRecipe.pantryUsage || 0) * 100).toFixed(0)}%
                                     </div>
                                 </div>
                                 <div className="col-span-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-3 border border-indigo-100 dark:border-indigo-800/50 flex justify-between items-center">
-                                    <div className="text-[10px] uppercase font-bold text-indigo-400">Multiplicador de Porción</div>
-                                    <div className="text-lg font-bold text-indigo-600 dark:text-indigo-300">
-                                        x{previewRecipe.portionMultiplier}
+                                    <div className="text-[10px] uppercase font-bold text-indigo-400 font-mono">x{previewRecipe.portionMultiplier || 1.0} porción</div>
+                                    <div className="text-[10px] font-bold text-indigo-600 dark:text-indigo-300 uppercase tracking-wider">
+                                        {previewRecipe.mealType || "Candidato"}
                                     </div>
                                 </div>
                             </div>
 
-                            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 px-1">Macronutrientes Generados</h4>
-                            <ul className="space-y-3 mb-8 px-1">
-                                <li className="text-sm text-slate-600 dark:text-slate-300 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                        <span>Proteínas</span>
+                            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 px-1 flex items-center gap-2">
+                                <Zap className="w-4 h-4 text-amber-500" /> Rendimiento Nutricional
+                            </h4>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 px-1">
+                                <div className="bg-orange-50 dark:bg-orange-950/30 p-3 rounded-2xl border border-orange-100 dark:border-orange-800/50 text-center sm:text-left">
+                                    <div className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase mb-1">Energía</div>
+                                    <div className="text-lg font-black text-orange-700 dark:text-orange-200">
+                                        {(previewRecipe.calories || parseFloat(previewRecipe.catalogRecipe?.totalCalories || '0')).toFixed(0)}
+                                        <span className="text-[10px] font-normal ml-0.5">kcal</span>
                                     </div>
-                                    <span className="font-bold">{(previewRecipe.proteinGrams * previewRecipe.portionMultiplier).toFixed(1)}g</span>
-                                </li>
-                                <li className="text-sm text-slate-600 dark:text-slate-300 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                        <span>Energía / Kcal</span>
+                                </div>
+                                <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-2xl border border-blue-100 dark:border-blue-800/50 text-center sm:text-left">
+                                    <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase mb-1">Proteína</div>
+                                    <div className="text-lg font-black text-blue-700 dark:text-blue-200">
+                                        {(previewRecipe.proteinGrams || parseFloat(previewRecipe.catalogRecipe?.totalProtein || '0')).toFixed(1)}g
                                     </div>
-                                    <span className="font-bold">{(previewRecipe.calories * previewRecipe.portionMultiplier).toFixed(1)} kcal</span>
-                                </li>
-                            </ul>
+                                </div>
+                                <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 text-center sm:text-left">
+                                    <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase mb-1">Carbos</div>
+                                    <div className="text-lg font-black text-emerald-700 dark:text-emerald-200">
+                                        {parseFloat(previewRecipe.catalogRecipe?.totalCarbs || '0').toFixed(1)}g
+                                    </div>
+                                </div>
+                                <div className="bg-rose-50 dark:bg-rose-950/30 p-3 rounded-2xl border border-rose-100 dark:border-rose-800/50 text-center sm:text-left">
+                                    <div className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase mb-1">Grasas</div>
+                                    <div className="text-lg font-black text-rose-700 dark:text-rose-200">
+                                        {parseFloat(previewRecipe.catalogRecipe?.totalFat || '0').toFixed(1)}g
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Phase 4: Ingredients Section */}
+                            {previewRecipe.catalogRecipe?.baseRecipeIngredientPlanRequestList && (
+                                <div className="mb-8 px-1">
+                                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
+                                        <Utensils className="w-3.5 h-3.5 text-indigo-500" /> Ingredientes
+                                    </h4>
+                                    <div className="flex flex-col gap-2">
+                                        {previewRecipe.catalogRecipe.baseRecipeIngredientPlanRequestList.map((ing: any, i: number) => (
+                                            <div key={i} className="flex justify-between items-center p-2.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                                                <span className="text-xs text-slate-700 dark:text-slate-300 capitalize font-medium">{ing.name}</span>
+                                                <span className="text-xs font-mono font-bold text-indigo-500">
+                                                    {((ing.quantity || 0) * (previewRecipe.portionMultiplier || 1)).toFixed(2)} {ing.unitOfMeasure}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : (
@@ -830,7 +889,7 @@ export const ReviewLogsBoard = () => {
                 <div className="fixed inset-0 z-[100] flex flex-col justify-end lg:hidden">
                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setPreviewRecipe(null)}></div>
                     <div className="relative w-full bg-white dark:bg-slate-900 h-[85vh] rounded-t-3xl shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300">
-                        
+
                         <div className="w-full h-1.5 flex justify-center pt-3 pb-1" onClick={() => setPreviewRecipe(null)}>
                             <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
                         </div>
@@ -842,62 +901,104 @@ export const ReviewLogsBoard = () => {
                                 <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1 font-mono">{previewRecipe.recipeId}</div>
                             </div>
                             <button onClick={() => setPreviewRecipe(null)} className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full text-slate-500 transition-colors">
-                                <X className="w-5 h-5"/>
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
-                        
+
                         <div className="p-6 flex-grow overflow-y-auto">
+                            {/* Candidate Label if not in plan */}
+                            {!previewRecipe.logId && (
+                                <div className="mb-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2">
+                                    <Search className="w-3.5 h-3.5 text-slate-400" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Vista Previa de Candidato</span>
+                                </div>
+                            )}
+
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl mb-6 border border-indigo-100 dark:border-indigo-900/50">
                                 <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400 mb-2 flex items-center gap-2">
-                                    <TrendingUp className="w-3 h-3"/> Razonamiento de la IA
+                                    <TrendingUp className="w-3 h-3" /> Razonamiento de la IA
                                 </h4>
-                                {previewRecipe.aiReasoning && (
+                                {previewRecipe.aiReasoning ? (
                                     <div className="mt-1">
                                         <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80">"{previewRecipe.aiReasoning}"</p>
                                     </div>
+                                ) : (
+                                    <p className="text-xs italic text-slate-400">Sin razonamiento guardado en DB.</p>
                                 )}
                             </div>
-                            
+
                             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 px-1">Distribución Numérica</h4>
-                            
+
                             <div className="grid grid-cols-2 gap-3 mb-6 px-1">
                                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
                                     <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Costo Unitario</div>
                                     <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                                        ${(previewRecipe.estimatedCost * previewRecipe.portionMultiplier).toFixed(2)}
+                                        ${(previewRecipe.estimatedCost || 0).toFixed(2)}
                                     </div>
                                 </div>
                                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
-                                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Impacto Alacena</div>
+                                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Alacena</div>
                                     <div className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                                        {(previewRecipe.pantryUsage * 100).toFixed(0)}% Utilizado
+                                        {((previewRecipe.pantryUsage || 0) * 100).toFixed(0)}%
                                     </div>
                                 </div>
                                 <div className="col-span-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-3 border border-indigo-100 dark:border-indigo-800/50 flex justify-between items-center">
                                     <div className="text-[10px] uppercase font-bold text-indigo-400">Multiplicador de Porción</div>
                                     <div className="text-lg font-bold text-indigo-600 dark:text-indigo-300">
-                                        x{previewRecipe.portionMultiplier}
+                                        x{previewRecipe.portionMultiplier || 1.0}
                                     </div>
                                 </div>
                             </div>
 
-                            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 px-1">Macronutrientes Generados</h4>
-                            <ul className="space-y-3 mb-8 px-1">
-                                <li className="text-sm text-slate-600 dark:text-slate-300 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                        <span>Proteínas</span>
+                            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 px-1 flex items-center gap-2">
+                                <Zap className="w-4 h-4 text-amber-500" /> Rendimiento Nutricional
+                            </h4>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 px-1">
+                                <div className="bg-orange-50 dark:bg-orange-950/30 p-3 rounded-2xl border border-orange-100 dark:border-orange-800/50">
+                                    <div className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase mb-1">Energía</div>
+                                    <div className="text-lg font-black text-orange-700 dark:text-orange-200">
+                                        {(previewRecipe.calories || parseFloat(previewRecipe.catalogRecipe?.totalCalories || '0')).toFixed(0)}
+                                        <span className="text-[10px] font-normal ml-0.5">kcal</span>
                                     </div>
-                                    <span className="font-bold">{(previewRecipe.proteinGrams * previewRecipe.portionMultiplier).toFixed(1)}g</span>
-                                </li>
-                                <li className="text-sm text-slate-600 dark:text-slate-300 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                        <span>Energía / Kcal</span>
+                                </div>
+                                <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-2xl border border-blue-100 dark:border-blue-800/50">
+                                    <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase mb-1">Proteína</div>
+                                    <div className="text-lg font-black text-blue-700 dark:text-blue-200">
+                                        {(previewRecipe.proteinGrams || parseFloat(previewRecipe.catalogRecipe?.totalProtein || '0')).toFixed(1)}g
                                     </div>
-                                    <span className="font-bold">{(previewRecipe.calories * previewRecipe.portionMultiplier).toFixed(1)} kcal</span>
-                                </li>
-                            </ul>
+                                </div>
+                                <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-800/50">
+                                    <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase mb-1">Carbos</div>
+                                    <div className="text-lg font-black text-emerald-700 dark:text-emerald-200">
+                                        {parseFloat(previewRecipe.catalogRecipe?.totalCarbs || '0').toFixed(1)}g
+                                    </div>
+                                </div>
+                                <div className="bg-rose-50 dark:bg-rose-950/30 p-3 rounded-2xl border border-rose-100 dark:border-rose-800/50">
+                                    <div className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase mb-1">Grasas</div>
+                                    <div className="text-lg font-black text-rose-700 dark:text-rose-200">
+                                        {parseFloat(previewRecipe.catalogRecipe?.totalFat || '0').toFixed(1)}g
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Phase 4: Ingredients Section (Mobile) */}
+                            {previewRecipe.catalogRecipe?.baseRecipeIngredientPlanRequestList && (
+                                <div className="mb-10 px-1">
+                                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
+                                        <Utensils className="w-3.5 h-3.5 text-indigo-500" /> Ingredientes
+                                    </h4>
+                                    <div className="flex flex-col gap-2">
+                                        {previewRecipe.catalogRecipe.baseRecipeIngredientPlanRequestList.map((ing: any, i: number) => (
+                                            <div key={i} className="flex justify-between items-center p-2.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                                                <span className="text-xs text-slate-700 dark:text-slate-300 capitalize">{ing.name}</span>
+                                                <span className="text-xs font-mono font-bold text-indigo-500">
+                                                    {((ing.quantity || 0) * (previewRecipe.portionMultiplier || 1)).toFixed(2)} {ing.unitOfMeasure}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -908,20 +1009,20 @@ export const ReviewLogsBoard = () => {
                 <div className="fixed inset-0 z-[110] flex items-end lg:items-center justify-center p-0 lg:p-4">
                     <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setReplaceTx(null)}></div>
                     <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 lg:border border-slate-200 dark:border-slate-800 rounded-t-3xl lg:rounded-2xl shadow-2xl flex flex-col h-[90vh] lg:h-auto animate-in slide-in-from-bottom lg:zoom-in-95 duration-200">
-                        
+
                         <div className="p-6 pb-4 border-b border-slate-100 dark:border-slate-800">
                             <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-4 lg:hidden"></div>
                             <div className="flex justify-between items-center mb-1">
                                 <h3 className="text-xl font-bold dark:text-white">Modificar y Re-calibrar</h3>
-                                <button onClick={() => setReplaceTx(null)} className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500"><X className="w-4 h-4"/></button>
+                                <button onClick={() => setReplaceTx(null)} className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500"><X className="w-4 h-4" /></button>
                             </div>
                             <p className="text-sm text-slate-500 mb-4">Ajustando métricas en: <strong className="text-slate-800 dark:text-slate-200 text-base">{replaceTx.originalRecipeName}</strong></p>
-                            
+
                             <div className="flex gap-4 items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
                                 <div className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-300">Multiplicador de Porciones Generales (Afecta Costo y Proteína):</div>
                                 <div className="flex items-center gap-2">
-                                    <input 
-                                        type="number" 
+                                    <input
+                                        type="number"
                                         step="0.05"
                                         min="0.5"
                                         max="3.0"
@@ -938,8 +1039,8 @@ export const ReviewLogsBoard = () => {
                             <div className="p-4 bg-white dark:bg-slate-900 sticky top-0 border-b border-slate-100 dark:border-slate-800">
                                 <div className="relative">
                                     <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         placeholder="Busca comida para intercambiarla completamente (Opcional)..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -948,8 +1049,8 @@ export const ReviewLogsBoard = () => {
                                 </div>
                             </div>
                             {searchResults.map(r => (
-                                <div 
-                                    key={r.recipeId} 
+                                <div
+                                    key={r.recipeId}
                                     onClick={() => setSelectedReplacementId(r.recipeId)}
                                     className={`px-6 py-3 cursor-pointer flex justify-between items-center border-b border-slate-100 dark:border-slate-800 last:border-0 ${selectedReplacementId === r.recipeId ? 'bg-indigo-50 dark:bg-indigo-900/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                                 >
@@ -963,11 +1064,11 @@ export const ReviewLogsBoard = () => {
                         </div>
 
                         <div className="p-6 bg-slate-50 dark:bg-slate-950 rounded-b-2xl">
-                             <div className="mb-4">
+                            <div className="mb-4">
                                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                                     Lógica de Selección (SELECTION_LOGIC) <span className="text-red-500">*</span>
                                 </label>
-                                <select 
+                                <select
                                     value={replaceReasonLogic}
                                     onChange={(e) => setReplaceReasonLogic(e.target.value as SelectionLogicCode)}
                                     className="w-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500/50 text-slate-800 dark:text-slate-200"
@@ -983,7 +1084,7 @@ export const ReviewLogsBoard = () => {
                                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                                     Razonamiento del Humano (aiReasoning Override) <span className="text-red-500">*</span>
                                 </label>
-                                <textarea 
+                                <textarea
                                     value={replaceAiReasoningText}
                                     onChange={(e) => setReplaceAiReasoningText(e.target.value)}
                                     placeholder="Ej: Se aumentó porción x1.5 para asegurar el techo de proteína de Hipertrofia."
@@ -999,8 +1100,8 @@ export const ReviewLogsBoard = () => {
                                 <button onClick={() => setReplaceTx(null)} className="flex-1 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm">
                                     Descartar
                                 </button>
-                                <button 
-                                    onClick={confirmReplacement} 
+                                <button
+                                    onClick={confirmReplacement}
                                     disabled={!replaceReasonLogic || replaceAiReasoningText.length < 10}
                                     className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-white font-bold text-sm"
                                 >
@@ -1023,7 +1124,7 @@ export const ReviewLogsBoard = () => {
                                 <p className="text-sm text-slate-500">Estado de insumos al momento de generar este plan</p>
                             </div>
                             <button onClick={() => setIsPantryOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-500 transition-colors">
-                                <X className="w-5 h-5"/>
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
                         <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50/50 dark:bg-slate-950/20">
@@ -1037,9 +1138,9 @@ export const ReviewLogsBoard = () => {
                             ))}
                         </div>
                         <div className="p-6 border-t border-slate-100 dark:border-slate-800 text-center">
-                             <button onClick={() => setIsPantryOpen(false)} className="px-8 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20">
+                            <button onClick={() => setIsPantryOpen(false)} className="px-8 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20">
                                 Entendido
-                             </button>
+                            </button>
                         </div>
                     </div>
                 </div>
