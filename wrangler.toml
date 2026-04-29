@@ -5,4 +5,4 @@ pages_build_output_dir = "dist"
 
 [[kv_namespaces]]
 binding = "SESSION"
-id = "YOUR_KV_NAMESPACE_ID"
+id = "64e1fa1d17084a5ba4f9e336b1bd9026"
