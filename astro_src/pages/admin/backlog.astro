@@ -4,7 +4,7 @@ import { AdminGuard } from '@components/auth/AdminGuard';
 import { BacklogImporter } from '@components/admin/BacklogImporter';
 import { translations } from '@context/SettingsContext';
 
-const langCookie = Astro.cookies.get('culina_language')?.value || 'es';
+const langCookie = Astro.cookies.get('cacomi_language')?.value || 'es';
 const t = translations[langCookie as keyof typeof translations] || translations.es;
 ---
 
@@ -18,3 +18,4 @@ const t = translations[langCookie as keyof typeof translations] || translations.
         <BacklogImporter client:only="react" />
     </AdminGuard>
 </AdminLayout>
+

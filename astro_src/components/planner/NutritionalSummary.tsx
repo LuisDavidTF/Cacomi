@@ -4,10 +4,30 @@ import { Zap, Flame } from 'lucide-react';
 
 interface NutritionalSummaryProps {
     isHorizontal?: boolean;
+    targetCalories?: number;
+    targetProtein?: number;
+    meals?: any[];
 }
 
-export function NutritionalSummary({ isHorizontal = false }: NutritionalSummaryProps) {
+export function NutritionalSummary({ 
+    isHorizontal = false, 
+    targetCalories = 2000, 
+    targetProtein = 120, 
+    meals = [] 
+}: NutritionalSummaryProps) {
     const { t } = useSettings();
+
+    // Calculate average calories/protein per day (or just total if preferred)
+    // For this UI, showing the "Average planned" vs "Goal" is most intuitive
+    const totalCalories = meals.reduce((sum, m) => sum + (m.calories || 0), 0);
+    const totalProtein = meals.reduce((sum, m) => sum + (m.proteinGrams || 0), 0);
+    
+    // We assume 7 days for the weekly average
+    const avgCalories = Math.round(totalCalories / 7);
+    const avgProtein = Math.round(totalProtein / 7);
+
+    const proteinPercentage = Math.min(Math.round((avgProtein / targetProtein) * 100), 100);
+
 
     if (isHorizontal) {
         // Pill-style cards matching About's value cards — lighter, cleaner
@@ -26,8 +46,9 @@ export function NutritionalSummary({ isHorizontal = false }: NutritionalSummaryP
                             {t.planner?.proteins}
                         </span>
                         <span className="text-sm font-bold text-foreground tabular-nums leading-tight">
-                            64<span className="text-[10px] font-medium text-muted-foreground/50 ml-0.5">/ 120g</span>
+                            {avgProtein}<span className="text-[10px] font-medium text-muted-foreground/50 ml-0.5">/ {targetProtein}g</span>
                         </span>
+
                     </div>
                 </div>
 
@@ -44,8 +65,9 @@ export function NutritionalSummary({ isHorizontal = false }: NutritionalSummaryP
                             {t.planner?.calories}
                         </span>
                         <span className="text-sm font-bold text-foreground tabular-nums leading-tight">
-                            1,850<span className="text-[10px] font-medium text-muted-foreground/50 ml-0.5">kcal</span>
+                            {avgCalories.toLocaleString()}<span className="text-[10px] font-medium text-muted-foreground/50 ml-0.5">kcal</span>
                         </span>
+
                     </div>
                 </div>
             </div>
@@ -77,12 +99,13 @@ export function NutritionalSummary({ isHorizontal = false }: NutritionalSummaryP
                                 {t.planner?.proteins}
                             </span>
                         </div>
-                        <span className="text-lg font-bold text-foreground tabular-nums">64g</span>
+                        <span className="text-lg font-bold text-foreground tabular-nums">{avgProtein}g</span>
                     </div>
                     <div className="h-1.5 w-full bg-muted/40 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary rounded-full w-[53%]" />
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${proteinPercentage}%` }} />
                     </div>
-                    <p className="text-[10px] text-muted-foreground/40 text-right">Goal 120g</p>
+                    <p className="text-[10px] text-muted-foreground/40 text-right">Goal {targetProtein}g</p>
+
                 </div>
 
                 {/* Calories */}
@@ -96,9 +119,10 @@ export function NutritionalSummary({ isHorizontal = false }: NutritionalSummaryP
                                 {t.planner?.calories}
                             </span>
                         </div>
-                        <span className="text-xl font-bold text-foreground tabular-nums">1,850</span>
+                        <span className="text-xl font-bold text-foreground tabular-nums">{avgCalories.toLocaleString()}</span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground/40 text-right">Budget 2,200 kcal</p>
+                    <p className="text-[10px] text-muted-foreground/40 text-right">Budget {targetCalories.toLocaleString()} kcal</p>
+
                 </div>
             </div>
         </div>

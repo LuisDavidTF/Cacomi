@@ -15,8 +15,8 @@ interface Props {
 }
 
 const { 
-	title = 'Culina Smart - Planificador de Recetas Social',
-	description = 'Planifica tus comidas de manera inteligente y eficiente.',
+	title = 'Cacomi - Planificador de comidas',
+	description = 'Cacomi: El instinto de comer sano. Planifica tus comidas de manera inteligente y eficiente.',
 	image = '/og-image.jpg', // Placeholder image URL for Open Graph
 	canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url),
 	type = 'website',
@@ -33,12 +33,18 @@ const adminPathPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
-		<link rel="icon" type="image/png" href="/icon.png" />
+		<link rel="icon" type="image/png" href="/icon.png?v=2" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<link rel="manifest" href="/manifest.json" />
 		<link rel="canonical" href={canonicalURL} />
+		
+		<!-- PWA / Mobile Tags -->
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Cacomi" />
+		<link rel="apple-touch-icon" href="/icon.png" />
 		
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content={type} />
@@ -54,8 +60,8 @@ const adminPathPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/
 		<meta property="twitter:description" content={description} />
 		<meta property="twitter:image" content={new URL(image, Astro.url)} />
 
-		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F9F7F2" />
-		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1A1816" />
+		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f2ea" />
+		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#010006" />
 		
 		<!-- Google Fonts: Inter -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -83,7 +89,7 @@ const adminPathPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/
 		<script type="application/ld+json" set:html={JSON.stringify({
 			"@context": "https://schema.org",
 			"@type": "WebApplication",
-			"name": "Culina Smart",
+			"name": "Cacomi",
 			"applicationCategory": "LifestyleApplication",
 			"operatingSystem": "All",
 			"offers": {

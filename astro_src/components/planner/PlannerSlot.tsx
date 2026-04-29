@@ -3,7 +3,7 @@ import { Plus, Clock, Sun, Utensils, Moon } from 'lucide-react';
 import { useSettings } from '@context/SettingsContext';
 
 interface PlannerSlotProps {
-    type: 'breakfast' | 'lunch' | 'dinner';
+    type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
     label: string;
     time: string;
     recipe?: any;
@@ -15,11 +15,13 @@ const mealIcon = {
     breakfast: Sun,
     lunch: Utensils,
     dinner: Moon,
+    snack: Utensils, // You can use a different icon like Cookie or Sandwich if available, but Utensils is a safe bet
 };
 
 export function PlannerSlot({ type, label, time, recipe, isEditable = true, onClick }: PlannerSlotProps) {
     const { t } = useSettings();
-    const Icon = mealIcon[type];
+    const Icon = mealIcon[type] || Utensils;
+
 
     const hasTracking = recipe?.tracking !== undefined;
 
@@ -58,9 +60,13 @@ export function PlannerSlot({ type, label, time, recipe, isEditable = true, onCl
                             </div>
                         )}
 
-                        {recipe.portionMultiplier && recipe.portionMultiplier !== 1.0 && (
-                            <span className="text-white/80 text-[8px] font-bold uppercase tracking-wider mb-0.5">
-                                {recipe.portionMultiplier}x
+                        {recipe.portionMultiplier && recipe.portionMultiplier !== 1.0 ? (
+                            <span className="text-white text-[9px] font-bold bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] px-1.5 py-0.5 rounded mb-1 self-start">
+                                Ajuste {recipe.portionMultiplier}x
+                            </span>
+                        ) : (
+                            <span className="text-white/80 text-[8px] font-medium bg-black/40 px-1 py-0.5 rounded mb-1 self-start backdrop-blur-sm">
+                                1x (Original)
                             </span>
                         )}
                         <span className="text-white text-[9px] font-bold leading-tight line-clamp-1">{recipe.name}</span>

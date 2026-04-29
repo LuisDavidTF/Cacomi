@@ -4,7 +4,7 @@ import { translations } from '../../context/SettingsContext';
 
 export const prerender = false;
 
-const lang = Astro.cookies.get('culina_language')?.value || 'es';
+const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
 const t = translations[lang] || translations.es;
 ---
 
@@ -35,3 +35,4 @@ const t = translations[lang] || translations.es;
     </div>
   </div>
 </Layout>
+

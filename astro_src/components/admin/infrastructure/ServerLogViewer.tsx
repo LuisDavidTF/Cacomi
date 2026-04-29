@@ -3,7 +3,7 @@ import { useSettings } from '@context/SettingsContext';
 
 /**
  * ServerLogViewer
- * A mock component that simulates streaming server logs from Koyeb.
+ * Component that displays streaming server logs from Koyeb.
  */
 export const ServerLogViewer = () => {
     const { t } = useSettings();
@@ -11,22 +11,11 @@ export const ServerLogViewer = () => {
     const [isPaused, setIsPaused] = useState(false);
     const endOfLogsRef = useRef<HTMLDivElement>(null);
 
-    const mockLogLines: string[] = [];
+
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (!isPaused) {
-            interval = setInterval(() => {
-                setLogs(prev => {
-                    const nextLine = `${new Date().toISOString()} ${mockLogLines[Math.floor(Math.random() * mockLogLines.length)]}`;
-                    const newLogs = [...prev, nextLine];
-                    if (newLogs.length > 100) newLogs.shift();
-                    return newLogs;
-                });
-            }, 1500);
-        }
-
-        return () => clearInterval(interval);
+        // Log streaming logic to be implemented with real backend (Koyeb/Cloudflare)
+        // For now, it remains in a waiting state.
     }, [isPaused]);
 
     useEffect(() => {

@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { ADMIN_PIN as ENV_ADMIN_PIN } from 'astro:env/server';
 
 const ADMIN_PIN = ENV_ADMIN_PIN || import.meta.env.ADMIN_PIN;
-const ELEVATION_COOKIE = 'culina_admin_elevated';
+const ELEVATION_COOKIE = 'Cacomi_admin_elevated';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
     try {
@@ -43,3 +43,4 @@ export const GET: APIRoute = async ({ cookies }) => {
     const elevated = cookies.get(ELEVATION_COOKIE)?.value === 'true';
     return new Response(JSON.stringify({ elevated }), { status: 200 });
 };
+

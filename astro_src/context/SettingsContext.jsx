@@ -6,11 +6,11 @@ import { create } from 'zustand';
 export const translations = {
     es: {
         about: {
-            title: 'Acerca de Culina Smart',
-            desc: 'Conoce la misión, los valores y el futuro de Culina Smart, tu asistente de cocina con Inteligencia Artificial.',
+            title: 'Acerca de Cacomi',
+            desc: 'Conoce la misión, los valores y el futuro de Cacomi, tu asistente de cocina con Inteligencia Artificial.',
             missionTag: 'Nuestra Misión',
             missionTitle: 'Conectando tu despensa con el futuro de la cocina.',
-            missionDesc: 'Culina Smart nació de una necesidad simple: comer bien no debería costar tanto tiempo ni dinero. Usamos tecnología de punta para transformar tus ingredientes en la mejor comida de tu día.',
+            missionDesc: 'Cacomi nació de una necesidad simple: comer bien no debería costar tanto tiempo ni dinero. Usamos tecnología de punta para transformar tus ingredientes en la mejor comida de tu día.',
             pillarsTitle: 'Nuestros Pilares',
             pillarsSubtitle: 'Cada línea de código que escribimos está fundamentada en principios creados para mejorar tu vida diaria.',
             pillar1Title: 'Sostenibilidad',
@@ -20,7 +20,7 @@ export const translations = {
             pillar3Title: 'Salud y Economía',
             pillar3Desc: 'Empoderamos tus decisiones nutricionales y cuidamos tu bolsillo planificando tu despensa de forma eficiente.',
             blogTag: 'Próximamente',
-            blogTitle: 'El Diario de Culina (Blog)',
+            blogTitle: 'El Diario de Cacomi (Blog)',
             blogDesc: 'Creemos en la transparencia y aportación. Pronto lanzaremos un espacio donde nuestro equipo compartirá actualizaciones, recetas curadas, decisiones sobre la Inteligencia Artificial y trucos financieros para el hogar.',
             ctaTitle: '¿Listo para cambiar tu rutina?',
             ctaDesc: 'Únete a la comunidad de hogares inteligentes hoy mismo.',
@@ -50,6 +50,10 @@ export const translations = {
         planner: {
             title: 'Plan Semanal',
             generateAI: 'Generar con IA',
+            byDay: 'Por Día',
+            byWeek: 'Por Semana',
+            profileOverview: 'Perfil',
+            aiDisclaimer: 'Aviso: Las recetas y planes son generados por Inteligencia Artificial (basados en tecnología de Google Gemini) y se ofrecen únicamente como sugerencias. No constituyen consejo médico, nutricional ni dietético profesional. Siempre debes verificar los ingredientes para evitar riesgos de alergias o intolerancias. Úsalas bajo tu propia y estricta responsabilidad.',
             exploreRecipes: 'Explorar Recetas',
             searchPlaceholder: 'Buscar ingredientes...',
             nutritionalSummary: 'Resumen Nutricional',
@@ -99,8 +103,25 @@ export const translations = {
                     ateOut: 'Comí fuera',
                     forgot: 'Lo olvidé'
                 },
-                save: 'Guardar'
+                save: 'Guardar',
+                viewRecipe: 'Ver receta completa',
+                stats: {
+                    energy: 'Energía',
+                    protein: 'Proteína',
+                    cost: 'Costo'
+                },
+                scaledViewer: {
+                    title: 'Visor de Receta Ajustada',
+                    note: 'Nota de Ajuste',
+                    ingredients: 'Ingredientes Escala',
+                    instructions: 'Preparación'
+                }
             },
+            budget: 'Presupuesto Semanal',
+            spent: 'Gasto Estimado',
+            undefined: 'No definido',
+            priceDisclaimer: 'Los precios son estimaciones basadas en datos promediados. Pueden existir discrepancias significativas con los precios reales en tienda o errores en el cálculo. Por favor, usa estos valores solo como referencia orientativa.',
+            
             checkin: {
                 title: '¿Cómo te sentiste esta semana?',
                 stress: 'Nivel de estrés',
@@ -112,6 +133,14 @@ export const translations = {
                     high: 'Alto'
                 },
                 save: 'Completar Check-in'
+            },
+            consent: {
+                title: 'Entrenamiento de IA',
+                desc: 'Para ofrecerte mejores planes cada semana, analizamos y entrenamos nuestros modelos con los resultados generados.',
+                checkbox: 'Acepto que mis datos anonimizados de este plan sean usados y supervisados por un humano para mejorar el modelo de IA de Cacomi.',
+                acceptBtn: 'Aceptar y Generar',
+                cancelBtn: 'Cancelar',
+                acceptedStatus: 'Aceptaste compartir los datos anonimizados de este plan para ayudarnos a mejorar nuestros modelos. Puedes cambiar tus preferencias en '
             },
             concierge: {
                 loading: 'Nuestros chefs están diseñando tu menú. Te notificaremos cuando esté listo.',
@@ -125,7 +154,7 @@ export const translations = {
             ctaStart: 'Comenzar Gratis',
             ctaExplore: 'Explorar Recetas',
             featureTitle: 'Todo lo que necesitas para cocinar mejor',
-            featureSubtitle: 'Culina Smart no es solo un recetario, es tu asistente personal de cocina.',
+            featureSubtitle: 'Cacomi no es solo un recetario, es tu asistente personal de cocina.',
             evolution: 'La evolución de tu cocina',
             aiChef: 'IA Chef Integrada',
             noCommitment: 'Tú tienes el control siempre',
@@ -168,6 +197,7 @@ export const translations = {
         },
 
         common: {
+            appName: 'Cacomi',
             rights: 'Todos los derechos reservados.',
             aboutLink: 'Acerca de',
             edit: 'Editar',
@@ -253,13 +283,15 @@ export const translations = {
 
             magicError: 'No se pudo generar el borrador.',
             magicDisclaimer: 'La IA puede cometer errores. Verifica la información antes de publicar.',
+            aiLegalDisclaimer: 'Aviso Legal: Esta receta será marcada públicamente como "Generada por IA". Cacomi no asume responsabilidad por reacciones alérgicas, intolerancias o fallas culinarias derivadas de este contenido. Al generar, cocinar o publicar esta receta, lo haces bajo tu propia y estricta responsabilidad.',
+            poweredByGemini: 'Powered by Google Gemini',
             sensitiveWarn: 'Protege tu privacidad: No incluyas datos personales (teléfonos, direcciones) en la descripción.',
             imageRights: 'Al usar esta URL, confirmas tener derecho a compartir esta imagen.',
             loadingRecipe: 'Cargando datos de la receta...',
             noPermission: 'Redirigiendo... No tienes permiso.',
             deleteStep: 'Eliminar paso',
             disclaimerRetention: 'Al desactivar/eliminar tu cuenta, conservaremos tus datos temporalmente por 30 días para fines legales y de políticas de la plataforma antes de su eliminación definitiva.',
-            disclaimerTransfer: 'Si pones una receta pública, al desactivar/eliminar tu cuenta, las recetas que ya estén guardadas por otros usuarios podrían transferirse a la comunidad de Culina Smart para mantener la integridad de sus recetarios.'
+            disclaimerTransfer: 'Si pones una receta pública, al desactivar/eliminar tu cuenta, las recetas que ya estén guardadas por otros usuarios podrían transferirse a la comunidad de Cacomi para mantener la integridad de sus recetarios.'
         },
 
         feed: {
@@ -290,12 +322,12 @@ export const translations = {
             checkNet: 'Intenta conectarte a internet.',
             noInstr: 'No hay instrucciones detalladas para esta receta.',
             noIngr: 'No hay ingredientes listados.',
-            chef: 'Chef SmartRecipe'
+            chef: 'Chef Cacomi'
         },
 
         settings: {
             title: 'Configuración',
-            subtitle: 'Personaliza tu experiencia en Culina Smart.',
+            subtitle: 'Personaliza tu experiencia en Cacomi.',
             appearance: 'Apariencia',
             appearanceDesc: 'El modo oscuro se activará según tu elección.',
             language: 'Idioma y Región',
@@ -315,7 +347,7 @@ export const translations = {
             clear: 'Borrar descargas',
             clearing: 'Liberando...',
 
-            storageDesc: 'Culina Smart administra el espacio automáticamente.',
+            storageDesc: 'Cacomi administra el espacio automáticamente.',
             account: 'Cuenta y Privacidad',
             deleteAccount: 'Eliminar mi cuenta',
             deleteAccountDesc: 'Solicitar la baja permanente de tus datos.',
@@ -413,11 +445,11 @@ export const translations = {
     },
     en: {
         about: {
-            title: 'About Culina Smart',
-            desc: 'Learn about the mission, values, and future of Culina Smart, your AI-powered kitchen assistant.',
+            title: 'About Cacomi',
+            desc: 'Learn about the mission, values, and future of Cacomi, your AI-powered kitchen assistant.',
             missionTag: 'Our Mission',
             missionTitle: 'Connecting your pantry with the future of cooking.',
-            missionDesc: 'Culina Smart was born from a simple need: eating well shouldn\'t cost so much time and money. We use cutting-edge tech to turn your ingredients into the best meal of your day.',
+            missionDesc: 'Cacomi was born from a simple need: eating well shouldn\'t cost so much time and money. We use cutting-edge tech to turn your ingredients into the best meal of your day.',
             pillarsTitle: 'Our Pillars',
             pillarsSubtitle: 'Every line of code we write is grounded in principles designed to improve your daily life.',
             pillar1Title: 'Sustainability',
@@ -427,7 +459,7 @@ export const translations = {
             pillar3Title: 'Health & Economy',
             pillar3Desc: 'We empower your nutritional decisions and take care of your wallet by efficiently planning your pantry.',
             blogTag: 'Coming Soon',
-            blogTitle: 'The Culina Journal (Blog)',
+            blogTitle: 'The Cacomi Journal (Blog)',
             blogDesc: 'We believe in transparency and contribution. Soon we will launch a space where our team will share updates, curated recipes, AI decisions, and financial household tips.',
             ctaTitle: 'Ready to change your routine?',
             ctaDesc: 'Join the smart household community today.',
@@ -446,7 +478,7 @@ export const translations = {
             plan: 'Plan',
             profile: 'My Profile',
             progress: 'My Progress',
-            progressDesc: 'Our health and progress tracking tool is under development to offer you the best metrics for your smart nutrition.',
+            progressDesc: 'Our health and progress tracking tool is under development to offer you the best metrics for your Nutrición Inteligente.',
             plannerDesc: 'Organize your weekly menus with ease and generate automatic shopping lists.',
             comingSoon: 'Coming Soon',
             beta: 'Beta',
@@ -454,77 +486,6 @@ export const translations = {
             accountMenu: 'Account Menu'
         },
 
-        planner: {
-            title: 'Weekly Plan',
-            generateAI: 'Generate with AI',
-            exploreRecipes: 'Explore Recipes',
-            searchPlaceholder: 'Search ingredients...',
-            nutritionalSummary: 'Nutritional Summary',
-            proteins: 'Proteins',
-            calories: 'Daily calories (avg)',
-            dragHere: 'Drag here',
-            breakfast: 'Breakfast',
-            lunch: 'Lunch',
-            dinner: 'Dinner',
-            snack: 'Snack',
-            tags: {
-                healthy: 'Healthy',
-                quick: 'Quick',
-                vegan: 'Vegan'
-            },
-            days: {
-                dom: 'SUN',
-                lun: 'MON',
-                mar: 'TUE',
-                mie: 'WED',
-                jue: 'THU',
-                vie: 'FRI',
-                sab: 'SAT'
-            },
-            thisWeek: 'This week',
-            nextWeek: 'Next',
-            lastWeek: 'Last week',
-            prevWeek: 'Previous',
-            weeks: 'weeks',
-            today: 'Today',
-            pastWeekNote: 'This week has passed. You can only plan the next 7 days from today.',
-            futureWeekNote: 'You can browse future weeks, but only the next 7 days can be planned.',
-            tracking: {
-                eaten: 'I ate it',
-                rating: 'Rating',
-                satiety: 'How did you feel?',
-                reason: 'Why did you skip it?',
-                satietyLevels: {
-                    veryHungry: 'Very hungry',
-                    satisfied: 'Satisfied',
-                    veryFull: 'Very full'
-                },
-                reasons: {
-                    noTime: 'No time',
-                    tooExpensive: 'Too expensive',
-                    didntLike: 'Didn\'t like it',
-                    ateOut: 'Ate out',
-                    forgot: 'Forgot'
-                },
-                save: 'Save'
-            },
-            checkin: {
-                title: 'How did you feel this week?',
-                stress: 'Stress level',
-                energy: 'Energy level',
-                notes: 'Additional notes',
-                levels: {
-                    low: 'Low',
-                    medium: 'Medium',
-                    high: 'High'
-                },
-                save: 'Complete Check-in'
-            },
-            concierge: {
-                loading: 'Our chefs are designing your menu. We will notify you when it\'s ready.',
-                noteTitle: 'Chef\'s Note:'
-            }
-        },
 
         landing: {
             heroTitle: 'Smart Meal Planning',
@@ -532,7 +493,7 @@ export const translations = {
             ctaStart: 'Start for Free',
             ctaExplore: 'Explore Recipes',
             featureTitle: 'Everything you need to cook better',
-            featureSubtitle: 'Culina Smart is not just a recipe book, it\'s your personal kitchen assistant.',
+            featureSubtitle: 'Cacomi is not just a recipe book, it\'s your personal kitchen assistant.',
             evolution: 'The evolution of your kitchen',
             aiChef: 'Integrated AI Chef',
             noCommitment: 'You are always in control',
@@ -575,6 +536,7 @@ export const translations = {
         },
 
         common: {
+            appName: 'Cacomi',
             rights: 'All rights reserved.',
             aboutLink: 'About Us',
             edit: 'Edit',
@@ -591,6 +553,78 @@ export const translations = {
             back: 'Back',
             offlineMode: 'Offline Mode: Showing saved recipes.',
             offlineSaved: 'Recipe saved for offline use'
+        },
+
+        planner: {
+            title: 'Weekly Plan',
+            generateAI: 'Generate with AI',
+            aiDisclaimer: 'Notice: Recipes and meal plans are generated by Artificial Intelligence (powered by Google Gemini) and are provided purely as suggestions. They do not constitute professional medical, nutritional, or dietary advice. You must always verify ingredients to avoid allergy or intolerance risks. Use them strictly at your own risk.',
+            byDay: 'By Day',
+            byWeek: 'By Week',
+            profileOverview: 'Profile',
+            exploreRecipes: 'Explore Recipes',
+            searchPlaceholder: 'Search ingredients...',
+            nutritionalSummary: 'Nutritional Summary',
+            proteins: 'Proteins',
+            calories: 'Avg Daily Calories',
+            dragHere: 'Drag here',
+            breakfast: 'Breakfast',
+            lunch: 'Lunch',
+            dinner: 'Dinner',
+            snack: 'Snack',
+            tags: { healthy: 'Healthy', quick: 'Quick', vegan: 'Vegan' },
+            days: { dom: 'SUN', lun: 'MON', mar: 'TUE', mie: 'WED', jue: 'THU', vie: 'FRI', sab: 'SAT' },
+            thisWeek: 'This week',
+            nextWeek: 'Next week',
+            lastWeek: 'Last week',
+            prevWeek: 'Previous',
+            weeks: 'weeks',
+            today: 'Today',
+            pastWeekNote: 'This week is in the past. You can only plan for the next 7 days from today.',
+            futureWeekNote: 'You can explore future weeks, but you can only plan for the next 7 days.',
+            tracking: {
+                eaten: 'I ate it',
+                rating: 'Rating',
+                satiety: 'How full are you?',
+                reason: 'Why did you skip it?',
+                satietyLevels: { veryHungry: 'Very hungry', satisfied: 'Satisfied', veryFull: 'Very full' },
+                reasons: { noTime: 'No time', tooExpensive: 'Too expensive', didntLike: 'Did not like', ateOut: 'Ate out', forgot: 'Forgot' },
+                save: 'Save',
+                viewRecipe: 'View Full Recipe',
+                stats: {
+                    energy: 'Energy',
+                    protein: 'Protein',
+                    cost: 'Cost'
+                },
+                scaledViewer: {
+                    title: 'Adjusted Recipe Viewer',
+                    note: 'Adjustment Note',
+                    ingredients: 'Scaled Ingredients',
+                    instructions: 'Preparation'
+                }
+            },
+            budget: 'Weekly Budget',
+            spent: 'Estimated Spent',
+            undefined: 'Undefined',
+            priceDisclaimer: 'Prices are estimates based on averaged data. Significant discrepancies with real store prices or calculation errors may exist. Please use these values as a general reference only.',
+            
+            checkin: {
+                title: 'How did you feel this week?',
+                stress: 'Stress Level',
+                energy: 'Energy Level',
+                notes: 'Additional Notes',
+                levels: { low: 'Low', medium: 'Medium', high: 'High' },
+                save: 'Complete Check-in'
+            },
+            consent: {
+                title: 'AI Training',
+                desc: 'To offer you better plans each week, we analyze and train our models with the generated results.',
+                checkbox: 'I agree that my anonymized data from this plan may be used and supervised by a human to improve Cacomi\'s AI model.',
+                acceptBtn: 'Accept & Generate',
+                cancelBtn: 'Cancel',
+                acceptedStatus: 'You agreed to share the anonymized data of this plan to help us improve our AI models. You can change your preferences in '
+            },
+            concierge: { loading: 'Our chefs are designing your menu...', noteTitle: 'Chef Note:' }
         },
 
         auth: {
@@ -660,13 +694,15 @@ export const translations = {
 
             magicError: 'Could not generate draft.',
             magicDisclaimer: 'AI can make mistakes. Verify info before publishing.',
+            aiLegalDisclaimer: 'Legal Notice: This recipe will be publicly marked as "AI Generated". Cacomi is not responsible for allergies, culinary failures, or generated content. By generating, cooking, or publishing this recipe, you do so strictly at your own risk.',
+            poweredByGemini: 'Powered by Google Gemini',
             sensitiveWarn: 'Protect your privacy: Do not include personal data (phones, addresses) in the description.',
             imageRights: 'By using this URL, you confirm you have the right to share this image.',
             loadingRecipe: 'Loading recipe data...',
             noPermission: 'Redirecting... You do not have permission.',
             deleteStep: 'Delete step',
             disclaimerRetention: 'Upon account deactivation/deletion, we will temporarily retain your data for 30 days for legal and platform policy purposes before permanent deletion.',
-            disclaimerTransfer: 'If you set a recipe to public, upon account deactivation/deletion, recipes already saved by other users may be transferred to the Culina Smart community to maintain their cookbooks\' integrity.'
+            disclaimerTransfer: 'If you set a recipe to public, upon account deactivation/deletion, recipes already saved by other users may be transferred to the Cacomi community to maintain their cookbooks\' integrity.'
         },
 
         feed: {
@@ -697,12 +733,12 @@ export const translations = {
             checkNet: 'Try connecting to the internet.',
             noInstr: 'No detailed instructions for this recipe.',
             noIngr: 'No ingredients listed.',
-            chef: 'Chef SmartRecipe'
+            chef: 'Chef Cacomi'
         },
 
         settings: {
             title: 'Settings',
-            subtitle: 'Customize your Culina Smart experience.',
+            subtitle: 'Customize your Cacomi experience.',
             appearance: 'Appearance',
             appearanceDesc: 'Dark mode will activate based on your choice.',
             language: 'Language & Region',
@@ -722,7 +758,7 @@ export const translations = {
             clear: 'Clear downloads',
             clearing: 'Clearing...',
 
-            storageDesc: 'Culina Smart manages space automatically.',
+            storageDesc: 'Cacomi manages space automatically.',
             account: 'Account & Privacy',
             deleteAccount: 'Delete my account',
             deleteAccountDesc: 'Request permanent deletion of your data.',
@@ -820,11 +856,11 @@ export const translations = {
     },
     fr: {
         about: {
-            title: 'À propos de Culina Smart',
-            desc: 'Découvrez la mission, les valeurs et l\'avenir de Culina Smart, votre assistant de cuisine IA.',
+            title: 'À propos de Cacomi',
+            desc: 'Découvrez la mission, les valeurs et l\'avenir de Cacomi, votre assistant de cuisine IA.',
             missionTag: 'Notre Mission',
             missionTitle: 'Connecter votre garde-manger à l\'avenir de la cuisine.',
-            missionDesc: 'Culina Smart est né d\'un besoin simple : bien manger ne devrait pas coûter tant de temps ni d\'argent. Nous utilisons des technologies de pointe pour transformer vos ingrédients.',
+            missionDesc: 'Cacomi est né d\'un besoin simple : bien manger ne devrait pas coûter tant de temps ni d\'argent. Nous utilisons des technologies de pointe pour transformer vos ingrédients.',
             pillarsTitle: 'Nos Piliers',
             pillarsSubtitle: 'Chaque ligne de code que nous écrivons est fondée sur des principes conçus pour améliorer votre quotidien.',
             pillar1Title: 'Durabilité',
@@ -834,7 +870,7 @@ export const translations = {
             pillar3Title: 'Santé et Économie',
             pillar3Desc: 'Nous renforçons vos décisions nutritionnelles et prenons soin de votre portefeuille en planifiant efficacement.',
             blogTag: 'Bientôt Disponible',
-            blogTitle: 'Le Journal de Culina (Blog)',
+            blogTitle: 'Le Journal de Cacomi (Blog)',
             blogDesc: 'Nous croyons en la transparence. Bientôt, nous lancerons un espace où notre équipe partagera des mises à jour, des recettes, et des conseils.',
             ctaTitle: 'Prêt à changer de routine ?',
             ctaDesc: 'Rejoignez la communauté des foyers intelligents dès aujourd\'hui.',
@@ -939,7 +975,7 @@ export const translations = {
             ctaStart: 'Commencer Gratuitement',
             ctaExplore: 'Explorer Recettes',
             featureTitle: 'Tout ce dont vous avez besoin pour mieux cuisiner',
-            featureSubtitle: 'Culina Smart n\'est pas seulement un livre de recettes, c\'est votre assistant de cuisine personnel.',
+            featureSubtitle: 'Cacomi n\'est pas seulement un livre de recettes, c\'est votre assistant de cuisine personnel.',
             evolution: 'L\'évolution de votre cuisine',
             aiChef: 'Chef IA Intégré',
             noCommitment: 'Vous avez toujours le contrôle',
@@ -1073,7 +1109,7 @@ export const translations = {
             noPermission: 'Redirection... Vous n\'avez pas la permission.',
             deleteStep: 'Supprimer l\'étape',
             disclaimerRetention: 'Dès la désactivation/suppression du compte, nous conserverons temporairement vos données pendant 30 jours à des fins légales et de politique de la plateforme avant suppression définitive.',
-            disclaimerTransfer: 'Si vous rendez une recette publique, lors de la désactivation/suppression du compte, les recettes déjà enregistrées par d\'autres utilisateurs peuvent être transférées à la communauté Culina Smart.'
+            disclaimerTransfer: 'Si vous rendez une recette publique, lors de la désactivation/suppression du compte, les recettes déjà enregistrées par d\'autres utilisateurs peuvent être transférées à la communauté Cacomi.'
         },
 
         feed: {
@@ -1104,12 +1140,12 @@ export const translations = {
             checkNet: 'Essayez de vous connecter à internet.',
             noInstr: 'Aucune instruction détaillée pour cette recette.',
             noIngr: 'Aucun ingrédient listé.',
-            chef: 'Chef SmartRecipe'
+            chef: 'Chef Cacomi'
         },
 
         settings: {
             title: 'Paramètres',
-            subtitle: 'Personnalisez votre expérience Culina Smart.',
+            subtitle: 'Personnalisez votre expérience Cacomi.',
             appearance: 'Apparence',
             appearanceDesc: 'Le mode sombre s\'activera selon votre choix.',
             language: 'Langue et Région',
@@ -1129,7 +1165,7 @@ export const translations = {
             clear: 'Effacer les téléchargements',
             clearing: 'Nettoyage...',
 
-            storageDesc: 'Culina Smart gère l\'espace automatiquement.',
+            storageDesc: 'Cacomi gère l\'espace automatiquement.',
             account: 'Compte et Confidentialité',
             deleteAccount: 'Supprimer mon compte',
             deleteAccountDesc: 'Demander la suppression définitive de vos données.',
@@ -1236,14 +1272,14 @@ export const useSettings = create((set, get) => ({
 
     setStrategy: (strategy) => {
         set({ imageStrategy: strategy });
-        if (typeof window !== 'undefined') localStorage.setItem('culina_image_strategy', strategy);
+        if (typeof window !== 'undefined') localStorage.setItem('Cacomi_image_strategy', strategy);
     },
 
     setTheme: (newTheme) => {
         set({ theme: newTheme });
         if (typeof window !== 'undefined') {
-            localStorage.setItem('culina_theme', newTheme);
-            document.cookie = `culina_theme=${newTheme}; path=/; max-age=31536000; SameSite=Lax`;
+            localStorage.setItem('Cacomi_theme', newTheme);
+            document.cookie = `Cacomi_theme=${newTheme}; path=/; max-age=31536000; SameSite=Lax`;
             applyTheme(newTheme);
         }
     },
@@ -1251,15 +1287,15 @@ export const useSettings = create((set, get) => ({
     setLanguage: (lang) => {
         set({ language: lang, t: translations[lang] || translations.es });
         if (typeof window !== 'undefined') {
-            localStorage.setItem('culina_language', lang);
-            document.cookie = `culina_language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+            localStorage.setItem('cacomi_language', lang);
+            document.cookie = `cacomi_language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
             document.documentElement.lang = lang;
         }
     },
 
     setAutoTranslate: (enabled) => {
         set({ autoTranslate: enabled });
-        if (typeof window !== 'undefined') localStorage.setItem('culina_auto_translate', JSON.stringify(enabled));
+        if (typeof window !== 'undefined') localStorage.setItem('Cacomi_auto_translate', JSON.stringify(enabled));
     },
 
     shouldLoadImage: () => {
@@ -1300,17 +1336,17 @@ export const useSettings = create((set, get) => ({
     initialize: () => {
         if (typeof window === 'undefined') return;
 
-        const savedStrategy = localStorage.getItem('culina_image_strategy');
+        const savedStrategy = localStorage.getItem('Cacomi_image_strategy');
         if (savedStrategy) set({ imageStrategy: savedStrategy });
 
-        const savedTheme = localStorage.getItem('culina_theme') || 'system';
+        const savedTheme = localStorage.getItem('Cacomi_theme') || 'system';
         set({ theme: savedTheme });
         applyTheme(savedTheme);
 
-        const savedLang = localStorage.getItem('culina_language') || 'es';
+        const savedLang = localStorage.getItem('cacomi_language') || 'es';
         set({ language: savedLang, t: translations[savedLang] || translations.es });
 
-        const savedAutoTranslate = localStorage.getItem('culina_auto_translate');
+        const savedAutoTranslate = localStorage.getItem('Cacomi_auto_translate');
         if (savedAutoTranslate) set({ autoTranslate: JSON.parse(savedAutoTranslate) });
 
         get().checkNetwork();
@@ -1324,7 +1360,7 @@ export const useSettings = create((set, get) => ({
 
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleSystemChange = () => {
-            if (localStorage.getItem('culina_theme') === 'system') {
+            if (localStorage.getItem('Cacomi_theme') === 'system') {
                 applyTheme('system');
             }
         };
@@ -1346,3 +1382,5 @@ export function SettingsProvider({ children }) {
 
     return <>{children}</>;
 }
+
+

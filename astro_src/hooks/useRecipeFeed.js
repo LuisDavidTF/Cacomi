@@ -8,7 +8,7 @@ import { feedCache } from '@utils/feedCache';
  * Custom hook to handle recipe fetching, pagination, and infinite scroll logic.
  * Separation of Concerns: Keeps the UI component clean and focused on presentation.
  */
-const STORAGE_KEY = 'culina_feed_cache';
+const STORAGE_KEY = 'Cacomi_feed_cache';
 
 export function useRecipeFeed({ initialData } = {}) {
     // Helper to load from storage safely
@@ -279,3 +279,4 @@ export function useRecipeFeed({ initialData } = {}) {
         removeRecipe
     };
 }
+

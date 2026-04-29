@@ -220,7 +220,7 @@ export default function SettingsPage() {
             )}
 
             <div className="text-center text-xs text-muted-foreground mt-8">
-                Culina Smart v1.2.0 • Build 2026
+                Cacomi v1.2.0 • Build 2026
             </div>
 
             {/* Modal de confirmación para eliminar cuenta */}
@@ -262,3 +262,4 @@ export default function SettingsPage() {
         </div>
     );
 }
+

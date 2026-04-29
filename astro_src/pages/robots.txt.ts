@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = ({ request }) => {
-    const baseUrl = import.meta.env.PUBLIC_BASE_URL || 'https://culinasmart.com';
+    const baseUrl = import.meta.env.PUBLIC_BASE_URL || 'https://Cacomismart.com';
 
     const robotsText = `
 User-agent: *
@@ -19,3 +19,4 @@ Sitemap: ${baseUrl}/sitemap.xml
         },
     });
 };
+

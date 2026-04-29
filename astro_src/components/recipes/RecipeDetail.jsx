@@ -66,7 +66,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
         showToast(t.common?.offlineSaved || 'Receta guardada para uso sin conexión', 'success');
     };
 
-    const imageUrl = recipe.imageUrl || 'https://placehold.co/1200x800/f3f4f6/9ca3af?text=Culina+Smart';
+    const imageUrl = recipe.imageUrl || 'https://placehold.co/1200x800/f3f4f6/9ca3af?text=Cacomi+Smart';
     const authorName = recipe.authorName || recipe.user?.name || (t.recipe?.chef || 'Chef');
     const prepTime = recipe.preparationTimeMinutes || 0;
     const createdAt = recipe.createdAt ? new Date(recipe.createdAt).toLocaleDateString() : null;
@@ -260,3 +260,4 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
         </article>
     );
 }
+

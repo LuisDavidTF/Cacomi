@@ -27,7 +27,7 @@ export const useAuth = create((set, get) => ({
         // Cuenta desactivada: limpiar sesión y redirigir a login
         set({ user: null, isAuthenticated: false, isLoading: false });
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('culina_user_session');
+          localStorage.removeItem('Cacomi_user_session');
           window.location.assign('/login');
         }
         return;
@@ -36,7 +36,7 @@ export const useAuth = create((set, get) => ({
       if (res.status === 401) {
         set({ user: null, isAuthenticated: false, isLoading: false });
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('culina_user_session');
+          localStorage.removeItem('Cacomi_user_session');
         }
         return;
       }
@@ -55,13 +55,13 @@ export const useAuth = create((set, get) => ({
         role: extractRole(user)
       };
       
-      localStorage.setItem('culina_user_session', JSON.stringify(safeUser));
+      localStorage.setItem('Cacomi_user_session', JSON.stringify(safeUser));
       set({ user: safeUser, isAuthenticated: true, isLoading: false });
 
     } catch (error) {
       console.warn("Session check failed (Network/Server):", error);
       if (typeof window !== 'undefined') {
-        const cachedUser = localStorage.getItem('culina_user_session');
+        const cachedUser = localStorage.getItem('Cacomi_user_session');
         if (cachedUser) {
           set({ user: JSON.parse(cachedUser), isAuthenticated: true, isLoading: false });
         } else {
@@ -93,7 +93,7 @@ export const useAuth = create((set, get) => ({
       profile_photo: data.user.profile_photo_url || data.user.profile_photo,
       role: extractRole(data.user)
     };
-    localStorage.setItem('culina_user_session', JSON.stringify(safeUser));
+    localStorage.setItem('Cacomi_user_session', JSON.stringify(safeUser));
 
     set({ user: safeUser, isAuthenticated: true });
     return safeUser;
@@ -124,7 +124,7 @@ export const useAuth = create((set, get) => ({
     // Limpiamos el estado del cliente antes de navegar
     set({ user: null, isAuthenticated: false });
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('culina_user_session');
+      localStorage.removeItem('Cacomi_user_session');
       if (!returnUrl) {
         CacheManager.clearAll();
       }

@@ -33,7 +33,7 @@ export function FeatureAnnouncement({ version }: { version: string }) {
                     {t.announcement?.newUpdate || "Nueva Actualización"} {version}
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold tracking-tight mb-2">
-                    {t.announcement?.title || "¡Descubre lo nuevo en Culina Smart!"}
+                    {t.announcement?.title || "¡Descubre lo nuevo en Cacomi!"}
                 </h3>
                 <p className="text-muted-foreground text-sm sm:text-base mb-6 leading-relaxed">
                     {t.announcement?.desc || "Hemos implementado mejoras clave en el desempeño de la aplicación, el planificador semanal y en nuestras recomendaciones por inteligencia artificial. Continúa explorando para descubrir una experiencia más fluida y rápida."}
@@ -50,3 +50,4 @@ export function FeatureAnnouncement({ version }: { version: string }) {
         </div>
     );
 }
+

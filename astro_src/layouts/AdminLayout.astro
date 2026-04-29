@@ -10,10 +10,10 @@ interface Props {
 }
 
 const { 
-	title = 'Admin Panel - Culina Smart',
+	title = 'Admin Panel - Cacomi',
 } = Astro.props;
 
-const langCookie = Astro.cookies.get('culina_language')?.value || 'es';
+const langCookie = Astro.cookies.get('cacomi_language')?.value || 'es';
 const t = translations[langCookie as keyof typeof translations] || translations.es;
 // After context.rewrite(), Astro.url.pathname reflects the internal /admin/* path
 const currentPath = Astro.url.pathname.replace(/\/$/, "");
@@ -65,7 +65,7 @@ const getLinkStyle = (path: string) => {
 						<div class="flex flex-col md:flex-row md:items-center justify-between w-full">
                             <div class="flex items-center justify-between w-full md:w-auto py-3 md:py-0 md:border-r border-slate-300 dark:border-slate-700 md:pr-6 md:mr-4">
                                 <a class="flex items-center space-x-2" href="/">
-                                    <span class="font-bold inline-block text-lg md:text-base">Culina Smart <span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded ml-1.5 align-middle">ADMIN</span></span>
+                                    <span class="font-bold inline-block text-lg md:text-base">Cacomi <span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded ml-1.5 align-middle">ADMIN</span></span>
                                 </a>
                                 
                                 {/* Mobile Menu Toggle */}
@@ -124,3 +124,4 @@ const getLinkStyle = (path: string) => {
 		</AppProviders>
 	</body>
 </html>
+

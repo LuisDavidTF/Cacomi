@@ -5,7 +5,7 @@ import { Target, Heart, Sparkles, Sprout, ArrowRight, Rss } from 'lucide-react';
 
 export const prerender = false;
 
-const lang = Astro.cookies.get('culina_language')?.value || 'es';
+const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
 const t = translations[lang] || translations.es;
 
 const values = [
@@ -37,7 +37,14 @@ const values = [
       <div class="absolute inset-0 z-0">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
       </div>
-      <div class="relative z-10 max-w-4xl mx-auto max-w-[800px]">
+      <div class="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
+        <div class="mb-8 w-full max-w-[400px]">
+          <img 
+            src="/images/brand/logo_about.png" 
+            alt="Cacomi Mission" 
+            class="w-full h-auto rounded-3xl shadow-2xl border border-border/50"
+          />
+        </div>
         <div class="inline-flex items-center justify-center gap-2 px-3 py-1 mb-6 rounded-full bg-primary/10 text-primary text-sm font-medium">
            <Target className="w-4 h-4" /> {t.about.missionTag}
         </div>
@@ -133,3 +140,4 @@ const values = [
     </section>
   </div>
 </Layout>
+

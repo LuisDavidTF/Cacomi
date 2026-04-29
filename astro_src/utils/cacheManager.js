@@ -7,9 +7,9 @@ const LIMITS = {
 };
 
 const KEYS = {
-    FEED: 'culina_feed_cache',
-    VISITED: 'culina_visited_cache',
-    USER: 'culina_user_session'
+    FEED: 'Cacomi_feed_cache',
+    VISITED: 'Cacomi_visited_cache',
+    USER: 'Cacomi_user_session'
 };
 
 /**
@@ -121,3 +121,4 @@ export const CacheManager = {
         };
     }
 };
+

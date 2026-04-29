@@ -22,10 +22,10 @@ Use these skills for detailed patterns on-demand:
 | `zustand-5` | State management patterns | [SKILL.md](.agent/skills/zustand-5/SKILL.md) |
 | `ai-sdk-5` | Vercel AI SDK patterns | [SKILL.md](.agent/skills/ai-sdk-5/SKILL.md) |
 | `learning-loop` | Protocol for QA, error verification, and skill evolution | [SKILL.md](.agent/skills/learning-loop/SKILL.md) |
-| `smart-recipe-planner-ui` | UI components and styling conventions | [SKILL.md](.agent/skills/smart-recipe-planner-ui/SKILL.md) |
-| `smart-recipe-planner-test-ui` | Frontend E2E testing patterns | [SKILL.md](.agent/skills/smart-recipe-planner-test-ui/SKILL.md) |
-| `smart-recipe-planner-git` | Git, Commits, and PR workflow | [SKILL.md](.agent/skills/smart-recipe-planner-git/SKILL.md) |
-| `smart-recipe-planner-ticket-workflow` | Ticket-based branching and merging workflow | [SKILL.md](.agent/skills/smart-recipe-planner-ticket-workflow/SKILL.md) |
+| `cacomi-ui` | UI components and styling conventions | [SKILL.md](.agent/skills/cacomi-ui/SKILL.md) |
+| `cacomi-test-ui` | Frontend E2E testing patterns | [SKILL.md](.agent/skills/cacomi-test-ui/SKILL.md) |
+| `cacomi-git` | Git, Commits, and PR workflow | [SKILL.md](.agent/skills/cacomi-git/SKILL.md) |
+| `cacomi-ticket-workflow` | Ticket-based branching and merging workflow | [SKILL.md](.agent/skills/cacomi-ticket-workflow/SKILL.md) |
 
 ### Auto-invoke Skills
 
@@ -37,8 +37,8 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | Building AI chat features | `ai-sdk-5` |
 | After fixing ANY error or bug | `learning-loop` |
 | Creating Zod schemas | `zod-4` |
-| Creating/modifying UI components | `smart-recipe-planner-ui` |
-| Managing Commits / PRs | `smart-recipe-planner-git` |
+| Creating/modifying UI components | `cacomi-ui` |
+| Managing Commits / PRs | `cacomi-git` |
 | Using Zustand stores | `zustand-5` |
 | Working with Tailwind classes | `tailwind-4` |
 | Writing Playwright E2E tests | `playwright` |
@@ -49,7 +49,7 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
 ## Project Overview
 
-Smart Recipe Planner is a modern web application for managing recipes and meal planning.
+Cacomi is a modern web application for managing recipes and meal planning.
 
 | Component | Location | Tech Stack |
 |-----------|----------|------------|
@@ -57,7 +57,7 @@ Smart Recipe Planner is a modern web application for managing recipes and meal p
 | Skills | `.agent/skills/` | Agentic Skills Definitions |
 
 ### Translation Rule (CRITICAL)
-- **Every new UI text MUST be translated**. Always add new translations to `astro_src/context/SettingsContext.jsx` for all available languages (e.g., `es`, `en`, `fr`). Do not hardcode strings in Astro or React components. For `.astro` files, use `prerender = false` and read the `culina_language` cookie to extract strings from the exported `translations` object.
+- **Every new UI text MUST be translated**. Always add new translations to `astro_src/context/SettingsContext.jsx` for all available languages (e.g., `es`, `en`, `fr`). Do not hardcode strings in Astro or React components. For `.astro` files, use `prerender = false` and read the `cacomi_language` cookie to extract strings from the exported `translations` object.
 
 ### Security Rule (CRITICAL - BFF Pattern)
 - **NEVER use `PUBLIC_` prefix for Backend URLs or Secrets**. Vite/Astro will bundle any `PUBLIC_` variable into the client-side JS.

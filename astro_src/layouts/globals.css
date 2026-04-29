@@ -38,23 +38,21 @@
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
-/* 🎨 CULINA SMART VISUAL IDENTITY: "Modern Rustic / Bistro" */
+/* 🎨 Cacomi VISUAL IDENTITY: "Modern Rustic / Bistro" */
 :root {
   /* === LIGHT MODE: Warm & Organic === */
 
-  /* Background: Warm Oatmeal (Avena) */
-  --bg-page: #F9F7F2;
-  --background: #F9F7F2;
-  /* Compatibilidad estándar */
+  /* Background: Soft Linen (New requested color) */
+  --bg-page: #f7f2ea;
+  --background: #f7f2ea;
 
-  /* Cards: Pure White */
+  /* Cards: Pure White or very light bone */
   --card: #FFFFFF;
   --card-foreground: #2D2A26;
-  /* Charcoal suave */
 
   /* Text Colors */
   --foreground: #2D2A26;
-  --muted: #EBE9E4;
+  --muted: #efebdf;
   --muted-foreground: #6E6A66;
   /* Gris piedra */
 
@@ -85,22 +83,20 @@
 
 /* === DARK MODE: Intimate & Elegant === */
 .dark {
-  /* Background: Deep Espresso (Café muy oscuro, NO azul) */
-  --bg-page: #1A1816;
-  --background: #1A1816;
+  /* Background: Obsidian Black (New requested color) */
+  --bg-page: #010006;
+  --background: #010006;
 
-  /* Cards: Dark Wood tone */
-  --card: #262320;
+  /* Cards: Slightly lighter for depth */
+  --card: #0a0a0f;
   --card-foreground: #EDEBE8;
-  /* Off-white cálido */
 
   /* Text Colors */
   --foreground: #EDEBE8;
-  --muted: #332F2C;
+  --muted: #11111a;
   --muted-foreground: #A8A4A0;
-  /* Gris cálido */
 
-  /* BRAND: Primary -> Light Terracotta (Más brillo para contraste) */
+  /* BRAND: Primary -> Light Terracotta */
   --primary: #E07A5F;
   --primary-foreground: #FFFFFF;
 
@@ -109,16 +105,14 @@
   --secondary-foreground: #FFFFFF;
 
   /* UI Elements */
-  --accent: #332F2C;
+  --accent: #1a1a24;
   --accent-foreground: #EDEBE8;
 
   --destructive: #7F1D1D;
-  /* Rojo oscuro elegante */
   --destructive-foreground: #FEF2F2;
 
-  --border: #4A4641;
-  /* Borde más visible para botones "outline" en oscuro */
-  --input: #3E3A36;
+  --border: #252533;
+  --input: #1a1a24;
   --ring: #E07A5F;
 }
 

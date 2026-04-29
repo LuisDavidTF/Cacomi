@@ -2,7 +2,7 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { useSettings } from '@context/SettingsContext';
 
-const mockData: any[] = [];
+
 
 export const SystemMetricsChart = () => {
     const { t } = useSettings();
@@ -17,7 +17,7 @@ export const SystemMetricsChart = () => {
                 <div className="h-64">
                     <h4 className="text-sm font-medium text-slate-500 mb-4">{t.admin?.cpuUsage || 'CPU Usage'} (%)</h4>
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={mockData}>
+                        <LineChart data={[]}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
                             <XAxis dataKey="time" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
                             <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
@@ -33,7 +33,7 @@ export const SystemMetricsChart = () => {
                 <div className="h-64">
                     <h4 className="text-sm font-medium text-slate-500 mb-4">{t.admin?.ramUsage || 'RAM Usage'} (%)</h4>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={mockData}>
+                        <AreaChart data={[]}>
                             <defs>
                                 <linearGradient id="colorRam" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>

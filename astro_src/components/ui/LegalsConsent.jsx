@@ -16,8 +16,8 @@ export function LegalsConsent() {
 
     useEffect(() => {
         // Check both localStorage and document.cookie for the consent flag
-        const hasConsent = localStorage.getItem('culina_cookie_consent') === 'true' ||
-            document.cookie.includes('culina_cookie_consent=true');
+        const hasConsent = localStorage.getItem('Cacomi_cookie_consent') === 'true' ||
+            document.cookie.includes('Cacomi_cookie_consent=true');
 
         if (!hasConsent) {
             setIsVisible(true);
@@ -26,12 +26,12 @@ export function LegalsConsent() {
 
     const acceptCookies = () => {
         // Set localStorage for client-side persistence
-        localStorage.setItem('culina_cookie_consent', 'true');
+        localStorage.setItem('Cacomi_cookie_consent', 'true');
 
         // Set a real cookie for potential server-side checks or cross-framework consistency
         const expirationDate = new Date();
         expirationDate.setFullYear(expirationDate.getFullYear() + 1);
-        document.cookie = `culina_cookie_consent=true; path=/; expires=${expirationDate.toUTCString()}; SameSite=Lax`;
+        document.cookie = `Cacomi_cookie_consent=true; path=/; expires=${expirationDate.toUTCString()}; SameSite=Lax`;
 
         setIsVisible(false);
     };
@@ -68,3 +68,4 @@ export function LegalsConsent() {
         </div>
     );
 }
+

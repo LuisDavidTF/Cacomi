@@ -113,7 +113,6 @@ export const useApiClient = () => {
 
     deactivateAccount: () => request('/api/users/me', { method: 'DELETE' }),
 
-    // TODO: Ticket FE-02 - Remove mock data when backend is ready
     syncPantry: async (changes) => {
       // Offline-first sync with deltas
       return request('/api/pantry', { body: { changes }, method: 'POST' });

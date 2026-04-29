@@ -16,7 +16,7 @@ export interface LocalPantryItem {
 export type { LocalPantryItem as PantryItemType };
 
 // Extend Dexie class to handle typescript properly for specific tables
-const db = new Dexie('SmartRecipePlannerDB_v2') as Dexie & {
+const db = new Dexie('CacomiPlannerDB_v2') as Dexie & {
     pantryItems: EntityTable<LocalPantryItem, 'id'>;
 };
 
@@ -26,3 +26,4 @@ db.version(3).stores({
 });
 
 export { db };
+

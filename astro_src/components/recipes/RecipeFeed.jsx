@@ -46,7 +46,7 @@ export function RecipeFeed({ initialData = null }) {
   // Scroll Restoration Logic
   useEffect(() => {
     if (status === 'success' && recipes.length > 0) {
-      const savedScroll = sessionStorage.getItem('culina_feed_scroll');
+      const savedScroll = sessionStorage.getItem('Cacomi_feed_scroll');
       const targetScroll = parseInt(savedScroll, 10);
       
       // Ensure we have a valid numeric target before attempting to manipulate scroll
@@ -65,7 +65,7 @@ export function RecipeFeed({ initialData = null }) {
           if (maxScrollable >= targetScroll || attempts > 15) {
             window.scrollTo({ top: targetScroll, behavior: 'instant' });
             console.log(`[Scroll Restore] Scrolled to ${targetScroll}`);
-            sessionStorage.removeItem('culina_feed_scroll');
+            sessionStorage.removeItem('Cacomi_feed_scroll');
           } else {
             attempts++;
             setTimeout(tryScroll, 100);
@@ -255,3 +255,4 @@ export function RecipeFeed({ initialData = null }) {
     </div >
   );
 }
+

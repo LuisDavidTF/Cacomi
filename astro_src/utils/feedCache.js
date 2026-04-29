@@ -1,9 +1,9 @@
 /**
  * Utility to manage the Recipe Feed Cache in LocalStorage.
- * Key used: 'culina_feed_cache'
+ * Key used: 'Cacomi_feed_cache'
  */
 
-const STORAGE_KEY = 'culina_feed_cache';
+const STORAGE_KEY = 'Cacomi_feed_cache';
 const CACHE_DURATION = 30 * 60 * 1000; // 30 Minutes
 
 export const feedCache = {
@@ -95,3 +95,4 @@ export const feedCache = {
         }
     }
 };
+

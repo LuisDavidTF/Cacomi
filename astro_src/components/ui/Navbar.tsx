@@ -95,9 +95,18 @@ export function Navbar() {
                         {/* Left: Logo */}
                         <div className="flex-1 flex items-center justify-start">
                             <a href="/" onClick={handleLogoClick} className="shrink-0 flex items-center gap-2 group">
-                                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent tracking-tight md:flex items-center gap-2 hidden group-hover:opacity-80 transition-opacity">
-                                    Culina Smart
-                                </span>
+                                {/* Light Mode Logo */}
+                                <img 
+                                    src="/images/brand/logo_navbar_light.png" 
+                                    alt="Cacomi" 
+                                    className="h-12 w-auto object-contain hidden md:block dark:md:hidden group-hover:scale-105 transition-transform"
+                                />
+                                {/* Dark Mode Logo */}
+                                <img 
+                                    src="/images/brand/logo_navbar_dark.png" 
+                                    alt="Cacomi" 
+                                    className="h-12 w-auto object-contain hidden dark:md:block group-hover:scale-105 transition-transform [mask-image:radial-gradient(ellipse_at_center,black_75%,transparent_100%)]"
+                                />
                             </a>
                         </div>
 
@@ -111,17 +120,11 @@ export function Navbar() {
                                 <ShoppingBasket className="w-6 h-6" />
                                 <span className="hidden lg:inline">{t?.nav?.pantry || 'Despensa'}</span>
                             </a>
-                            <a 
-                                href="#" 
-                                onClick={(e) => e.preventDefault()}
-                                className={`relative flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap opacity-60 cursor-not-allowed pointer-events-none group`}
-                            >
-                                <div className="flex items-center gap-2 lg:gap-3">
-                                    <CalendarDays className="w-6 h-6 text-muted-foreground" />
-                                    <span className="hidden lg:inline text-muted-foreground">{t?.nav?.planner || 'Planificador'}</span>
-                                </div>
-                                <span className="absolute left-1/2 -translate-x-1/2 -top-2 bg-muted text-muted-foreground text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border border-border backdrop-blur-md z-[60] whitespace-nowrap shadow-sm tracking-widest">
-                                    {t?.nav?.soon || t?.nav?.comingSoon || 'Soon'}
+                            <a href="/planner" className={`flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/planner') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <CalendarDays className="w-6 h-6" />
+                                <span className="hidden lg:inline">{t?.nav?.planner || 'Planificador'}</span>
+                                <span className="absolute -top-1.5 -right-2 flex h-5 px-2 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white uppercase tracking-tighter shadow-md border border-background scale-90 group-hover:scale-100 transition-transform">
+                                    BETA
                                 </span>
                             </a>
                         </div>
@@ -276,8 +279,19 @@ export function Navbar() {
             {/* Mobile Top Header */}
             <header className="fixed top-0 left-0 right-0 z-40 bg-background/95 dark:bg-card/95 backdrop-blur-md shadow-xs border-b border-border/50 md:hidden h-14 flex items-center justify-between px-4">
                 <div className="w-8"></div> {/* Spacer to center the logo */}
-                <a href="/" onClick={handleLogoClick} className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-                    <span className="text-xl font-bold text-primary tracking-tight">Culina Smart</span>
+                <a href="/" onClick={handleLogoClick} className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2 h-12">
+                    {/* Light Mode Logo */}
+                    <img 
+                        src="/images/brand/logo_navbar_light.png" 
+                        alt="Cacomi" 
+                        className="h-full w-auto object-contain dark:hidden"
+                    />
+                    {/* Dark Mode Logo */}
+                    <img 
+                        src="/images/brand/logo_navbar_dark.png" 
+                        alt="Cacomi" 
+                        className="h-full w-auto object-contain hidden dark:block [mask-image:radial-gradient(ellipse_at_center,black_75%,transparent_100%)]"
+                    />
                 </a>
                 
                 <div className="flex items-center justify-end w-8">
@@ -329,17 +343,11 @@ export function Navbar() {
 
                     {/* Planner for authenticated users */}
                     {isAuthenticated && (
-                        <a 
-                            href="#" 
-                            onClick={(e) => e.preventDefault()}
-                            className="relative flex flex-1 flex-col items-center justify-center gap-1 opacity-60 cursor-not-allowed pointer-events-none"
-                        >
-                            <div className="flex flex-col items-center justify-center gap-1">
-                                <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
-                                <span className="text-[10px] font-medium leading-none whitespace-nowrap uppercase text-muted-foreground">{t?.nav?.plan || 'Plan'}</span>
-                            </div>
-                            <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-muted text-muted-foreground text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-border backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
-                                {t?.nav?.soon || t?.nav?.comingSoon || 'Soon'}
+                        <a href="/planner" className={`flex flex-1 flex-col items-center justify-center gap-1 relative ${getIsActive('/planner') ? 'text-primary pointer-events-none' : 'text-muted-foreground hover:text-foreground'}`}>
+                            <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7" />
+                            <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.plan || 'Plan'}</span>
+                            <span className="absolute top-0 right-1 bg-primary text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full border border-background shadow-md tracking-tighter">
+                                BETA
                             </span>
                         </a>
                     )}

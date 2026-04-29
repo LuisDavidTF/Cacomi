@@ -53,9 +53,9 @@ export default defineConfig({
         AstroPWA({
             registerType: 'autoUpdate',
             manifest: {
-                name: 'Smart Recipe Planner',
-                short_name: 'RecipePlanner',
-                description: 'Plan your meals and manage your pantry intelligently',
+                name: 'Cacomi: Planificador de comidas',
+                short_name: 'Cacomi',
+                description: 'Planifica tus comidas de manera inteligente con el instinto de comer sano.',
                 theme_color: '#ffffff',
                 icons: [
                     { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
@@ -65,6 +65,7 @@ export default defineConfig({
             workbox: {
                 globDirectory: isDev ? '.astro' : 'dist',
                 globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+                maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
             },
         })
     ]

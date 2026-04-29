@@ -1,7 +1,7 @@
-# Smart Recipe Planner UI - AI Agent Ruleset
+# Cacomi UI - AI Agent Ruleset
 
 > **Skills Reference**: For detailed patterns, use these skills:
-> - [`smart-recipe-planner-ui`](../.agent/skills/smart-recipe-planner-ui/SKILL.md) - Project-specific UI patterns
+> - [`cacomi-ui`](../.agent/skills/cacomi-ui/SKILL.md) - Project-specific UI patterns
 > - [`typescript`](../.agent/skills/typescript/SKILL.md) - Const types, flat interfaces
 > - [`react-19`](../.agent/skills/react-19/SKILL.md) - No useMemo/useCallback, compiler
 > - [`nextjs-16`](../.agent/skills/nextjs-16/SKILL.md) - App Router, Server Actions
@@ -10,9 +10,9 @@
 > - [`zustand-5`](../.agent/skills/zustand-5/SKILL.md) - Selectors, persist middleware
 > - [`ai-sdk-5`](../.agent/skills/ai-sdk-5/SKILL.md) - UIMessage, sendMessage
 > - [`playwright`](../.agent/skills/playwright/SKILL.md) - Page Object Model, selectors
-> - [`smart-recipe-planner-test-ui`](../.agent/skills/smart-recipe-planner-test-ui/SKILL.md) - E2E testing specific to this project
-> - [`smart-recipe-planner-i18n`](../.agent/skills/smart-recipe-planner-i18n/SKILL.md) - Reactive Translation (i18n) and hardcoded texts
-> - [`smart-recipe-planner-offline`](../.agent/skills/smart-recipe-planner-offline/SKILL.md) - Standards and strategies for offline capabilities
+> - [`cacomi-test-ui`](../.agent/skills/cacomi-test-ui/SKILL.md) - E2E testing specific to this project
+> - [`cacomi-i18n`](../.agent/skills/cacomi-i18n/SKILL.md) - Reactive Translation (i18n) and hardcoded texts
+> - [`cacomi-offline`](../.agent/skills/cacomi-offline/SKILL.md) - Standards and strategies for offline capabilities
 
 ### Auto-invoke Skills
 
@@ -23,16 +23,16 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | App Router / Server Actions | `nextjs-16` |
 | Building AI chat features | `ai-sdk-5` |
 | Creating Zod schemas | `zod-4` |
-| Creating/modifying UI components | `smart-recipe-planner-ui` |
+| Creating/modifying UI components | `cacomi-ui` |
 | Using Zustand stores | `zustand-5` |
-| Working on UI structure (actions/adapters/types/hooks) | `smart-recipe-planner-ui` |
+| Working on UI structure (actions/adapters/types/hooks) | `cacomi-ui` |
 | Working with Tailwind classes | `tailwind-4` |
 | Writing Playwright E2E tests | `playwright` |
-| Writing Smart Recipe Planner UI E2E tests | `smart-recipe-planner-test-ui` |
+| Writing Cacomi UI E2E tests | `cacomi-test-ui` |
 | Writing React components | `react-19` |
 | Writing TypeScript types/interfaces | `typescript` |
-| Adding hardcoded texts or toasts | `smart-recipe-planner-i18n` |
-| Fetching data or handling offline fallbacks | `smart-recipe-planner-offline` |
+| Adding hardcoded texts or toasts | `cacomi-i18n` |
+| Fetching data or handling offline fallbacks | `cacomi-offline` |
 
 ---
 

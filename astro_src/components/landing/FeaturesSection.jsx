@@ -62,7 +62,7 @@ export function FeaturesSection() {
                         {t.landing?.featureTitle || "Todo lo que necesitas para cocinar mejor"}
                     </h2>
                     <p className="text-lg md:text-xl text-muted-foreground">
-                        {t.landing?.featureSubtitle || "Culina Smart no es solo un recetario, es tu asistente personal de cocina."}
+                        {t.landing?.featureSubtitle || "Cacomi no es solo un recetario, es tu asistente personal de cocina."}
                     </p>
                 </div>
 
@@ -144,3 +144,4 @@ export function FeaturesSection() {
         </section>
     );
 }
+

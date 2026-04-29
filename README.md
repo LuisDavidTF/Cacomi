@@ -1,6 +1,9 @@
-# 🍽️ Culina Smart — Smart Recipe Planner
+# 🍽️ Cacomi — Planificador de comidas
 
-Culina Smart es una aplicación web moderna e inteligente para planificar comidas, gestionar tu despensa y generar recetas con IA. Construida con tecnologías de punta y optimizada para experiencia de escritorio y móvil con soporte offline completo.
+Cacomi es una aplicación web moderna e inteligente para planificar comidas, gestionar tu despensa y generar recetas con IA. Construida con tecnologías de punta y optimizada para experiencia de escritorio y móvil con soporte offline completo.
+
+> [!WARNING]
+> **Estado Beta**: Actualmente la plataforma se encuentra en fase de pruebas. Al momento del lanzamiento oficial, se realizará una limpieza completa de la base de datos (usuarios, recetas y despensa).
 
 ## ✨ Features
 

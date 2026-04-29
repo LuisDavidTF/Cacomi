@@ -129,21 +129,32 @@ export function MagicGenerator({ onDraftGenerated }) {
           </div>
         )}
 
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            onClick={handleGenerate}
-            isLoading={isGenerating}
-            disabled={isGenerating || !prompt.trim()}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm text-xs px-5 border-transparent"
-          >
-            <SparklesIcon className="w-4 h-4 mr-2" />
-            {t.createRecipe.magicBtn}
-          </Button>
+        <div className="flex justify-end mt-4">
+          <div className="flex flex-col items-end gap-1">
+            <Button
+              type="button"
+              onClick={handleGenerate}
+              isLoading={isGenerating}
+              disabled={isGenerating || !prompt.trim()}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm text-xs px-5 border-transparent w-full sm:w-auto"
+            >
+              <SparklesIcon className="w-4 h-4 mr-2" />
+              {t.createRecipe.magicBtn}
+            </Button>
+            <span className="text-[9px] font-semibold text-muted-foreground/60 tracking-wide pr-1">
+              {t.createRecipe?.poweredByGemini || 'Powered by Google Gemini'}
+            </span>
+          </div>
         </div>
-        <p className="text-[10px] text-center text-muted-foreground mt-2 opacity-80">
-          {t.createRecipe.magicDisclaimer}
-        </p>
+        
+        <div className="mt-5 pt-3 border-t border-border/30 space-y-2">
+            <p className="text-[10px] text-center text-muted-foreground opacity-90 font-medium">
+                {t.createRecipe.magicDisclaimer}
+            </p>
+            <p className="text-[10px] text-justify text-muted-foreground/70 leading-[1.35]">
+                {t.createRecipe?.aiLegalDisclaimer}
+            </p>
+        </div>
       </div>
     </div>
   );

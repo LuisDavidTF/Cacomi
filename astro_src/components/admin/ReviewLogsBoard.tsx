@@ -21,7 +21,8 @@ interface TrainingLogsDayResponse {
     logId: number;
     recipeId: number;
     recipeName: string;
-    dayOfWeek: string;
+    dayOfWeek?: string;
+    mealDate?: string;
     mealType: string;
     portionMultiplier: number;
     proteinGrams: number;
@@ -99,22 +100,35 @@ const DAY_MAP: Record<string, string> = {
  * Groups flat training logs into a weekly summary for the grid UI.
  */
 const groupLogsByDay = (logs: TrainingLogsDayResponse[]): DaySummary[] => {
-    const dayOrder = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
     const groups: Record<string, TrainingLogsDayResponse[]> = {};
 
     logs.forEach(log => {
-        let day = log.dayOfWeek.toUpperCase();
-        // Harmonize English vs Spanish day names from backend
-        day = DAY_MAP[day] || day;
-
-        if (!groups[day]) groups[day] = [];
-        groups[day].push(log);
+        const key = log.mealDate || log.dayOfWeek || 'UNKNOWN';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(log);
     });
 
-    return dayOrder.map(day => ({
-        name: day.substring(0, 3).toUpperCase(), // "LUN", "MAR"...
-        meals: groups[day] || []
-    })).filter(d => d.meals.length > 0);
+    const sortedKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
+    return sortedKeys.map(key => {
+        let name = key;
+
+        if (/^\d{4}-\d{2}-\d{2}$/.test(key)) {
+            const d = new Date(key + 'T12:00:00Z');
+            const days = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+            name = `${days[d.getUTCDay()]} ${d.getUTCDate()}`;
+        } else {
+            let day = key.toUpperCase();
+            day = DAY_MAP[day] || day;
+            name = day.substring(0, 3).toUpperCase();
+        }
+
+        return {
+            name,
+            date: key,
+            meals: groups[key]
+        };
+    }).filter(d => d.meals.length > 0);
 };
 
 // Metric calculation helpers

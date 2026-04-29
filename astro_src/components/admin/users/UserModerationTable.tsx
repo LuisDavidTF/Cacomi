@@ -10,11 +10,11 @@ type UserSession = {
     reportsCnt: number;
 };
 
-const MOCK_USERS: UserSession[] = [];
+
 
 export const UserModerationTable = () => {
     const { t } = useSettings();
-    const [users, setUsers] = useState<UserSession[]>(MOCK_USERS);
+    const [users, setUsers] = useState<UserSession[]>([]);
     const [search, setSearch] = useState('');
     const [modal, setModal] = useState<{ isOpen: boolean; actionType: 'Ban' | 'Delete'; user: UserSession | null }>({ isOpen: false, actionType: 'Ban', user: null });
     const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());

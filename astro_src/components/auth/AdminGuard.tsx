@@ -4,7 +4,7 @@ import { useSettings } from '@context/SettingsContext';
 /**
  * AdminGuard component
  * Validates the existence of a short-lived admin token.
- * If invalid or absent, presents a mock elevation of privileges dialog.
+ * If invalid or absent, presents an elevation of privileges dialog.
  */
 export const AdminGuard = ({ children }: { children: React.ReactNode }) => {
     const [isAuthorized, setIsAuthorized] = useState(false);

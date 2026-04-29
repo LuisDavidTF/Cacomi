@@ -5,13 +5,12 @@ import { WeeklyPlanner } from '../components/planner/WeeklyPlanner';
 
 export const prerender = false;
 
-// Planificador en desarrollo - Redirigir al inicio para el lanzamiento de mantenimiento
-return Astro.redirect('/');
+const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
 
-const lang = Astro.cookies.get('culina_language')?.value || 'es';
 const t = translations[lang] || translations.es;
 ---
 
 <Layout title={`${t.nav.planner} - ${t.nav.beta}`}>
   <WeeklyPlanner client:load />
 </Layout>
+

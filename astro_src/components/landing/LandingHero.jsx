@@ -15,7 +15,7 @@ export function LandingHero() {
             <div className="absolute inset-0 z-0 lg:hidden">
                 <img 
                     src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1000&auto=format&fit=crop" 
-                    alt="Culina Smart Background Mobile" 
+                    alt="Cacomi Background Mobile" 
                     className="w-full h-[65%] object-cover opacity-20"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/90 to-background" />
@@ -36,7 +36,7 @@ export function LandingHero() {
                         </div>
 
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground !leading-[1.1] mb-6">
-                            <span className="block mb-2">{t.common?.appName || 'Culina Smart'}</span>
+                            <span className="block mb-2">{t.common?.appName || 'Cacomi'}</span>
                             <span className="block bg-clip-text text-transparent bg-gradient-to-r from-primary to-amber-500 pb-1">
                                 {t.landing?.heroTitle || 'Planificación de Comidas Inteligente'}
                             </span>
@@ -87,7 +87,7 @@ export function LandingHero() {
                         <div className="relative w-full max-w-[500px] aspect-[4/5] rounded-[2.5rem] border border-border/50 shadow-2xl overflow-hidden group">
                            <img 
                                src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1000&auto=format&fit=crop" 
-                               alt="Culina Smart Cooking" 
+                               alt="Cacomi Cooking" 
                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                            />
                            {/* Overlay gradiente inferior para fundirse a negro sutilmente */}
@@ -114,3 +114,4 @@ export function LandingHero() {
         </section>
     );
 }
+

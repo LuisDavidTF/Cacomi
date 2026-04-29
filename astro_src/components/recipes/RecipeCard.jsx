@@ -38,7 +38,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const handleNavigate = () => {
     if (typeof window !== 'undefined') {
       const scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      sessionStorage.setItem('culina_feed_scroll', scrollPos.toString());
+      sessionStorage.setItem('Cacomi_feed_scroll', scrollPos.toString());
     }
   };
 
