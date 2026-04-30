@@ -16,6 +16,8 @@ Cacomi es una aplicación web moderna e inteligente para planificar comidas, ges
 - **📱 PWA** — Instalable en móvil y escritorio. Soporte offline con Service Worker y sincronización local.
 - **🌙 Modo Oscuro** — Tema claro/oscuro con persistencia de preferencia.
 - **⚡ SSR + Edge Ready** — Renderizado en servidor con Astro 6.
+- **🔄 Bucle de Descubrimiento** — Sistema de recomendaciones de recetas similares curadas inteligentemente para aumentar el engagement.
+- **💰 Monetización Premium** — Integración nativa con Google AdSense mediante contenedores de alto impacto visual.
 - **🗺️ SEO** — Sitemap dinámico, canonical URLs, Open Graph y meta tags optimizados.
 
 ---

@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ClockIcon, UserIcon, CalendarIcon, ChevronLeftIcon } from '@components/ui/Icons';
+import { ClockIcon, UserIcon, CalendarIcon, ChevronLeftIcon, HeartIcon } from '@components/ui/Icons';
 import { SmartImage } from '@components/ui/SmartImage';
 import { useSettings } from '@context/SettingsContext';
 import { RichText } from '@components/ui/RichText';
 import { CacheManager } from '@utils/cacheManager';
 import { useToast } from '@context/ToastContext';
 import { Button } from '@components/ui/Button';
+import { RecipeCard } from './RecipeCard';
+import { slugify } from '@utils/slugify';
+import { getEnv } from '@utils/env';
 
 /**
  * RecipeDetail Component
@@ -36,6 +39,20 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
             setIsLoading(false);
         }
     }, [initialRecipe, recipeId]);
+
+    // Google Ads Initialization
+    useEffect(() => {
+        const PUBLIC_ENABLE_ADS = getEnv('PUBLIC_ENABLE_ADS') || getEnv('NEXT_PUBLIC_ENABLE_ADS');
+        if (PUBLIC_ENABLE_ADS === 'true' && !isLoading && recipe) {
+            try {
+                if (typeof window !== 'undefined' && window.adsbygoogle) {
+                    (window.adsbygoogle = window.adsbygoogle || []).push({});
+                }
+            } catch (err) {
+                console.error('AdSense error in detail view:', err);
+            }
+        }
+    }, [isLoading, recipe]);
 
     if (isLoading) return <div className="p-10 text-center">{t.recipe?.loading || 'Cargando...'}</div>;
 
@@ -71,8 +88,10 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
     const prepTime = recipe.preparationTimeMinutes || 0;
     const createdAt = recipe.createdAt ? new Date(recipe.createdAt).toLocaleDateString() : null;
 
+    const PUBLIC_ENABLE_ADS = getEnv('PUBLIC_ENABLE_ADS') || getEnv('NEXT_PUBLIC_ENABLE_ADS');
+
     return (
-        <article className="max-w-6xl mx-auto pt-8 pb-8 sm:pt-12 sm:pb-12 px-4 sm:px-6 lg:px-8 min-h-screen">
+        <article className="max-w-6xl mx-auto pt-8 pb-16 sm:pt-12 sm:pb-24 px-4 sm:px-6 lg:px-8 min-h-screen space-y-12">
             <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 transition-colors duration-300 relative">
 
                 {/* Back Button - Positioned with more offset to clear sticky navbar */}
@@ -85,7 +104,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                 const isInternalHistory = window.history.state && window.history.state.index > 0;
                                 // Fallback for browsers
                                 const hasBrowserHistory = window.history.length > 2;
-                                
+
                                 if (isInternalHistory || hasBrowserHistory) {
                                     e.preventDefault();
                                     window.history.back();
@@ -158,11 +177,6 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                 </div>
 
                 {/* Main Grid: 2-column layout on Large Screens */}
-                {/* 
-                   Mobile DOM order: Description -> Ingredients -> Instructions 
-                   Desktop (lg): Description (1,1), Ingredients (2, 1 spans 2), Instructions (1,2)
-                   lg:grid-rows-[auto_1fr] ensures the Description row doesn't stretch to match the sidebar's height.
-                */}
                 <div className="p-6 md:p-10 lg:p-14 grid gap-10 lg:gap-16 lg:grid-cols-[2fr_1fr] lg:grid-rows-[auto_1fr] items-start">
 
                     {/* Column 1, Row 1: Description */}
@@ -255,6 +269,76 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                         </section>
                     </div>
 
+                </div>
+            </div>
+
+            {/* Premium Advertisement Banner (Google Ads Integrated) */}
+            {PUBLIC_ENABLE_ADS === 'true' && (
+                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-900 p-8 sm:p-12 shadow-2xl group border border-white/10 min-h-[250px] flex items-center">
+                    <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700" />
+                    <div className="absolute bottom-0 left-0 -mb-12 -ml-12 w-48 h-48 bg-black/20 rounded-full blur-2xl" />
+
+                    <div className="relative z-10 w-full grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8 items-center">
+                        <div className="text-center md:text-left space-y-3">
+                            <span className="inline-block bg-white/20 backdrop-blur-md px-4 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
+                                {t.recipe?.adSponsor || 'Patrocinado'}
+                            </span>
+                            <h3 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+                                {t.recipe?.adTitle || 'Recomendado para ti'}
+                            </h3>
+                            <p className="text-emerald-100/80 text-sm sm:text-base max-w-xs font-light">
+                                Explora servicios y productos seleccionados especialmente para complementar tu cocina.
+                            </p>
+                        </div>
+                        
+                        {/* Google AdSense Slot */}
+                        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10 flex items-center justify-center min-h-[150px]">
+                            <ins
+                                className="adsbygoogle block"
+                                style={{ display: "block", width: "100%", height: "100%", minWidth: "250px", minHeight: "100px" }}
+                                data-ad-format="fluid"
+                                data-ad-layout-key="-6t+ed+2i-1n-4w"
+                                data-ad-client="ca-pub-2928206942835905"
+                                data-ad-slot="9876543210" // Example ID for Detail View
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Similar Recipes & Discovery Loop */}
+            <div className="space-y-10">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-6">
+                    <div className="space-y-2">
+                        <h2 className="text-2xl sm:text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
+                            {t.recipe?.similarRecipes || 'Recetas Similares'}
+                        </h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base flex items-center">
+                            <HeartIcon className="w-4 h-4 mr-2 text-red-500 animate-pulse" />
+                            {t.recipe?.keepExploring || 'Sigue explorando nuevos sabores'}
+                        </p>
+                    </div>
+                    <div className="hidden sm:block">
+                        <span className="text-xs font-bold text-primary uppercase tracking-widest bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
+                            CACOMI CURATED
+                        </span>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    {recipe.similarRecipes && recipe.similarRecipes.length > 0 ? (
+                        recipe.similarRecipes.map((similar, index) => (
+                            <RecipeCard
+                                key={similar.id || index}
+                                recipe={similar}
+                                viewHref={`/recipes/${slugify(similar.name)}/${similar.id}`}
+                            />
+                        ))
+                    ) : (
+                        <div className="col-span-full py-12 text-center bg-gray-50 dark:bg-gray-800/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                            <p className="text-gray-400 italic">No hay recetas similares disponibles en este momento.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </article>

@@ -334,7 +334,12 @@ export const translations = {
             checkNet: 'Intenta conectarte a internet.',
             noInstr: 'No hay instrucciones detalladas para esta receta.',
             noIngr: 'No hay ingredientes listados.',
-            chef: 'Chef Cacomi'
+            chef: 'Chef Cacomi',
+            similarRecipes: 'Recetas Similares',
+            relatedTitle: 'También te puede gustar',
+            adTitle: 'Recomendado para ti',
+            adSponsor: 'Patrocinado',
+            keepExploring: 'No te detengas, ¡sigue explorando nuevos sabores!'
         },
 
         settings: {
@@ -757,7 +762,12 @@ export const translations = {
             checkNet: 'Try connecting to the internet.',
             noInstr: 'No detailed instructions for this recipe.',
             noIngr: 'No ingredients listed.',
-            chef: 'Chef Cacomi'
+            chef: 'Chef Cacomi',
+            similarRecipes: 'Similar Recipes',
+            relatedTitle: 'You might also love',
+            adTitle: 'Recommended for you',
+            adSponsor: 'Sponsored',
+            keepExploring: "Don't stop now, keep exploring new flavors!"
         },
 
         settings: {
@@ -1164,7 +1174,12 @@ export const translations = {
             checkNet: 'Essayez de vous connecter à internet.',
             noInstr: 'Aucune instruction détaillée pour cette recette.',
             noIngr: 'Aucun ingrédient listé.',
-            chef: 'Chef Cacomi'
+            chef: 'Chef Cacomi',
+            similarRecipes: 'Recettes Similaires',
+            relatedTitle: 'Vous pourriez aussi aimer',
+            adTitle: 'Recommandé pour vous',
+            adSponsor: 'Sponsorisé',
+            keepExploring: 'Ne vous arrêtez pas, continuez à explorer de nouvelles saveurs !'
         },
 
         settings: {
