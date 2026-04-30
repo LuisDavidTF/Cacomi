@@ -160,6 +160,8 @@ export function WeeklyPlanner() {
     const dayPillsContainerRef = useRef<HTMLDivElement>(null);
     const targetScrollDateRef = useRef<Date>(today);
     const lastClickTimeRef = useRef<number>(0);
+    const longPressTimerRef = useRef<any>(null);
+    const startPosRef = useRef({ x: 0, y: 0 });
 
     // View Mode State
     const [viewMode, setViewMode] = useState<'WEEK' | 'DAY'>('DAY');
@@ -187,9 +189,18 @@ export function WeeklyPlanner() {
 
     // Custom Pointer Drag Logic (for Mobile/Tablet)
     useEffect(() => {
-        if (!draggingRecipeData) return;
-
         const onPointerMove = (e: PointerEvent) => {
+            // Cancel long press if moved significantly
+            if (longPressTimerRef.current && !draggingRecipeData) {
+                const dist = Math.sqrt(Math.pow(e.clientX - startPosRef.current.x, 2) + Math.pow(e.clientY - startPosRef.current.y, 2));
+                if (dist > 40) { // Increased threshold to 40px to allow for natural finger movement during long press
+                    clearTimeout(longPressTimerRef.current);
+                    longPressTimerRef.current = null;
+                }
+            }
+
+            if (!draggingRecipeData) return;
+
             setDragPosition({ x: e.clientX, y: e.clientY });
             if (!isDraggingRecipe) {
                 setIsDraggingRecipe(true);
@@ -198,13 +209,14 @@ export function WeeklyPlanner() {
         };
 
         const onPointerUp = (e: PointerEvent) => {
-            if (isDraggingRecipe) {
+            if (longPressTimerRef.current) {
+                clearTimeout(longPressTimerRef.current);
+                longPressTimerRef.current = null;
+            }
+
+            if (isDraggingRecipe && draggingRecipeData) {
                 // Find drop target
                 const elements = document.elementsFromPoint(e.clientX, e.clientY);
-                const dropZone = elements.find(el => el.closest('[onDrop]')) as HTMLElement;
-                
-                // Note: manual drop handling is complex, but we can simulate a drop event
-                // Or better, identify the slot by a data attribute
                 const slot = elements.find(el => el.hasAttribute('data-slot-date')) as HTMLElement;
                 if (slot) {
                     const date = slot.getAttribute('data-slot-date')!;
@@ -219,11 +231,34 @@ export function WeeklyPlanner() {
 
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerUp);
         return () => {
             window.removeEventListener('pointermove', onPointerMove);
             window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointercancel', onPointerUp);
         };
     }, [draggingRecipeData, isDraggingRecipe]);
+
+    const handlePointerDown = (e: React.PointerEvent, recipe: any) => {
+        startPosRef.current = { x: e.clientX, y: e.clientY };
+        
+        if (e.pointerType === 'touch') {
+            // Clear any existing timer
+            if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+            
+            longPressTimerRef.current = setTimeout(() => {
+                setDraggingRecipeData(recipe);
+                setDragPosition({ x: e.clientX, y: e.clientY });
+                setIsDraggingRecipe(true);
+                setIsSidebarOpen(false);
+                if (window.navigator.vibrate) window.navigator.vibrate([60, 40, 60]); // Distinct double vibration
+                longPressTimerRef.current = null;
+            }, 1200); // 1.2s long press as requested by user
+        } else {
+            setDraggingRecipeData(recipe);
+            setDragPosition({ x: e.clientX, y: e.clientY });
+        }
+    };
 
     // Touch Drag and Drop Polyfill
     useEffect(() => {
@@ -976,11 +1011,11 @@ export function WeeklyPlanner() {
                     }
                 }}
             >
-                <div className={`absolute right-0 top-0 bottom-0 w-[min(100vw,440px)] bg-background
+                <div className={`absolute right-0 top-0 bottom-0 w-[min(100vw,600px)] bg-background
                                  flex flex-col shadow-2xl
                                  transition-all duration-500
                                  ${(isSidebarOpen && !isDraggingRecipe) ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-full opacity-0 scale-95 pointer-events-none'}`}>
-                    <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md px-6 py-5 border-b border-border/40 flex justify-between items-center">
+                    <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md px-6 py-4 border-b border-border/40 flex justify-between items-center mb-1">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 <Search className="w-4 h-4" />
@@ -1011,13 +1046,13 @@ export function WeeklyPlanner() {
                             </button>
                         </div>
                     </div>
-                    <div className="p-6 overflow-y-auto pb-28">
+                    <div className="flex-1 overflow-hidden px-4 md:px-6 pb-2">
                         <RecipeSidebar 
                             isMobile 
                             selectionMode={!!pendingMealSlot}
                             onSelectRecipe={(recipe) => handleSelectRecipeForSlot(recipe)}
                             onDragStateChange={(isDragging) => setIsDraggingRecipe(isDragging)}
-                            onPointerDown={(_, recipe) => setDraggingRecipeData(recipe)}
+                            onPointerDown={handlePointerDown}
                         />
                     </div>
                 </div>
@@ -1380,7 +1415,7 @@ export function WeeklyPlanner() {
                                 selectionMode={!!pendingMealSlot}
                                 onSelectRecipe={(recipe) => handleSelectRecipeForSlot(recipe)}
                                 onDragStateChange={(isDragging) => setIsDraggingRecipe(isDragging)}
-                                onPointerDown={(_, recipe) => setDraggingRecipeData(recipe)}
+                                onPointerDown={handlePointerDown}
                             />
                         </aside>
                     </div>

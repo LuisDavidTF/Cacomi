@@ -114,7 +114,7 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
     };
 
     return (
-        <div className={`bg-muted/20 md:bg-muted/30 border border-border/40 md:border-border/50 rounded-[2.5rem] p-8 md:p-6 space-y-10 md:space-y-8 animate-in slide-in-from-right duration-700 flex flex-col h-full max-h-[85vh] ${isMobile ? 'border-none bg-transparent p-0' : ''}`}>
+        <div className={`bg-muted/20 md:bg-muted/30 border border-border/40 md:border-border/50 rounded-[2.5rem] p-6 md:p-6 space-y-6 md:space-y-8 animate-in slide-in-from-right duration-700 flex flex-col h-full max-h-[96vh] mb-2 ${isMobile ? 'border-none bg-transparent p-0 max-h-none' : ''}`}>
             <div className="shrink-0">
                 {!isMobile && (
                     <h2 className="text-2xl md:text-xl font-black tracking-tight mb-6 flex items-center justify-between">
@@ -216,7 +216,7 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
                                 onDragEnd={handleDragEnd}
                                 onPointerDown={(e) => onPointerDown?.(e, recipe)}
                                 onClick={() => selectionMode && onSelectRecipe?.(recipe)}
-                                className={`group relative p-3 bg-background rounded-2xl border border-border/50 shadow-sm transition-all cursor-grab active:cursor-grabbing touch-none
+                                className={`group relative p-3 bg-background rounded-2xl border border-border/50 shadow-sm transition-all cursor-grab active:cursor-grabbing select-none
                                     ${selectionMode ? 'animate-shake border-primary/30 ring-2 ring-primary/5 hover:scale-[1.02] hover:border-primary cursor-pointer' : 'hover:shadow-md hover:border-primary/30'}
                                 `}
                             >
