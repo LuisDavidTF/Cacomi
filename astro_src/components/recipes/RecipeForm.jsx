@@ -151,9 +151,16 @@ export function RecipeForm({ recipeId }) {
               onChange={(e) => handlers.setFieldValue('type', e.target.value)}
               className="w-full bg-background border border-input rounded-md text-sm py-2 px-3 focus:ring-ring focus:border-ring text-foreground"
             >
-              <option value="breakfast">{t.createRecipe.breakfast}</option>
-              <option value="lunch">{t.createRecipe.lunch}</option>
-              <option value="dinner">{t.createRecipe.dinner}</option>
+              <option value="BREAKFAST">{t.recipeTypes?.BREAKFAST || 'Desayuno'}</option>
+              <option value="LUNCH">{t.recipeTypes?.LUNCH || 'Almuerzo'}</option>
+              <option value="DINNER">{t.recipeTypes?.DINNER || 'Cena'}</option>
+              <option value="MAIN_COURSE">{t.recipeTypes?.MAIN_COURSE || 'Plato Fuerte'}</option>
+              <option value="SIDE_VEGETABLE">{t.recipeTypes?.SIDE_VEGETABLE || 'Guarnición de Verduras'}</option>
+              <option value="SIDE_CARB">{t.recipeTypes?.SIDE_CARB || 'Cereales y Tubérculos'}</option>
+              <option value="LEGUME">{t.recipeTypes?.LEGUME || 'Leguminosas'}</option>
+              <option value="SNACK">{t.recipeTypes?.SNACK || 'Snack / Colación'}</option>
+              <option value="SAUCE">{t.recipeTypes?.SAUCE || 'Salsas y Aderezos'}</option>
+              <option value="SOUP">{t.recipeTypes?.SOUP || 'Sopas y Caldos'}</option>
             </select>
           </div>
           <div>

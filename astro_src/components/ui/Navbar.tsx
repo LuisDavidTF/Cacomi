@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 // Context
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
+import { NavbarSearch } from './NavbarSearch';
 
 // Icons (Lucide React)
 import {
@@ -45,6 +46,19 @@ export function Navbar() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isProfileDropdownOpen]);
+
+    // Block background scroll when mobile menu is open
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isMobileMenuOpen]);
+
     const [currentPath, setCurrentPath] = useState('');
     // Secret admin path — injected server-side into body[data-admin-path], never in JS bundle
     const [adminPath, setAdminPath] = useState('/admin/dashboard');
@@ -112,25 +126,30 @@ export function Navbar() {
 
                         {/* Center: Main Navigation (Desktop) */}
                         <div className="hidden md:flex flex-1 items-center justify-center space-x-1 lg:space-x-2">
-                            <a href="/" onClick={handleLogoClick} className={`flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <Home className="w-6 h-6" />
-                                <span className="hidden lg:inline">{t?.nav?.home || 'Inicio'}</span>
+                            <a href="/" onClick={handleLogoClick} className={`flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <Home className="w-5 lg:w-6 h-5 lg:h-6" />
+                                <span className="hidden md:inline">{t?.nav?.home || 'Inicio'}</span>
                             </a>
-                            <a href="/pantry" className={`flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/pantry') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <ShoppingBasket className="w-6 h-6" />
-                                <span className="hidden lg:inline">{t?.nav?.pantry || 'Despensa'}</span>
+                            <a href="/pantry" className={`flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/pantry') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <ShoppingBasket className="w-5 lg:w-6 h-5 lg:h-6" />
+                                <span className="hidden md:inline">{t?.nav?.pantry || 'Despensa'}</span>
                             </a>
-                            <a href="/planner" className={`flex items-center gap-2 lg:gap-3 px-4 lg:px-5 py-2 text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/planner') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <CalendarDays className="w-6 h-6" />
-                                <span className="hidden lg:inline">{t?.nav?.planner || 'Planificador'}</span>
+                            <a href="/planner" className={`flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/planner') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <CalendarDays className="w-5 lg:w-6 h-5 lg:h-6" />
+                                <span className="hidden md:inline">{t?.nav?.planner || 'Planificador'}</span>
                                 <span className="absolute -top-1.5 -right-2 flex h-5 px-2 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white uppercase tracking-tighter shadow-md border border-background scale-90 group-hover:scale-100 transition-transform">
                                     BETA
                                 </span>
                             </a>
                         </div>
+                        
+                        {/* Center: Search Bar */}
+                        <div className="hidden md:flex flex-none items-center justify-center">
+                            <NavbarSearch />
+                        </div>
 
                         {/* Right: Actions (Desktop) */}
-                        <div className="hidden md:flex flex-1 items-center justify-end space-x-2 lg:space-x-3">
+                        <div className="hidden md:flex flex-none lg:flex-1 items-center justify-end space-x-2 lg:space-x-3">
                             {isAuthenticated ? (
                                 <>
                                     <a
@@ -294,14 +313,16 @@ export function Navbar() {
                     />
                 </a>
                 
-                <div className="flex items-center justify-end w-8">
+                <div className="flex items-center justify-end w-auto min-w-[80px] gap-1">
                     {!isAuthenticated && (
-                        <a href="/settings" className="p-2 -mr-2 text-muted-foreground hover:bg-muted rounded-full transition-colors" aria-label="Ajustes">
+                        <a href="/settings" className="p-2 text-muted-foreground hover:bg-muted rounded-full transition-colors" aria-label="Ajustes">
                             <Settings className="w-5 h-5" />
                         </a>
                     )}
+                    <NavbarSearch isMobile={true} />
                 </div>
             </header>
+
 
             {/* Mobile Bottom Navigation Bar */}
             <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border/50 md:hidden pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
@@ -327,17 +348,11 @@ export function Navbar() {
                         </div>
                     ) : (
                         <a 
-                            href="#" 
-                            onClick={(e) => e.preventDefault()}
-                            className="relative flex flex-1 flex-col items-center justify-center gap-1 opacity-60 cursor-not-allowed pointer-events-none"
+                            href="/planner" 
+                            className={`flex flex-1 flex-col items-center justify-center gap-1 ${getIsActive('/planner') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                         >
-                            <div className="flex flex-col items-center justify-center gap-1">
-                                <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
-                                <span className="text-[10px] font-medium leading-none whitespace-nowrap uppercase text-muted-foreground">{t?.nav?.plan || 'Plan'}</span>
-                            </div>
-                            <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-muted text-muted-foreground text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border border-border backdrop-blur-md shadow-sm whitespace-nowrap tracking-widest z-[60]">
-                                {t?.nav?.soon || t?.nav?.comingSoon || 'Soon'}
-                            </span>
+                            <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7" />
+                            <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.plan || 'Plan'}</span>
                         </a>
                     )}
 

@@ -11,7 +11,10 @@ import {
     Target,
     Activity,
     Wallet,
-    Info
+    Info,
+    AlertCircle,
+    CheckCircle2,
+    RotateCcw
 } from 'lucide-react';
 import { useSettings } from '@context/SettingsContext';
 import { useAuth } from '@context/AuthContext';
@@ -21,7 +24,11 @@ import { MealTrackingModal, type MealTrackingData } from './MealTrackingModal';
 import { WeeklyCheckinModal } from './WeeklyCheckinModal';
 import { PlannerDay } from './PlannerDay';
 import { NutritionalSummary } from './NutritionalSummary';
+import { Modal } from '../ui/Modal';
+import { Button } from '../ui/Button';
 import type { PlanResponse, Meal, GroupedMeals } from '@/types/planner';
+import { db } from '@/lib/db';
+import { generateUUIDv7 } from '@/lib/utils';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -133,7 +140,23 @@ export function WeeklyPlanner() {
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [pendingMealSlot, setPendingMealSlot] = useState<{ date: string, type: string } | null>(null);
+    const [isDraggingRecipe, setIsDraggingRecipe] = useState(false);
+    const [draggingRecipeData, setDraggingRecipeData] = useState<any | null>(null);
+    const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    // Block background scroll when sidebar is open
+    useEffect(() => {
+        if (isSidebarOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isSidebarOpen]);
     const dayPillsContainerRef = useRef<HTMLDivElement>(null);
     const targetScrollDateRef = useRef<Date>(today);
     const lastClickTimeRef = useRef<number>(0);
@@ -152,35 +175,328 @@ export function WeeklyPlanner() {
     const [showConsentModal, setShowConsentModal] = useState(false);
     const [consentGiven, setConsentGiven] = useState(false);
     const [totalSpent, setTotalSpent] = useState(0);
+    const [notification, setNotification] = useState<{ 
+        title: string; 
+        message: string; 
+        type: 'info' | 'error' | 'success' | 'warning';
+        btnText?: string;
+    } | null>(null);
 
+    const [hasLocalChanges, setHasLocalChanges] = useState(false);
+    const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+
+    // Custom Pointer Drag Logic (for Mobile/Tablet)
     useEffect(() => {
-        if (planData?.meals) {
-            const total = planData.meals.reduce((sum, meal) => sum + (meal.estimatedCost || 0), 0);
-            setTotalSpent(total);
+        if (!draggingRecipeData) return;
+
+        const onPointerMove = (e: PointerEvent) => {
+            setDragPosition({ x: e.clientX, y: e.clientY });
+            if (!isDraggingRecipe) {
+                setIsDraggingRecipe(true);
+                setIsSidebarOpen(false);
+            }
+        };
+
+        const onPointerUp = (e: PointerEvent) => {
+            if (isDraggingRecipe) {
+                // Find drop target
+                const elements = document.elementsFromPoint(e.clientX, e.clientY);
+                const dropZone = elements.find(el => el.closest('[onDrop]')) as HTMLElement;
+                
+                // Note: manual drop handling is complex, but we can simulate a drop event
+                // Or better, identify the slot by a data attribute
+                const slot = elements.find(el => el.hasAttribute('data-slot-date')) as HTMLElement;
+                if (slot) {
+                    const date = slot.getAttribute('data-slot-date')!;
+                    const type = slot.getAttribute('data-slot-type')!;
+                    const id = slot.getAttribute('data-slot-id') || undefined;
+                    handleSelectRecipeForSlot(draggingRecipeData, date, type, id);
+                }
+            }
+            setDraggingRecipeData(null);
+            setIsDraggingRecipe(false);
+        };
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        return () => {
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+        };
+    }, [draggingRecipeData, isDraggingRecipe]);
+
+    // Touch Drag and Drop Polyfill
+    useEffect(() => {
+        const handleTouchStart = (e: TouchEvent) => {
+            const draggable = (e.target as HTMLElement).closest('[draggable="true"]');
+            if (!draggable) return;
+
+            // We don't want to prevent default for all touches, only for drag candidates
+            // But we need to handle the drag manually on touch
+        };
+
+        // Note: For simplicity and reliability without a full library, 
+        // we'll rely on the "Selection Mode" as the primary touch path, 
+        // but we'll improve the Selection Mode to handle the "notch" click as a "drag-like" experience.
+        // However, to satisfy the specific request of "allowing dragging from notch",
+        // we'll add a simple pointer-based ghosting if we detect a drag-like movement.
+    }, []);
+
+    const handleSelectRecipeForSlot = async (recipe: any, date?: string, type?: string, mealIdToReplace?: string) => {
+        const targetDate = date || pendingMealSlot?.date;
+        const targetType = type || pendingMealSlot?.type;
+
+        if (!targetDate || !targetType) return;
+
+        // Determine if we should replace an existing meal
+        let idToUpdate = mealIdToReplace;
+        
+        // If no explicit ID to replace, check if the slot is a main meal and already occupied
+        if (!idToUpdate && ['BREAKFAST', 'LUNCH', 'DINNER'].includes(targetType.toUpperCase())) {
+            const existingMainMeal = await db.plannedMeals
+                .where({ mealDate: targetDate, mealType: targetType.toUpperCase() })
+                .filter(m => m.isDeleted === 0)
+                .first();
+            if (existingMainMeal) idToUpdate = existingMainMeal.id;
         }
+
+        try {
+            if (idToUpdate) {
+                // UPDATE existing meal
+                await db.plannedMeals.update(idToUpdate, {
+                    recipeUUID: recipe.publicId || recipe.id,
+                    recipeName: recipe.name,
+                    imageUrl: recipe.imageUrl,
+                    proteinGrams: recipe.proteinGrams || 0,
+                    calories: recipe.calories || 0,
+                    estimatedCost: recipe.estimatedCost || 0,
+                    isSynced: 0,
+                    isDeleted: 0
+                });
+            } else {
+                // ADD new meal
+                const newMeal = {
+                    id: generateUUIDv7(),
+                    planId: planData?.planId || null,
+                    recipeUUID: recipe.publicId || recipe.id,
+                    recipeName: recipe.name,
+                    imageUrl: recipe.imageUrl,
+                    mealDate: targetDate,
+                    mealType: targetType.toUpperCase() as any,
+                    portionMultiplier: 1.0,
+                    proteinGrams: recipe.proteinGrams || 0,
+                    calories: recipe.calories || 0,
+                    estimatedCost: recipe.estimatedCost || 0,
+                    pantryUsage: 0,
+                    selectionLogicCode: 'PROTEIN_FILL' as any,
+                    aiReasoning: 'Manual addition',
+                    isSynced: 0,
+                    isDeleted: 0,
+                    isNew: 1
+                };
+                await db.plannedMeals.add(newMeal);
+            }
+            
+            // Reconstruct plan data with the changes
+            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            
+            setPlanData(prev => {
+                if (!prev) return null;
+                return {
+                    ...prev,
+                    meals: allMeals
+                };
+            });
+
+            setPendingMealSlot(null);
+            setIsSidebarOpen(false);
+
+            setNotification({
+                title: idToUpdate 
+                    ? (language === 'es' ? '¡Receta Sustituida!' : 'Recipe Replaced!') 
+                    : (language === 'es' ? '¡Receta Añadida!' : 'Recipe Added!'),
+                message: language === 'es' ? `Se actualizó con "${recipe.name}".` : `Updated with "${recipe.name}".`,
+                type: 'success'
+            });
+        } catch (err) {
+            console.error("Error managing meal:", err);
+        }
+    };
+    
+    const handleDeleteMeal = async (mealId: string) => {
+        try {
+            const meal = await db.plannedMeals.get(mealId);
+            if (!meal) return;
+
+            if (meal.isNew === 1) {
+                // Manual addition -> Permanent delete
+                await db.plannedMeals.delete(mealId);
+            } else {
+                // Original recipe -> Soft delete
+                await db.plannedMeals.update(mealId, { isDeleted: 1, isSynced: 0 });
+            }
+            
+            // Update local state
+            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            setPlanData(prev => prev ? { ...prev, meals: allMeals } : null);
+            
+            setNotification({
+                title: language === 'es' ? 'Receta Quitada' : 'Recipe Removed',
+                message: language === 'es' ? 'Se ha eliminado la receta del plan.' : 'The recipe has been removed from the plan.',
+                type: 'info'
+            });
+        } catch (err) {
+            console.error("Error deleting meal:", err);
+        }
+    };
+
+    // Detect local changes
+    useEffect(() => {
+        const checkLocalChanges = async () => {
+            if (!planData?.planId) return;
+            const changes = await db.plannedMeals
+                .where('planId').equals(planData.planId)
+                .filter(m => m.isSynced === 0 || m.isDeleted === 1)
+                .count();
+            setHasLocalChanges(changes > 0);
+        };
+        checkLocalChanges();
     }, [planData]);
 
-    const fetchPlan = async () => {
+    const handleRestorePlan = () => {
+        setShowRestoreConfirm(true);
+    };
+
+    const confirmRestorePlan = async () => {
+        try {
+            setShowRestoreConfirm(false);
+            setIsGenerating(true); // Show loading state
+            
+            // 1. Restore deleted meals by setting isDeleted: 0 and isSynced: 1 
+            const modified = await db.plannedMeals
+                .where('planId').equals(planData?.planId || 0)
+                .filter(m => m.isDeleted === 1 || m.isSynced === 0)
+                .toArray();
+            
+            for (const m of modified) {
+                await db.plannedMeals.update(m.id, { isDeleted: 0, isSynced: 1 });
+            }
+
+            // 2. Force re-fetch (this will handle clearing manual additions)
+            await fetchPlan(true);
+            
+            setNotification({
+                title: language === 'es' ? 'Plan Restaurado' : 'Plan Restored',
+                message: language === 'es' ? 'Se ha recuperado la versión original del servidor.' : 'The original server version has been recovered.',
+                type: 'success'
+            });
+        } catch (err) {
+            console.error("Error restoring plan:", err);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const fetchPlan = async (force: boolean = false) => {
         try {
             const response = await fetch('/api/proxy/planner');
             if (response.ok) {
-                const data = await response.json();
+                const data: PlanResponse = await response.json();
+                
+                // 1. Save metadata separately
+                const { meals, ...metadata } = data;
+                await db.planMetadata.put({
+                    ...metadata,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                // 2. Save individual meals
+                // We overwrite existing meals for this plan if they are already synced or if force is true
+                for (const meal of meals) {
+                    const existing = await db.plannedMeals
+                        .filter(m => m.logId === meal.logId || (m.planId === data.planId && m.mealDate === meal.mealDate && m.mealType === meal.mealType))
+                        .first();
+
+                    if (existing) {
+                        // Only overwrite if it hasn't been modified locally (isSynced === 1) OR if force is true
+                        if (existing.isSynced === 1 || force) {
+                            await db.plannedMeals.update(existing.id, {
+                                ...meal,
+                                planId: data.planId,
+                                isSynced: 1,
+                                isDeleted: 0
+                            });
+                        }
+                    } else {
+                        // New meal from backend
+                        await db.plannedMeals.add({
+                            ...meal,
+                            id: generateUUIDv7(),
+                            planId: data.planId,
+                            isSynced: 1,
+                            isDeleted: 0,
+                            isNew: 0
+                        });
+                    }
+                }
+                
+                // 3. Final cleanup: reset deletion flags for any meal that is in the backend response
+                // but marked as deleted locally
+                if (force) {
+                    // Manual additions are PRESERVED as per user preference
+                }
+                
+                // Update state
+                const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                const reconstructedPlan: PlanResponse = {
+                    ...metadata,
+                    meals: allMeals
+                };
+
                 setPlanData(prev => {
                     if (prev?.status === 'GENERATING' && data.status === 'COMPLETED') {
-                        setTimeout(() => alert(language === 'es' ? '¡Tu plan de comidas inteligente está listo!' : 'Your smart meal plan is ready!'), 500);
+                        setTimeout(() => {
+                            setNotification({
+                                title: language === 'es' ? '¡Plan Listo!' : 'Plan Ready!',
+                                message: language === 'es' ? '¡Tu plan de comidas inteligente está listo!' : 'Your smart meal plan is ready!',
+                                type: 'success'
+                            });
+                        }, 500);
                     }
-                    return data;
+                    return reconstructedPlan;
                 });
             } else {
                 console.error('Failed to fetch plan:', response.status);
+                await fallbackToLocal();
             }
         } catch (err) {
             console.error('Error fetching plan:', err);
+            await fallbackToLocal();
+        }
+    };
+
+    const fallbackToLocal = async () => {
+        const allMetadata = await db.planMetadata.toArray();
+        if (allMetadata.length > 0) {
+            const latestMetadata = allMetadata.sort((a, b) => b.planId - a.planId)[0];
+            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            
+            setPlanData({
+                ...latestMetadata,
+                meals: allMeals
+            } as PlanResponse);
         }
     };
 
     useEffect(() => {
-        fetchPlan();
+        const bootstrap = async () => {
+            // Initial fast load from local DB
+            await fallbackToLocal();
+            // Refresh from backend
+            fetchPlan();
+        };
+
+        bootstrap();
         const hasSeenPlannerGuide = document.cookie.includes('seen_planner_guide=true');
         if (!hasSeenPlannerGuide) setShowOnboarding(true);
     }, []);
@@ -377,15 +693,27 @@ export function WeeklyPlanner() {
             
             if (response.status === 409) {
                 if (data.message?.includes('coins')) {
-                    alert(language === 'es' 
-                        ? 'Ya generaste tu menú para esta semana o utilizaste tus coins Cacomi para generar recetas con IA y no tienes suficientes para el plan.' 
-                        : 'You have already generated your menu for this week or used your Cacomi coins to generate recipes with AI and do not have enough left for the plan.');
+                    setNotification({
+                        title: language === 'es' ? 'Límite de Generación' : 'Generation Limit',
+                        message: language === 'es' 
+                            ? 'Ya generaste tu menú para esta semana o utilizaste tus Cacomi coins para generar recetas con IA y no tienes suficientes para el plan.' 
+                            : 'You have already generated your menu for this week or used your Cacomi coins to generate recipes with AI and do not have enough left for the plan.',
+                        type: 'warning'
+                    });
                 } else if (data.message?.includes('metas')) {
-                    alert(language === 'es' 
-                        ? 'Aún no completas tu información nutricional o perfil. (Próximamente: Formulario de perfil)' 
-                        : 'You have not yet completed your nutritional information or profile. (Coming soon: Profile form)');
+                    setNotification({
+                        title: language === 'es' ? 'Perfil Incompleto' : 'Incomplete Profile',
+                        message: language === 'es' 
+                            ? 'Aún no completas tu información nutricional o perfil. (Próximamente: Formulario de perfil)' 
+                            : 'You have not yet completed your nutritional information or profile. (Coming soon: Profile form)',
+                        type: 'info'
+                    });
                 } else {
-                    alert(data.message || 'Error de conflicto al solicitar la generación del plan.');
+                    setNotification({
+                        title: 'Error',
+                        message: data.message || 'Error de conflicto al solicitar la generación del plan.',
+                        type: 'error'
+                    });
                 }
                 return;
             }
@@ -394,7 +722,11 @@ export function WeeklyPlanner() {
             await fetchPlan();
         } catch (error) {
             console.error("Error generating plan:", error);
-            alert("Error de conexión al solicitar el plan.");
+            setNotification({
+                title: 'Error',
+                message: language === 'es' ? "Error de conexión al solicitar el plan." : "Connection error while requesting plan.",
+                type: 'error'
+            });
         } finally {
             setIsGenerating(false);
         }
@@ -538,6 +870,85 @@ export function WeeklyPlanner() {
                 </div>
             )}
 
+            {/* ── NOTIFICATION MODAL ── */}
+            {notification && (
+                <div 
+                    className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in"
+                    onClick={() => setNotification(null)}
+                >
+                    <div 
+                        className="bg-background border border-border/50 shadow-2xl rounded-3xl p-8 max-w-md w-full relative animate-in zoom-in-95 duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 
+                            ${notification.type === 'error' ? 'bg-destructive/10 text-destructive' : 
+                              notification.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' : 
+                              notification.type === 'warning' ? 'bg-amber-500/10 text-amber-500' : 
+                              'bg-primary/10 text-primary'}`}
+                        >
+                            {notification.type === 'error' && <AlertCircle className="w-7 h-7" />}
+                            {notification.type === 'success' && <CheckCircle2 className="w-7 h-7" />}
+                            {notification.type === 'warning' && <AlertCircle className="w-7 h-7" />}
+                            {notification.type === 'info' && <Info className="w-7 h-7" />}
+                        </div>
+                        
+                        <h2 className="text-2xl font-bold mb-3">{notification.title}</h2>
+                        <p className="text-muted-foreground leading-relaxed mb-8 whitespace-pre-wrap">
+                            {notification.message}
+                        </p>
+                        
+                        <button
+                            onClick={() => setNotification(null)}
+                            className={`w-full py-3.5 rounded-full font-bold active:scale-[0.98] transition-all shadow-lg 
+                                ${notification.type === 'error' ? 'bg-destructive text-destructive-foreground shadow-destructive/25' : 
+                                  notification.type === 'success' ? 'bg-emerald-600 text-white shadow-emerald-600/25' : 
+                                  'bg-primary text-primary-foreground shadow-primary/25'}`}
+                        >
+                            {notification.btnText || (language === 'es' ? 'Entendido' : 'Got it')}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Confirmation Modal for Restore ── */}
+            <Modal
+                isOpen={showRestoreConfirm}
+                onClose={() => setShowRestoreConfirm(false)}
+                title={language === 'es' ? 'Recuperar Plan Original' : 'Recover Original Plan'}
+            >
+                <div className="flex flex-col gap-6">
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-primary/10 border border-primary/20">
+                        <Info className="w-6 h-6 text-primary shrink-0 mt-1" />
+                        <div className="flex flex-col gap-1">
+                            <p className="text-sm font-bold text-primary uppercase tracking-wider">
+                                {language === 'es' ? 'Recuperar recetas' : 'Recover recipes'}
+                            </p>
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                                {language === 'es' 
+                                    ? 'Esta acción volverá a mostrar todas las recetas originales generadas por la IA que hayas quitado. Tus recetas añadidas manualmente se mantendrán intactas.'
+                                    : 'This action will show all original AI-generated recipes you removed. Your manually added recipes will remain intact.'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                        <Button 
+                            onClick={confirmRestorePlan}
+                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground border-none h-12 text-sm font-black uppercase tracking-widest"
+                        >
+                            {language === 'es' ? 'Sí, recuperar originales' : 'Yes, recover originals'}
+                        </Button>
+                        <Button 
+                            variant="outline"
+                            onClick={() => setShowRestoreConfirm(false)}
+                            className="w-full h-12 text-sm font-bold opacity-60 hover:opacity-100"
+                        >
+                            {language === 'es' ? 'Cancelar' : 'Cancel'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+
             {/* ── NOTCH ── */}
             <button
                 onClick={() => setIsSidebarOpen(true)}
@@ -556,26 +967,58 @@ export function WeeklyPlanner() {
             {/* ── SIDEBAR DRAWER ── */}
             <div
                 className={`fixed inset-0 z-[70] transition-all duration-300 xl:hidden
-                            ${isSidebarOpen ? 'bg-black/50 backdrop-blur-sm pointer-events-auto' : 'bg-transparent pointer-events-none'}`}
-                onClick={(e) => e.target === e.currentTarget && setIsSidebarOpen(false)}
+                            ${isSidebarOpen ? (isDraggingRecipe ? 'bg-transparent' : 'bg-black/50 backdrop-blur-sm') : 'bg-transparent'} 
+                            ${isSidebarOpen && !isDraggingRecipe ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                        setIsSidebarOpen(false);
+                        setPendingMealSlot(null);
+                    }
+                }}
             >
                 <div className={`absolute right-0 top-0 bottom-0 w-[min(100vw,440px)] bg-background
                                  flex flex-col shadow-2xl
-                                 transition-transform duration-300
-                                 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                                 transition-all duration-500
+                                 ${(isSidebarOpen && !isDraggingRecipe) ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-full opacity-0 scale-95 pointer-events-none'}`}>
                     <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md px-6 py-5 border-b border-border/40 flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 <Search className="w-4 h-4" />
                             </div>
-                            <h2 className="text-sm font-bold uppercase tracking-widest">{t.planner?.exploreRecipes}</h2>
+                            <div>
+                                <h2 className="text-sm font-bold uppercase tracking-widest">{t.planner?.exploreRecipes}</h2>
+                                {pendingMealSlot && (
+                                    <p className="text-[10px] font-black uppercase text-primary tracking-widest mt-1 animate-pulse">
+                                        {language === 'es' ? 'Seleccionando para' : 'Selecting for'} {pendingMealSlot.type}
+                                    </p>
+                                )}
+                            </div>
                         </div>
-                        <button onClick={() => setIsSidebarOpen(false)} className="p-2 bg-muted/60 rounded-xl hover:bg-muted transition-colors">
-                            <X className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {pendingMealSlot && (
+                                <button 
+                                    onClick={() => {
+                                        setPendingMealSlot(null);
+                                        setIsSidebarOpen(false);
+                                    }}
+                                    className="px-3 py-1.5 bg-muted text-muted-foreground hover:text-foreground rounded-lg text-[10px] font-bold transition-colors"
+                                >
+                                    {language === 'es' ? 'Cancelar' : 'Cancel'}
+                                </button>
+                            )}
+                            <button onClick={() => { setIsSidebarOpen(false); setPendingMealSlot(null); }} className="p-2 bg-muted/60 rounded-xl hover:bg-muted transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                     <div className="p-6 overflow-y-auto pb-28">
-                        <RecipeSidebar isMobile />
+                        <RecipeSidebar 
+                            isMobile 
+                            selectionMode={!!pendingMealSlot}
+                            onSelectRecipe={(recipe) => handleSelectRecipeForSlot(recipe)}
+                            onDragStateChange={(isDragging) => setIsDraggingRecipe(isDragging)}
+                            onPointerDown={(_, recipe) => setDraggingRecipeData(recipe)}
+                        />
                     </div>
                 </div>
             </div>
@@ -784,14 +1227,29 @@ export function WeeklyPlanner() {
                             </button>
                         </div>
 
+                        {/* Restore button */}
+                        {hasLocalChanges && (
+                            <button
+                                onClick={handleRestorePlan}
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-full
+                                           border border-amber-500/40 bg-amber-500/5 text-amber-600 dark:text-amber-400
+                                           text-sm font-bold shrink-0
+                                           hover:bg-amber-500/10 hover:border-amber-500/60
+                                           active:scale-95 transition-all shadow-sm ml-auto"
+                            >
+                                <RotateCcw className="w-4 h-4" />
+                                {language === 'es' ? 'Restaurar' : 'Restore'}
+                            </button>
+                        )}
+
                         {/* Today button */}
                         <button
                             onClick={() => scrollToDate(today, 'auto')}
-                            className="flex items-center gap-1.5 px-4 py-2 rounded-full
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full
                                        border border-primary/40 bg-primary/5 text-primary
                                        text-sm font-bold shrink-0
                                        hover:bg-primary/10 hover:border-primary/60
-                                       active:scale-95 transition-all shadow-sm ml-auto xl:mr-[360px]"
+                                       active:scale-95 transition-all shadow-sm ${hasLocalChanges ? 'ml-0' : 'ml-auto'} xl:mr-[360px]`}
                         >
                             {t.planner?.today || 'Hoy'}
                         </button>
@@ -865,7 +1323,19 @@ export function WeeklyPlanner() {
                                     meals={groupedMeals[formatDateToString(date)] || []}
                                     isEditable={isDayEditable(date)}
                                     onMealClick={(md) => setSelectedMeal(md)}
-                                    onAddMeal={() => setIsSidebarOpen(true)}
+                                    onAddMeal={(type) => {
+                                        const slotDate = formatDateToString(date);
+                                        if (pendingMealSlot?.date === slotDate && pendingMealSlot?.type === type) {
+                                            setPendingMealSlot(null);
+                                            setIsSidebarOpen(false);
+                                        } else {
+                                            setPendingMealSlot({ date: slotDate, type });
+                                            setIsSidebarOpen(true);
+                                        }
+                                    }}
+                                    onDropRecipe={(recipe, type, mealId) => handleSelectRecipeForSlot(recipe, formatDateToString(date), type, mealId)}
+                                    onDeleteMeal={handleDeleteMeal}
+                                    pendingMealSlot={pendingMealSlot}
                                     viewMode={viewMode}
                                 />
                             ))}
@@ -883,7 +1353,19 @@ export function WeeklyPlanner() {
                                         meals={groupedMeals[formatDateToString(activeDate)] || []}
                                         isEditable={isDayEditable(activeDate)}
                                         onMealClick={(md) => setSelectedMeal(md)}
-                                        onAddMeal={() => setIsSidebarOpen(true)}
+                                        onAddMeal={(type) => {
+                                            const slotDate = formatDateToString(activeDate);
+                                            if (pendingMealSlot?.date === slotDate && pendingMealSlot?.type === type) {
+                                                setPendingMealSlot(null);
+                                                setIsSidebarOpen(false);
+                                            } else {
+                                                setPendingMealSlot({ date: slotDate, type });
+                                                setIsSidebarOpen(true);
+                                            }
+                                        }}
+                                        onDropRecipe={(recipe, type, mealId) => handleSelectRecipeForSlot(recipe, formatDateToString(activeDate), type, mealId)}
+                                        onDeleteMeal={handleDeleteMeal}
+                                        pendingMealSlot={pendingMealSlot}
                                         viewMode={viewMode}
                                     />
                                 );
@@ -892,19 +1374,35 @@ export function WeeklyPlanner() {
                     )}
                         </div>
                         
-                        {/* ─── Sidebar (xl+) ─── */}
+                         {/* ─── Sidebar (xl+) ─── */}
                         <aside className="hidden xl:flex flex-col w-[300px] 2xl:w-[340px] shrink-0 sticky top-24">
-                            <RecipeSidebar />
+                            <RecipeSidebar 
+                                selectionMode={!!pendingMealSlot}
+                                onSelectRecipe={(recipe) => handleSelectRecipeForSlot(recipe)}
+                                onDragStateChange={(isDragging) => setIsDraggingRecipe(isDragging)}
+                                onPointerDown={(_, recipe) => setDraggingRecipeData(recipe)}
+                            />
                         </aside>
                     </div>
                 </div>
 
-                <button
-                    onClick={() => setIsCheckinOpen(true)}
-                    className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 p-4 bg-foreground text-background rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-transform"
-                >
-                    <Sparkles className="w-6 h-6" />
-                </button>
+
+                {/* Drag Ghost Card */}
+                {draggingRecipeData && isDraggingRecipe && (
+                    <div 
+                        className="fixed z-[9999] pointer-events-none w-32 aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-2 border-primary ring-4 ring-primary/20"
+                        style={{ 
+                            left: dragPosition.x, 
+                            top: dragPosition.y,
+                            transform: 'translate(-50%, -50%) scale(1.1)',
+                        }}
+                    >
+                        <img src={draggingRecipeData.imageUrl || draggingRecipeData.image} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-2 text-center">
+                            <span className="text-[10px] font-bold text-white line-clamp-2">{draggingRecipeData.name}</span>
+                        </div>
+                    </div>
+                )}
 
             <style dangerouslySetInnerHTML={{ __html: `
                 .scrollbar-hide::-webkit-scrollbar { display: none; }

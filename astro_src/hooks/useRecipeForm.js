@@ -12,7 +12,7 @@ const INITIAL_STATE = {
   imageUrl: '',
   ingredients: [{ name: '', quantity: '', unit_of_measure: '' }],
   instructions: [''], // Default to Array<String>
-  type: 'lunch',
+  type: 'LUNCH',
   visibility: 'public',
 };
 
@@ -78,7 +78,7 @@ export function useRecipeForm(recipeId) {
             unit_of_measure: ing.unitOfMeasure || ing.unit_of_measure || '',
           })) || [{ name: '', quantity: '', unit_of_measure: '' }],
           instructions: Array.isArray(recipe.instructions) ? recipe.instructions : Object.values(recipe.instructions || {}),
-          type: recipe.type || 'lunch',
+          type: recipe.type || 'LUNCH',
           visibility: recipe.visibility || 'public',
         };
 

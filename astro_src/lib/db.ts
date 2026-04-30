@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
+import type { PlanResponse, Meal } from '@/types/planner';
 
 export interface LocalPantryItem {
     id: string; // React String UUIDv7
@@ -13,16 +14,32 @@ export interface LocalPantryItem {
     isNew: number; // 0 or 1
 }
 
+export interface LocalPlannedMeal extends Meal {
+    id: string; // Local UUIDv7
+    planId?: number | null;
+    isSynced: number; // 0 or 1
+    isDeleted: number; // 0 or 1
+    isNew: number; // 0 or 1
+}
+
+export interface LocalPlanMetadata extends Omit<PlanResponse, 'meals'> {
+    lastUpdated: string;
+}
+
 export type { LocalPantryItem as PantryItemType };
 
 // Extend Dexie class to handle typescript properly for specific tables
 const db = new Dexie('CacomiPlannerDB_v2') as Dexie & {
     pantryItems: EntityTable<LocalPantryItem, 'id'>;
+    plannedMeals: EntityTable<LocalPlannedMeal, 'id'>;
+    planMetadata: EntityTable<LocalPlanMetadata, 'planId'>;
 };
 
 // Schema registration
-db.version(3).stores({
-    pantryItems: 'id, ingredientId, isSynced, isDeleted'
+db.version(5).stores({
+    pantryItems: 'id, ingredientId, isSynced, isDeleted',
+    plannedMeals: 'id, planId, mealDate, mealType, isSynced, isDeleted',
+    planMetadata: 'planId'
 });
 
 export { db };

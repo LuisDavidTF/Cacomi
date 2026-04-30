@@ -32,6 +32,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const prepTime = recipe.preparationTimeMinutes || 0;
   const authorName = recipe.authorName || recipe.user?.name || 'Chef Anónimo';
   const type = recipe.type || 'General';
+  const translatedType = t.recipeTypes?.[type.toUpperCase()] || type;
 
   const [imgSrc, setImgSrc] = useState(imageUrl);
 
@@ -63,7 +64,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
         {/* Floating Badges */}
         <div className="absolute top-3 right-3 z-10">
           <span className="bg-white/95 backdrop-blur-md text-emerald-800 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-wider">
-            {type}
+            {translatedType}
           </span>
         </div>
 

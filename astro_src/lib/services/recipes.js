@@ -6,16 +6,34 @@ export const RecipeService = {
         if (params.cursor) searchParams.append('cursor', params.cursor);
         if (params.limit) searchParams.append('limit', params.limit);
 
-        // Explicitly handle "search" or other legacy params if needed, 
-        // but the API docs only mention cursor and limit for GET /recipes without search?
-        // Checking docs... getRecipes only lists cursor and limit.
-        // However, if there was filter logic, it might be separate. 
-        // For now, we stick to the docs provided.
-
         const queryString = searchParams.toString();
         const endpoint = queryString ? `/recipes?${queryString}` : '/recipes';
 
         return ApiService.request(endpoint, {
+            method: 'GET',
+            ...fetchOptions,
+        });
+    },
+
+    searchByName: async (name, page = 0, size = 10, fetchOptions = {}) => {
+        const searchParams = new URLSearchParams();
+        searchParams.append('name', name);
+        searchParams.append('page', page);
+        searchParams.append('size', size);
+        
+        return ApiService.request(`/recipes/search/name?${searchParams.toString()}`, {
+            method: 'GET',
+            ...fetchOptions,
+        });
+    },
+
+    searchByCategory: async (category, page = 0, size = 10, fetchOptions = {}) => {
+        const searchParams = new URLSearchParams();
+        searchParams.append('category', category);
+        searchParams.append('page', page);
+        searchParams.append('size', size);
+        
+        return ApiService.request(`/recipes/search/category?${searchParams.toString()}`, {
             method: 'GET',
             ...fetchOptions,
         });

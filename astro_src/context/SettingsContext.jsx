@@ -5,6 +5,18 @@ import { create } from 'zustand';
 
 export const translations = {
     es: {
+        recipeTypes: {
+            BREAKFAST: 'Desayuno',
+            LUNCH: 'Almuerzo',
+            DINNER: 'Cena',
+            MAIN_COURSE: 'Plato Fuerte',
+            SIDE_VEGETABLE: 'Guarnición de Verduras',
+            SIDE_CARB: 'Cereales y Tubérculos',
+            LEGUME: 'Leguminosas',
+            SNACK: 'Snack / Colación',
+            SAUCE: 'Salsas y Aderezos',
+            SOUP: 'Sopas y Caldos'
+        },
         about: {
             title: 'Acerca de Cacomi',
             desc: 'Conoce la misión, los valores y el futuro de Cacomi, tu asistente de cocina con Inteligencia Artificial.',
@@ -165,8 +177,8 @@ export const translations = {
 
         announcement: {
             newUpdate: 'Nueva Actualización',
-            title: '¡El Planificador Inteligente ya está aquí!',
-            desc: 'La funcionalidad más esperada ha llegado. Ahora puedes organizar tu semana, generar menús con IA y llevar un control nutricional de tus platos. Explora la pestaña de Planificador para comenzar.',
+            title: '¡Planificador Universal Interactivo!',
+            desc: 'La planificación definitiva ha llegado. Gestiona tu semana con el nuevo sistema de arrastrar y soltar (DND) optimizado para móviles y tablets. Sustituye recetas, añade snacks y guarda todo localmente para usarlo sin conexión.',
             btn: '¡Probar Planificador!',
             ariaClose: 'Cerrar anuncio'
         },
@@ -175,11 +187,11 @@ export const translations = {
             aiTitle: 'Recetas con IA',
             aiDesc: 'Nuestra inteligencia artificial analiza tus ingredientes disponibles para sugerirte recetas deliciosas y evitar el desperdicio de alimentos.',
             pantryTitle: 'Gestión de Despensa',
-            pantryDesc: 'Mantén un inventario digital de tu cocina. Recibe alertas de caducidad y sabe siempre qué tienes a mano.',
+            pantryDesc: 'Mantén un inventario digital de tu cocina con persistencia local. Recibe alertas de caducidad y sabe siempre qué tienes a mano.',
             communityTitle: 'Comunidad Activa',
             communityDesc: 'Comparte tus propias creaciones culinarias y descubre recetas de chefs caseros de todo el mundo.',
-            planningTitle: 'Planificación Semanal',
-            planningDesc: 'Organiza tus menús semanales con facilidad y genera listas de compras automáticas.'
+            planningTitle: 'Planificador Interactivo',
+            planningDesc: 'Organiza tus menús semanales con drag-and-drop universal. Sustituye comidas, añade snacks y gestiona todo offline.'
         },
 
         cookie: {
@@ -444,6 +456,18 @@ export const translations = {
         }
     },
     en: {
+        recipeTypes: {
+            BREAKFAST: 'Breakfast',
+            LUNCH: 'Lunch',
+            DINNER: 'Dinner',
+            MAIN_COURSE: 'Main Course',
+            SIDE_VEGETABLE: 'Vegetable Side',
+            SIDE_CARB: 'Carbs / Grains',
+            LEGUME: 'Legumes',
+            SNACK: 'Snack',
+            SAUCE: 'Sauces & Dressings',
+            SOUP: 'Soups & Broths'
+        },
         about: {
             title: 'About Cacomi',
             desc: 'Learn about the mission, values, and future of Cacomi, your AI-powered kitchen assistant.',
@@ -504,8 +528,8 @@ export const translations = {
 
         announcement: {
             newUpdate: 'New Update',
-            title: 'The Smart Planner is finally here!',
-            desc: 'Our most anticipated feature has arrived. Now you can organize your week, generate menus with AI, and track your nutritional intake. Explore the Planner tab to get started.',
+            title: 'Universal Interactive Planner!',
+            desc: 'The ultimate planning experience is here. Manage your week with the new drag-and-drop (DND) system optimized for mobile and tablet. Replace recipes, add snacks, and save everything locally for offline use.',
             btn: 'Try Planner!',
             ariaClose: 'Close announcement'
         },
@@ -514,11 +538,11 @@ export const translations = {
             aiTitle: 'AI Recipes',
             aiDesc: 'Our artificial intelligence analyzes your available ingredients to suggest delicious recipes and prevent food waste.',
             pantryTitle: 'Pantry Management',
-            pantryDesc: 'Keep a digital inventory of your kitchen. Get expiration alerts and always know what you have on hand.',
+            pantryDesc: 'Keep a digital inventory of your kitchen with local persistence. Get expiration alerts and always know what you have on hand.',
             communityTitle: 'Active Community',
             communityDesc: 'Share your own culinary creations and discover recipes from home chefs around the world.',
-            planningTitle: 'Weekly Planning',
-            planningDesc: 'Organize your weekly menus easily and generate automatic shopping lists.'
+            planningTitle: 'Interactive Planner',
+            planningDesc: 'Organize your weekly menus with universal drag-and-drop. Replace meals, add snacks, and manage everything offline.'
         },
 
         cookie: {

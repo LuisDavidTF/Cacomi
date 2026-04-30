@@ -35,10 +35,86 @@ export function RecipeFeed({ initialData = null }) {
   } = useRecipeFeed({ initialData });
 
   const [deleteModalState, setDeleteModalState] = useState({ isOpen: false, recipe: null });
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [categoryRecipes, setCategoryRecipes] = useState([]);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  const [categoryPage, setCategoryPage] = useState(0);
+  const [hasMoreCategory, setHasMoreCategory] = useState(false);
+  const [isCategoryLoadingMore, setIsCategoryLoadingMore] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const categoryDropdownRef = useRef(null);
 
   const api = useApiClient();
   const { showToast } = useToast();
-  const { t } = useSettings();
+  const { t, language } = useSettings();
+
+  // Construir la lista de categorías dinámica a partir de las traducciones
+  const categories = Object.entries(t.recipeTypes || {}).map(([key, label]) => ({
+      id: key,
+      label: label
+  }));
+
+  // Close dropdown on click outside
+  useEffect(() => {
+      const handleClickOutside = (event) => {
+          if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+              setShowAllCategories(false);
+          }
+      };
+      if (showAllCategories) document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showAllCategories]);
+
+  // Fetch category data when activeCategory or categoryPage changes
+  useEffect(() => {
+      if (!activeCategory) {
+          setCategoryRecipes([]);
+          setCategoryPage(0);
+          setHasMoreCategory(false);
+          return;
+      }
+
+      const fetchCategory = async () => {
+          if (categoryPage === 0) setIsCategoryLoading(true);
+          else setIsCategoryLoadingMore(true);
+
+          try {
+              const res = await fetch(`/api/recipes/search/category?category=${encodeURIComponent(activeCategory)}&page=${categoryPage}&size=20`);
+              if (res.ok) {
+                  const data = await res.json();
+                  const newRecipes = data || [];
+                  if (categoryPage === 0) {
+                      setCategoryRecipes(newRecipes);
+                  } else {
+                      setCategoryRecipes(prev => {
+                          // Prevent duplicates
+                          const existingIds = new Set(prev.map(r => r.publicId || r.id));
+                          const uniqueNew = newRecipes.filter(r => !existingIds.has(r.publicId || r.id));
+                          return [...prev, ...uniqueNew];
+                      });
+                  }
+                  setHasMoreCategory(newRecipes.length === 20);
+              }
+          } catch (err) {
+              console.error("Category search error", err);
+              showToast("Error loading categories", "error");
+          } finally {
+              setIsCategoryLoading(false);
+              setIsCategoryLoadingMore(false);
+          }
+      };
+
+      fetchCategory();
+  }, [activeCategory, categoryPage]);
+
+  const handleCategoryToggle = (category) => {
+      if (activeCategory === category) {
+          setActiveCategory(null);
+      } else {
+          setCategoryPage(0);
+          setActiveCategory(category);
+      }
+  };
 
   // Global scroll listener removed to prevent Astro View Transition bugs.
   // We rely exclusively on the explicit click-based save in RecipeCard.
@@ -89,7 +165,13 @@ export function RecipeFeed({ initialData = null }) {
 
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting) {
-        fetchMoreRecipes();
+        if (activeCategory) {
+            if (hasMoreCategory && !isCategoryLoadingMore) {
+                setCategoryPage(prev => prev + 1);
+            }
+        } else {
+            fetchMoreRecipes();
+        }
       }
     }, {
       rootMargin: '200px', // Trigger fetch 200px before bottom
@@ -101,7 +183,7 @@ export function RecipeFeed({ initialData = null }) {
     return () => {
       if (observer.current && currentSentinel) observer.current.unobserve(currentSentinel);
     };
-  }, [status, hasMore, fetchMoreRecipes, isErrorLoadingMore, isLoadingMore]);
+  }, [status, hasMore, fetchMoreRecipes, isErrorLoadingMore, isLoadingMore, activeCategory, hasMoreCategory, isCategoryLoadingMore]);
 
   // Actions
   const handleEdit = (recipe) => window.location.href = `/edit-recipe/${recipe.id}`;
@@ -146,6 +228,64 @@ export function RecipeFeed({ initialData = null }) {
         </Button>
       </div>
 
+      {/* Category Filter */}
+      <div className="mb-8">
+          <div className="flex flex-wrap gap-2.5 sm:gap-3">
+              {/* Todo Button */}
+              <button
+                  onClick={() => handleCategoryToggle(null)}
+                  className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-black transition-all shadow-sm ${
+                      !activeCategory 
+                      ? 'bg-primary text-primary-foreground shadow-primary/30 scale-105 border-primary' 
+                      : 'bg-background border border-border text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
+              >
+                  {language === 'es' ? 'Todo' : 'All'}
+              </button>
+
+              {categories.filter(cat => activeCategory === cat.id || categories.indexOf(cat) < 3).map((cat) => (
+                  <button
+                      key={cat.id}
+                      onClick={() => handleCategoryToggle(cat.id)}
+                      className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-black transition-all shadow-sm ${
+                          activeCategory === cat.id 
+                          ? 'bg-primary text-primary-foreground shadow-primary/30 scale-105 border-primary' 
+                          : 'bg-background border border-border text-muted-foreground hover:bg-muted hover:text-foreground'
+                      }`}
+                  >
+                      {cat.label}
+                  </button>
+              ))}
+
+              <div className="relative" ref={categoryDropdownRef}>
+                  <button 
+                      onClick={() => setShowAllCategories(!showAllCategories)}
+                      className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-black transition-all shadow-sm bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 flex items-center gap-2`}
+                  >
+                      {language === 'es' ? 'Ver más...' : 'See more...'}
+                  </button>
+                  
+                  {/* Dropdown for remaining categories */}
+                  <div className={`absolute top-full mt-2 left-0 sm:left-auto sm:right-0 bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-xl ring-1 ring-black/5 p-3 z-40 w-64 transition-all origin-top-left sm:origin-top-right ${showAllCategories ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+                      <div className="flex flex-wrap gap-2">
+                          {categories.filter(cat => activeCategory !== cat.id && categories.indexOf(cat) >= 3).map(cat => (
+                              <button
+                                  key={cat.id}
+                                  onClick={() => {
+                                      handleCategoryToggle(cat.id);
+                                      setShowAllCategories(false);
+                                  }}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-background border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                              >
+                                  {cat.label}
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
       {/* Content Area - Switches based on status */}
       {
         status === 'loading' ? (
@@ -162,9 +302,20 @@ export function RecipeFeed({ initialData = null }) {
               {t.feed.createFirst}
             </Button>
           </div>
+        ) : activeCategory && isCategoryLoading ? (
+            <div className="flex flex-col items-center justify-center py-20 opacity-60">
+                <Spinner />
+                <p className="text-xs font-bold uppercase tracking-widest text-primary mt-3">
+                    {language === 'es' ? 'Cargando Categoría...' : 'Loading Category...'}
+                </p>
+            </div>
+        ) : activeCategory && categoryRecipes.length === 0 ? (
+            <div className="text-center py-20 bg-card rounded-xl border border-dashed border-border shadow-sm">
+                <p className="text-muted-foreground text-lg mb-4">{language === 'es' ? 'No hay recetas en esta categoría.' : 'No recipes in this category.'}</p>
+            </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-            {recipes.map((recipe, index) => {
+            {(activeCategory ? categoryRecipes : recipes).map((recipe, index) => {
               // Insert Ad every 6 items (index 5, 11, 17...) if ads are enabled
               // 0-based index: 5 is the 6th item.
               const PUBLIC_ENABLE_ADS = getEnv('PUBLIC_ENABLE_ADS') || getEnv('NEXT_PUBLIC_ENABLE_ADS');
@@ -191,7 +342,7 @@ export function RecipeFeed({ initialData = null }) {
       {/* Pagination Sentinel - Only show if NO error and NOT loading */}
       {/* Hiding it while loading ensures that when it reappears, it triggers a FRESH intersection event if still visible */}
       {
-        !isErrorLoadingMore && !isLoadingMore && hasMore && (
+        !isErrorLoadingMore && !isLoadingMore && !isCategoryLoading && !isCategoryLoadingMore && (activeCategory ? hasMoreCategory : hasMore) && (
           <div ref={sentinelRef} aria-hidden="true" className="h-4 w-full" />
         )
       }
@@ -210,7 +361,7 @@ export function RecipeFeed({ initialData = null }) {
 
       {/* Loading More Indicator */}
       {
-        isLoadingMore && (
+        (isLoadingMore || isCategoryLoadingMore) && (
           <div className="flex justify-center py-8">
             <Spinner />
           </div>
@@ -219,7 +370,7 @@ export function RecipeFeed({ initialData = null }) {
 
       {/* End of Feed Message */}
       {
-        !hasMore && !isErrorLoadingMore && recipes.length > 0 && (
+        !(activeCategory ? hasMoreCategory : hasMore) && !isErrorLoadingMore && (activeCategory ? categoryRecipes : recipes).length > 0 && (
           <div className="text-center py-12 border-t mt-12 border-border">
             <p className="text-muted-foreground text-sm">{t.feed.end}</p>
           </div>

@@ -4,7 +4,7 @@ export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 export type SelectionLogicCode = 'PROTEIN_FILL' | 'CALORIC_DENSITY' | 'PANTRY_CLEARANCE' | 'BUDGET_SAVER';
 
 export interface Meal {
-    logId: number;
+    logId?: number | null;
     recipeUUID: string;
     recipeName: string;
     imageUrl: string;

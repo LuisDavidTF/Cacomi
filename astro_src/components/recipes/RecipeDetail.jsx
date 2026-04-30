@@ -113,7 +113,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                             {recipe.type && (
                                 <div className="absolute bottom-6 right-6 md:bottom-12 md:right-12 z-20">
                                     <span className="inline-block bg-primary px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-lg">
-                                        {recipe.type}
+                                        {t.recipeTypes?.[recipe.type?.toUpperCase()] || recipe.type}
                                     </span>
                                 </div>
                             )}
