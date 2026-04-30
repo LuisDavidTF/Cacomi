@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@context/AuthContext';
 import { useSettings } from '@context/SettingsContext';
-import { ClockIcon, EditIcon, TrashIcon, UserIcon } from '@components/ui/Icons';
+import { ClockIcon, EditIcon, TrashIcon, UserIcon, FlameIcon, ActivityIcon } from '@components/ui/Icons';
 
 export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const { user } = useAuth();
@@ -29,10 +29,12 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
 
   // Data correctness mapping from provided JSON
   const imageUrl = recipe.imageUrl || 'https://placehold.co/600x400/f3f4f6/9ca3af?text=Sin+Imagen';
-  const prepTime = recipe.preparationTimeMinutes || 0;
-  const authorName = recipe.authorName || recipe.user?.name || 'Chef Anónimo';
-  const type = recipe.type || 'General';
-  const translatedType = t.recipeTypes?.[type.toUpperCase()] || type;
+  const prepTime = recipe.preparationTimeMinutes;
+  const authorName = recipe.authorName || recipe.user?.name;
+  const typeValue = recipe.type || recipe.mealType;
+  const translatedType = typeValue ? (t.recipeTypes?.[typeValue.toUpperCase()] || typeValue) : null;
+  const calories = recipe.calories;
+  const protein = recipe.protein;
 
   const [imgSrc, setImgSrc] = useState(imageUrl);
 
@@ -62,11 +64,13 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10 opacity-60 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none" />
 
         {/* Floating Badges */}
-        <div className="absolute top-3 right-3 z-10">
-          <span className="bg-white/95 backdrop-blur-md text-emerald-800 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-wider">
-            {translatedType}
-          </span>
-        </div>
+        {translatedType && (
+          <div className="absolute top-3 right-3 z-10">
+            <span className="bg-white/95 backdrop-blur-md text-emerald-800 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-wider">
+              {translatedType}
+            </span>
+          </div>
+        )}
 
         <div className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           {isOwner && (
@@ -89,14 +93,30 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
 
         <div className="absolute bottom-4 left-4 right-4 z-10 text-white">
           <div className="flex items-center gap-4 text-xs font-medium mb-2">
-            <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
-              <ClockIcon className="w-3.5 h-3.5 mr-1.5 text-emerald-400" />
-              {prepTime} min
-            </span>
-            <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
-              <UserIcon className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
-              {authorName}
-            </span>
+            {prepTime > 0 && (
+              <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
+                <ClockIcon className="w-3.5 h-3.5 mr-1.5 text-emerald-400" />
+                {prepTime} min
+              </span>
+            )}
+            {authorName && (
+              <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm" title="Autor">
+                <UserIcon className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
+                {authorName}
+              </span>
+            )}
+            {calories > 0 && (
+              <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm" title="Calorías">
+                <FlameIcon className="w-3.5 h-3.5 mr-1.5 text-orange-400" />
+                {calories} kcal
+              </span>
+            )}
+            {protein > 0 && (
+              <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm" title="Proteína">
+                <ActivityIcon className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
+                {protein}g
+              </span>
+            )}
           </div>
 
         </div>
@@ -108,9 +128,11 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
           {recipe.name}
         </h3>
 
-        <p className="text-muted-foreground text-sm line-clamp-2 mb-4 flex-grow leading-relaxed font-light">
-          {recipe.description || 'Sin descripción disponible.'}
-        </p>
+        {recipe.description && (
+          <p className="text-muted-foreground text-sm line-clamp-2 mb-4 flex-grow leading-relaxed font-light">
+            {recipe.description}
+          </p>
+        )}
 
         {/* Footer Actions */}
         <div className="pt-4 mt-auto border-t border-border">

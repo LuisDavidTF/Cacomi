@@ -186,15 +186,20 @@ export function RecipeFeed({ initialData = null }) {
   }, [status, hasMore, fetchMoreRecipes, isErrorLoadingMore, isLoadingMore, activeCategory, hasMoreCategory, isCategoryLoadingMore]);
 
   // Actions
-  const handleEdit = (recipe) => window.location.href = `/edit-recipe/${recipe.id}`;
+  const handleEdit = (recipe) => window.location.href = `/edit-recipe/${recipe.publicId || recipe.id}`;
   const handleDelete = (recipe) => setDeleteModalState({ isOpen: true, recipe });
 
   const confirmDelete = async () => {
     if (!deleteModalState.recipe) return;
+    const recipeId = deleteModalState.recipe.publicId || deleteModalState.recipe.id;
     try {
-      await api.deleteRecipe(deleteModalState.recipe.id);
+      await api.deleteRecipe(recipeId);
       showToast(t.feed.deleted, 'success');
-      removeRecipe(deleteModalState.recipe.id);
+      removeRecipe(recipeId);
+      // Also remove from category recipes if active
+      if (activeCategory) {
+          setCategoryRecipes(prev => prev.filter(r => (r.publicId || r.id) !== recipeId));
+      }
       setDeleteModalState({ isOpen: false, recipe: null });
     } catch (error) {
       showToast(error.message || 'Error', 'error');
@@ -325,7 +330,7 @@ export function RecipeFeed({ initialData = null }) {
                 <React.Fragment key={recipe.id}>
                   <RecipeCard
                     recipe={recipe}
-                    viewHref={`/recipes/${slugify(recipe.name)}/${recipe.id}`}
+                    viewHref={`/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                   />
