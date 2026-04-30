@@ -24,6 +24,7 @@ export interface LocalPlannedMeal extends Meal {
 
 export interface LocalPlanMetadata extends Omit<PlanResponse, 'meals'> {
     lastUpdated: string;
+    isActive: number; // 0 or 1 (Active backend plan)
 }
 
 export type { LocalPantryItem as PantryItemType };
@@ -36,10 +37,10 @@ const db = new Dexie('CacomiPlannerDB_v2') as Dexie & {
 };
 
 // Schema registration
-db.version(5).stores({
+db.version(7).stores({
     pantryItems: 'id, ingredientId, isSynced, isDeleted',
-    plannedMeals: 'id, planId, mealDate, mealType, isSynced, isDeleted',
-    planMetadata: 'planId'
+    plannedMeals: 'id, planId, mealDate, mealType, isSynced, isDeleted, isPinned',
+    planMetadata: 'planId, isActive'
 });
 
 export { db };

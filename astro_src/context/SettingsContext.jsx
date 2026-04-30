@@ -104,17 +104,19 @@ export const translations = {
                 satiety: '¿Cómo quedaste?',
                 reason: '¿Por qué lo saltaste?',
                 satietyLevels: {
-                    veryHungry: 'Muy hambriento',
+                    hungry: 'Con hambre',
                     satisfied: 'Satisfecho',
-                    veryFull: 'Muy lleno'
+                    stuffed: 'Demasiado lleno'
                 },
                 reasons: {
                     noTime: 'Falta de tiempo',
                     tooExpensive: 'Muy caro',
                     didntLike: 'No me gustó',
                     ateOut: 'Comí fuera',
-                    forgot: 'Lo olvidé'
+                    forgot: 'Lo olvidé',
+                    other: 'Otro'
                 },
+                specifyReason: 'Especificar razón...',
                 save: 'Guardar',
                 viewRecipe: 'Ver receta completa',
                 stats: {
@@ -157,7 +159,12 @@ export const translations = {
             concierge: {
                 loading: 'Nuestros chefs están diseñando tu menú. Te notificaremos cuando esté listo.',
                 noteTitle: 'Nota del Chef:'
-            }
+            },
+            pinnedLabel: 'comidas fijadas',
+            generationNotice: 'Respetaremos',
+            pinTooltip: 'Fijar receta para que la IA no la cambie',
+            unpinTooltip: 'Desfijar receta',
+            generateConfirm: '¿Quieres generar un nuevo plan? Se usarán 50 Cacomi Coins.',
         },
 
         landing: {
@@ -339,7 +346,12 @@ export const translations = {
             relatedTitle: 'También te puede gustar',
             adTitle: 'Recomendado para ti',
             adSponsor: 'Patrocinado',
-            keepExploring: 'No te detengas, ¡sigue explorando nuevos sabores!'
+            keepExploring: 'No te detengas, ¡sigue explorando nuevos sabores!',
+            nutrition: 'Información Nutricional',
+            calories: 'Calorías',
+            protein: 'Proteína',
+            carbs: 'Carbohidratos',
+            fat: 'Grasas'
         },
 
         settings: {
@@ -616,8 +628,9 @@ export const translations = {
                 rating: 'Rating',
                 satiety: 'How full are you?',
                 reason: 'Why did you skip it?',
-                satietyLevels: { veryHungry: 'Very hungry', satisfied: 'Satisfied', veryFull: 'Very full' },
-                reasons: { noTime: 'No time', tooExpensive: 'Too expensive', didntLike: 'Did not like', ateOut: 'Ate out', forgot: 'Forgot' },
+                satietyLevels: { hungry: 'Hungry', satisfied: 'Satisfied', stuffed: 'Stuffed' },
+                reasons: { noTime: 'No time', tooExpensive: 'Too expensive', didntLike: 'Did not like', ateOut: 'Ate out', forgot: 'Forgot', other: 'Other' },
+                specifyReason: 'Specify reason...',
                 save: 'Save',
                 viewRecipe: 'View Full Recipe',
                 stats: {
@@ -653,7 +666,12 @@ export const translations = {
                 cancelBtn: 'Cancel',
                 acceptedStatus: 'You agreed to share the anonymized data of this plan to help us improve our AI models. You can change your preferences in '
             },
-            concierge: { loading: 'Our chefs are designing your menu...', noteTitle: 'Chef Note:' }
+            concierge: { loading: 'Our chefs are designing your menu...', noteTitle: 'Chef Note:' },
+            pinnedLabel: 'pinned meals',
+            generationNotice: 'We will respect',
+            pinTooltip: 'Pin recipe so AI does not change it',
+            unpinTooltip: 'Unpin recipe',
+            generateConfirm: 'Do you want to generate a new plan? 50 Cacomi Coins will be used.',
         },
 
         auth: {
@@ -767,7 +785,12 @@ export const translations = {
             relatedTitle: 'You might also love',
             adTitle: 'Recommended for you',
             adSponsor: 'Sponsored',
-            keepExploring: "Don't stop now, keep exploring new flavors!"
+            keepExploring: "Don't stop now, keep exploring new flavors!",
+            nutrition: 'Nutritional Information',
+            calories: 'Calories',
+            protein: 'Protein',
+            carbs: 'Carbs',
+            fat: 'Fat'
         },
 
         settings: {
@@ -1179,7 +1202,12 @@ export const translations = {
             relatedTitle: 'Vous pourriez aussi aimer',
             adTitle: 'Recommandé pour vous',
             adSponsor: 'Sponsorisé',
-            keepExploring: 'Ne vous arrêtez pas, continuez à explorer de nouvelles saveurs !'
+            keepExploring: 'Ne vous arrêtez pas, continuez à explorer de nouvelles saveurs !',
+            nutrition: 'Informations Nutritionnelles',
+            calories: 'Calories',
+            protein: 'Protéines',
+            carbs: 'Glucides',
+            fat: 'Lipides'
         },
 
         settings: {

@@ -5,7 +5,6 @@ import {
     Sparkles, 
     Search, 
     X,
-    Lock,
     CalendarDays,
     User,
     Target,
@@ -14,7 +13,9 @@ import {
     Info,
     AlertCircle,
     CheckCircle2,
-    RotateCcw
+    RotateCcw,
+    Trash2,
+    Utensils
 } from 'lucide-react';
 import { useSettings } from '@context/SettingsContext';
 import { useAuth } from '@context/AuthContext';
@@ -28,7 +29,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import type { PlanResponse, Meal, GroupedMeals } from '@/types/planner';
 import { db } from '@/lib/db';
-import { generateUUIDv7 } from '@/lib/utils';
+import { generateUUIDv7, formatDateToString } from '@/lib/utils';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -45,13 +46,6 @@ function addDays(date: Date, n: number): Date {
     return d;
 }
 
-function formatDateToString(date: Date): string {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -61,6 +55,55 @@ const editWindowEnd = addDays(today, 6);
 
 function isDayEditable(date: Date): boolean {
     return true; // All days are editable as per user request
+}
+
+const GUEST_PLAN_ID = 0;
+const DEFAULT_GUEST_PLAN: Omit<PlanResponse, 'meals'> = {
+    planId: GUEST_PLAN_ID,
+    birthDate: '2000-01-01',
+    activityLevel: 'MODERATELY_ACTIVE',
+    heightCm: 170,
+    currentWeight: 70,
+    goal: 'MAINTENANCE',
+    targetCalories: 2000,
+    targetWeight: 70,
+    targetProtein: 150,
+    weeklyBudget: null,
+    status: 'COMPLETED',
+    isActive: 1
+};
+
+function ReflectionPrompt({ onCheckin, language }: { onCheckin: () => void, language: string }) {
+    return (
+        <div className="mb-10 p-6 sm:p-8 bg-gradient-to-br from-primary/10 via-background to-indigo-500/10 border border-primary/20 rounded-[32px] shadow-2xl animate-in slide-in-from-top-4 duration-700 relative overflow-hidden group">
+            {/* Background sparkle */}
+            <div className="absolute -top-12 -right-12 w-40 h-40 bg-primary/20 rounded-full blur-[60px] animate-pulse" />
+            
+            <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                <div className="w-16 h-16 rounded-3xl bg-primary shadow-2xl shadow-primary/40 flex items-center justify-center rotate-6 group-hover:rotate-0 transition-transform duration-500 shrink-0">
+                    <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                
+                <div className="flex-1 text-center md:text-left">
+                    <h3 className="text-xl font-black tracking-tight mb-2">
+                        {language === 'es' ? '¡Tu semana está por terminar!' : 'Your week is almost over!'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground font-medium max-w-md leading-relaxed">
+                        {language === 'es' 
+                            ? 'Para que el Chef AI pueda diseñar tu próximo menú personalizado, necesitamos saber cómo te sentiste esta semana. ¡Es indispensable para continuar!' 
+                            : 'To allow the AI Chef to design your next personalized menu, we need to know how you felt this week. This is essential to continue!'}
+                    </p>
+                </div>
+                
+                <button 
+                    onClick={onCheckin}
+                    className="px-8 py-4 bg-primary text-primary-foreground rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all whitespace-nowrap"
+                >
+                    {language === 'es' ? 'Reflexionar ahora' : 'Reflect Now'}
+                </button>
+            </div>
+        </div>
+    );
 }
 
 function CustomCalendarModal({ isOpen, onClose, selectedDate, onSelect, language }: { isOpen: boolean, onClose: () => void, selectedDate: Date, onSelect: (d: Date) => void, language: string }) {
@@ -143,6 +186,7 @@ export function WeeklyPlanner() {
     const [pendingMealSlot, setPendingMealSlot] = useState<{ date: string, type: string } | null>(null);
     const [isDraggingRecipe, setIsDraggingRecipe] = useState(false);
     const [draggingRecipeData, setDraggingRecipeData] = useState<any | null>(null);
+    const [draggingMealId, setDraggingMealId] = useState<string | null>(null);
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -184,8 +228,31 @@ export function WeeklyPlanner() {
         btnText?: string;
     } | null>(null);
 
+    const mealsForNextWeek = React.useMemo(() => {
+        if (!planData?.meals) return [];
+        const tomorrowDate = new Date(today);
+        tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+        tomorrowDate.setHours(0, 0, 0, 0);
+        const nextWeekEndDate = new Date(tomorrowDate);
+        nextWeekEndDate.setDate(nextWeekEndDate.getDate() + 6);
+        const startDateStr = formatDateToString(tomorrowDate);
+        const endDateStr = formatDateToString(nextWeekEndDate);
+
+        return planData.meals.filter(m => 
+            m.mealDate >= startDateStr && 
+            m.mealDate <= endDateStr && 
+            m.isDeleted === 0
+        ).sort((a, b) => a.mealDate.localeCompare(b.mealDate));
+    }, [planData]);
+
     const [hasLocalChanges, setHasLocalChanges] = useState(false);
     const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+    const [generationStatus, setGenerationStatus] = useState<string | null>(null);
+    const [confirmDialog, setConfirmDialog] = useState<{
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    } | null>(null);
 
     // Custom Pointer Drag Logic (for Mobile/Tablet)
     useEffect(() => {
@@ -214,18 +281,26 @@ export function WeeklyPlanner() {
                 longPressTimerRef.current = null;
             }
 
-            if (isDraggingRecipe && draggingRecipeData) {
+            if (isDraggingRecipe) {
                 // Find drop target
                 const elements = document.elementsFromPoint(e.clientX, e.clientY);
-                const slot = elements.find(el => el.hasAttribute('data-slot-date')) as HTMLElement;
-                if (slot) {
-                    const date = slot.getAttribute('data-slot-date')!;
-                    const type = slot.getAttribute('data-slot-type')!;
-                    const id = slot.getAttribute('data-slot-id') || undefined;
-                    handleSelectRecipeForSlot(draggingRecipeData, date, type, id);
+
+                // Trash Can Drop
+                const trash = elements.find(el => el.id === 'delete-drop-zone');
+                if (trash && draggingMealId) {
+                    handleDeleteMeal(draggingMealId);
+                } else if (draggingRecipeData) {
+                    const slot = elements.find(el => el.hasAttribute('data-slot-date')) as HTMLElement;
+                    if (slot) {
+                        const date = slot.getAttribute('data-slot-date')!;
+                        const type = slot.getAttribute('data-slot-type')!;
+                        const id = slot.getAttribute('data-slot-id') || undefined;
+                        handleSelectRecipeForSlot(draggingRecipeData, date, type, id);
+                    }
                 }
             }
             setDraggingRecipeData(null);
+            setDraggingMealId(null);
             setIsDraggingRecipe(false);
         };
 
@@ -239,7 +314,7 @@ export function WeeklyPlanner() {
         };
     }, [draggingRecipeData, isDraggingRecipe]);
 
-    const handlePointerDown = (e: React.PointerEvent, recipe: any) => {
+    const handlePointerDown = (e: React.PointerEvent, recipe: any, mealId?: string) => {
         startPosRef.current = { x: e.clientX, y: e.clientY };
         
         if (e.pointerType === 'touch') {
@@ -248,6 +323,7 @@ export function WeeklyPlanner() {
             
             longPressTimerRef.current = setTimeout(() => {
                 setDraggingRecipeData(recipe);
+                if (mealId) setDraggingMealId(mealId);
                 setDragPosition({ x: e.clientX, y: e.clientY });
                 setIsDraggingRecipe(true);
                 setIsSidebarOpen(false);
@@ -256,6 +332,7 @@ export function WeeklyPlanner() {
             }, 1200); // 1.2s long press as requested by user
         } else {
             setDraggingRecipeData(recipe);
+            if (mealId) setDraggingMealId(mealId);
             setDragPosition({ x: e.clientX, y: e.clientY });
         }
     };
@@ -289,22 +366,26 @@ export function WeeklyPlanner() {
         // If no explicit ID to replace, check if the slot is a main meal and already occupied
         if (!idToUpdate && ['BREAKFAST', 'LUNCH', 'DINNER'].includes(targetType.toUpperCase())) {
             const existingMainMeal = await db.plannedMeals
-                .where({ mealDate: targetDate, mealType: targetType.toUpperCase() })
-                .filter(m => m.isDeleted === 0)
+                .where('mealDate').equals(targetDate)
+                .filter(m => m.mealType === targetType.toUpperCase() && m.isDeleted === 0)
                 .first();
             if (existingMainMeal) idToUpdate = existingMainMeal.id;
         }
 
         try {
+            const protein = recipe.proteinGrams ?? recipe.protein ?? 0;
+            const calories = recipe.calories ?? recipe.kcal ?? 0;
+            const cost = recipe.estimatedCost ?? recipe.cost ?? 0;
+
             if (idToUpdate) {
                 // UPDATE existing meal
                 await db.plannedMeals.update(idToUpdate, {
                     recipeUUID: recipe.publicId || recipe.id,
                     recipeName: recipe.name,
                     imageUrl: recipe.imageUrl,
-                    proteinGrams: recipe.proteinGrams || 0,
-                    calories: recipe.calories || 0,
-                    estimatedCost: recipe.estimatedCost || 0,
+                    proteinGrams: protein,
+                    calories: calories,
+                    estimatedCost: cost,
                     isSynced: 0,
                     isDeleted: 0
                 });
@@ -312,16 +393,16 @@ export function WeeklyPlanner() {
                 // ADD new meal
                 const newMeal = {
                     id: generateUUIDv7(),
-                    planId: planData?.planId || null,
+                    planId: (planData?.planId !== undefined && planData?.planId !== null) ? planData.planId : 0,
                     recipeUUID: recipe.publicId || recipe.id,
                     recipeName: recipe.name,
                     imageUrl: recipe.imageUrl,
                     mealDate: targetDate,
                     mealType: targetType.toUpperCase() as any,
                     portionMultiplier: 1.0,
-                    proteinGrams: recipe.proteinGrams || 0,
-                    calories: recipe.calories || 0,
-                    estimatedCost: recipe.estimatedCost || 0,
+                    proteinGrams: protein,
+                    calories: calories,
+                    estimatedCost: cost,
                     pantryUsage: 0,
                     selectionLogicCode: 'PROTEIN_FILL' as any,
                     aiReasoning: 'Manual addition',
@@ -336,9 +417,9 @@ export function WeeklyPlanner() {
             const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
             
             setPlanData(prev => {
-                if (!prev) return null;
+                const basePlan = prev || { ...DEFAULT_GUEST_PLAN, meals: [] };
                 return {
-                    ...prev,
+                    ...basePlan,
                     meals: allMeals
                 };
             });
@@ -373,7 +454,10 @@ export function WeeklyPlanner() {
             
             // Update local state
             const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
-            setPlanData(prev => prev ? { ...prev, meals: allMeals } : null);
+            setPlanData(prev => {
+                const basePlan = prev || { ...DEFAULT_GUEST_PLAN, meals: [] };
+                return { ...basePlan, meals: allMeals };
+            });
             
             setNotification({
                 title: language === 'es' ? 'Receta Quitada' : 'Recipe Removed',
@@ -382,6 +466,33 @@ export function WeeklyPlanner() {
             });
         } catch (err) {
             console.error("Error deleting meal:", err);
+        }
+    };
+
+    const handleTogglePinMeal = async (mealId: string) => {
+        try {
+            const meal = await db.plannedMeals.get(mealId);
+            if (!meal) return;
+
+            const newPinnedStatus = meal.isPinned === 1 ? 0 : 1;
+            await db.plannedMeals.update(mealId, { isPinned: newPinnedStatus });
+            
+            // Update local state
+            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            setPlanData(prev => {
+                const basePlan = prev || { ...DEFAULT_GUEST_PLAN, meals: [] };
+                return { ...basePlan, meals: allMeals };
+            });
+
+            if (newPinnedStatus === 1) {
+                setNotification({
+                    title: language === 'es' ? 'Receta Fijada' : 'Recipe Pinned',
+                    message: language === 'es' ? 'Esta receta se mantendrá en tu próximo plan.' : 'This recipe will be kept in your next plan.',
+                    type: 'success'
+                });
+            }
+        } catch (err) {
+            console.error("Error pinning meal:", err);
         }
     };
 
@@ -432,7 +543,47 @@ export function WeeklyPlanner() {
         }
     };
 
+    const pollStatus = async () => {
+        try {
+            const res = await fetch('/api/proxy/planner/status');
+            if (res.ok) {
+                const data = await res.json();
+                // Expected data: { status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED', message?: string }
+                if (data.status === 'COMPLETED') {
+                    setGenerationStatus(null);
+                    setIsGenerating(false);
+                    await fetchPlan(true);
+                } else if (data.status === 'FAILED') {
+                    setGenerationStatus(null);
+                    setIsGenerating(false);
+                    setNotification({
+                        title: 'Error',
+                        message: data.message || (language === 'es' ? 'La generación del plan ha fallado.' : 'Plan generation failed.'),
+                        type: 'error'
+                    });
+                } else {
+                    // Update progress message
+                    setGenerationStatus(data.message || (language === 'es' ? 'Estamos trabajando en ello...' : 'We are working on it...'));
+                }
+            }
+        } catch (e) {
+            console.error("Error polling status:", e);
+        }
+    };
+
+    useEffect(() => {
+        let interval: any;
+        if (isGenerating && generationStatus) {
+            interval = setInterval(pollStatus, 4000); // Poll every 4 seconds
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isGenerating, generationStatus]);
+
     const fetchPlan = async (force: boolean = false) => {
+        if (!isAuthenticated) return; // Don't fetch if not logged in
+        
         try {
             const response = await fetch('/api/proxy/planner');
             if (response.ok) {
@@ -440,16 +591,25 @@ export function WeeklyPlanner() {
                 
                 // 1. Save metadata separately
                 const { meals, ...metadata } = data;
+                
+                // Mark all other plans as inactive
+                await db.planMetadata.toCollection().modify({ isActive: 0 });
+
                 await db.planMetadata.put({
                     ...metadata,
-                    lastUpdated: new Date().toISOString()
+                    lastUpdated: new Date().toISOString(),
+                    isActive: 1
                 });
 
                 // 2. Save individual meals
                 // We overwrite existing meals for this plan if they are already synced or if force is true
                 for (const meal of meals) {
                     const existing = await db.plannedMeals
-                        .filter(m => m.logId === meal.logId || (m.planId === data.planId && m.mealDate === meal.mealDate && m.mealType === meal.mealType))
+                        .filter(m => 
+                            (m.mealId !== undefined && m.mealId !== null && m.mealId === meal.mealId) || 
+                            (m.logId !== undefined && m.logId !== null && m.logId === meal.logId) || 
+                            (m.planId === data.planId && m.mealDate === meal.mealDate && m.mealType === meal.mealType)
+                        )
                         .first();
 
                     if (existing) {
@@ -485,6 +645,7 @@ export function WeeklyPlanner() {
                 const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
                 const reconstructedPlan: PlanResponse = {
                     ...metadata,
+                    isActive: 1,
                     meals: allMeals
                 };
 
@@ -511,15 +672,34 @@ export function WeeklyPlanner() {
     };
 
     const fallbackToLocal = async () => {
-        const allMetadata = await db.planMetadata.toArray();
-        if (allMetadata.length > 0) {
-            const latestMetadata = allMetadata.sort((a, b) => b.planId - a.planId)[0];
+        // Try to get the active plan first
+        const activeMetadata = await db.planMetadata.where('isActive').equals(1).first();
+        
+        if (activeMetadata) {
             const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
-            
             setPlanData({
-                ...latestMetadata,
+                ...activeMetadata,
                 meals: allMeals
             } as PlanResponse);
+        } else {
+            // Fallback to latest planId if no active one is marked
+            const allMetadata = await db.planMetadata.toArray();
+            if (allMetadata.length > 0) {
+                const latestMetadata = allMetadata.sort((a, b) => b.planId - a.planId)[0];
+                const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                
+                setPlanData({
+                    ...latestMetadata,
+                    meals: allMeals
+                } as PlanResponse);
+            } else {
+                // No plan found at all -> Initialize with guest plan
+                const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                setPlanData({
+                    ...DEFAULT_GUEST_PLAN,
+                    meals: allMeals
+                } as PlanResponse);
+            }
         }
     };
 
@@ -601,6 +781,32 @@ export function WeeklyPlanner() {
             setGroupedMeals(grouped);
         }
     }, [planData]);
+
+    // Auto-scroll to today
+    useEffect(() => {
+        if (viewMode === 'WEEK' && scrollContainerRef.current && calendarDays.length > 0) {
+            const todayStr = new Date().toDateString();
+            const todayIdx = calendarDays.findIndex(d => d.toDateString() === todayStr);
+            
+            if (todayIdx !== -1) {
+                // Use a slight delay to ensure cards are rendered
+                setTimeout(() => {
+                    const todayEl = document.getElementById(`day-${todayIdx}`);
+                    if (todayEl && scrollContainerRef.current) {
+                        const container = scrollContainerRef.current;
+                        const containerWidth = container.offsetWidth;
+                        const elementOffset = todayEl.offsetLeft;
+                        const elementWidth = todayEl.offsetWidth;
+                        
+                        container.scrollTo({
+                            left: elementOffset - (containerWidth / 2) + (elementWidth / 2),
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 100);
+            }
+        }
+    }, [viewMode, calendarDays]);
 
     // Initialize scroll to today
     useEffect(() => {
@@ -707,19 +913,79 @@ export function WeeklyPlanner() {
         setShowConsentModal(true);
     };
 
-    const confirmGeneration = async () => {
+    const handleClearAndGenerate = async () => {
+        setConfirmDialog({
+            title: language === 'es' ? '¿Borrar Selección?' : 'Clear Selection?',
+            message: language === 'es' 
+                ? 'Esto eliminará todas las recetas que tienes actualmente para la próxima semana. ¿Deseas continuar?' 
+                : 'This will remove all recipes you currently have for next week. Do you want to proceed?',
+            onConfirm: async () => {
+                try {
+                    const tomorrowDate = new Date(today);
+                    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+                    const startDateStr = formatDateToString(tomorrowDate);
+                    const nextWeekEndDate = new Date(tomorrowDate);
+                    nextWeekEndDate.setDate(nextWeekEndDate.getDate() + 6);
+                    const endDateStr = formatDateToString(nextWeekEndDate);
+
+                    await db.plannedMeals
+                        .where('mealDate')
+                        .between(startDateStr, endDateStr, true, true)
+                        .modify({ isDeleted: 1, isSynced: 0 });
+
+                    // Refresh local state to update the modal list
+                    const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                    setPlanData(prev => prev ? { ...prev, meals: allMeals } : null);
+                    setConfirmDialog(null);
+                } catch (err) {
+                    console.error("Error clearing week:", err);
+                }
+            }
+        });
+    };
+
+    const confirmGeneration = async (skipPinned: boolean = false) => {
         setShowConsentModal(false);
 
         console.log("AI Generation requested with consent:", consentGiven);
         setIsGenerating(true);
         
         try {
+            // Target week: Tomorrow to Tomorrow + 6 days
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+
+            const nextWeekEnd = new Date(tomorrow);
+            nextWeekEnd.setDate(nextWeekEnd.getDate() + 6);
+            nextWeekEnd.setHours(23, 59, 59, 999);
+            
+            const startDateStr = formatDateToString(tomorrow);
+            const endDateStr = formatDateToString(nextWeekEnd);
+
+            // Fetch meals in that range that are NOT deleted
+            // We consider "pinned" any meal that has isPinned: 1 OR isNew: 1 (manual)
+            const existingMeals = await db.plannedMeals
+                .where('mealDate')
+                .between(startDateStr, endDateStr, true, true)
+                .filter(m => m.isDeleted === 0 && (m.isPinned === 1 || m.isNew === 1))
+                .toArray();
+
+            const pinnedMeals = skipPinned ? [] : mealsForNextWeek.map(m => ({
+                mealDate: m.mealDate,
+                mealType: m.mealType.toUpperCase(),
+                recipePublicId: m.recipeUUID
+            }));
+
             const response = await fetch('/api/proxy/planner/request', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({}) // Sending empty object as requested
+                body: JSON.stringify({
+                    weeklyBudget: planData?.weeklyBudget || 900,
+                    pinnedMeals
+                })
             });
             
             const text = await response.text();
@@ -754,29 +1020,190 @@ export function WeeklyPlanner() {
             }
             
             // Success
-            await fetchPlan();
+            if (response.ok) {
+                // Clear the local week immediately so we can fetch the fresh adjusted recipes from the backend
+                await db.plannedMeals
+                    .where('mealDate')
+                    .between(startDateStr, endDateStr, true, true)
+                    .delete();
+            }
+
+            if (data.message?.includes('encolado') || data.message?.includes('queued') || data.message?.includes('ID:')) {
+                setGenerationStatus(data.message);
+                setIsGenerating(true);
+                // Polling useEffect will handle the rest
+            } else {
+                await fetchPlan();
+                setIsGenerating(false);
+            }
         } catch (error) {
             console.error("Error generating plan:", error);
+            setIsGenerating(false);
             setNotification({
                 title: 'Error',
                 message: language === 'es' ? "Error de conexión al solicitar el plan." : "Connection error while requesting plan.",
                 type: 'error'
             });
-        } finally {
-            setIsGenerating(false);
         }
     };
 
-    const handleSaveMealTracking = (mealPlanRecipeId: number, data: any) => {
-        console.log("Tracking Guardado (PATCH API):", mealPlanRecipeId, data);
-        // In a real app, optimistically update the `plan` state
-        setSelectedMeal(null);
+    const handleSaveMealTracking = async (mealPlanRecipeId: number | string, data: any) => {
+        console.log("Tracking/Ajuste Guardado:", mealPlanRecipeId, data);
+        
+        try {
+            // Case 1: Manual meal (Local ID is UUID string)
+            if (typeof mealPlanRecipeId === 'string') {
+                await db.plannedMeals.update(mealPlanRecipeId, {
+                    ...data,
+                    isSynced: 0
+                });
+                
+                // Update local state
+                const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                setPlanData(prev => prev ? { ...prev, meals: allMeals } : null);
+
+                setNotification({
+                    title: language === 'es' ? '¡Porción Ajustada!' : 'Portion Adjusted!',
+                    message: language === 'es' ? 'Se han actualizado las cantidades y nutrición de tu receta.' : 'Your recipe amounts and nutrition have been updated.',
+                    type: 'success'
+                });
+                setSelectedMeal(null);
+                return;
+            }
+
+            // Case 2: Backend meal (Numeric ID)
+            const response = await fetch('/api/proxy/planner/meal-check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                // Update local DB
+                const meal = await db.plannedMeals
+                    .filter(m => m.mealId === mealPlanRecipeId || m.logId === mealPlanRecipeId)
+                    .first();
+
+                if (meal) {
+                    await db.plannedMeals.update(meal.id, {
+                        tracking: data
+                    });
+                    
+                    // Update state to reflect tracking change
+                    const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                    setPlanData(prev => prev ? { ...prev, meals: allMeals } : null);
+                }
+
+                setNotification({
+                    title: language === 'es' ? '¡Registro Guardado!' : 'Record Saved!',
+                    message: language === 'es' ? 'Se ha actualizado el seguimiento de tu comida.' : 'Your meal tracking has been updated.',
+                    type: 'success'
+                });
+            } else {
+                throw new Error('Failed to save tracking');
+            }
+        } catch (err) {
+            console.error("Error saving tracking:", err);
+            setNotification({
+                title: 'Error',
+                message: language === 'es' ? 'No se pudo guardar el registro.' : 'Could not save record.',
+                type: 'error'
+            });
+        } finally {
+            setSelectedMeal(null);
+        }
     };
 
-    const handleSaveCheckin = (data: any) => {
-        console.log("Check-in Guardado (POST API):", data);
-        setIsCheckinOpen(false);
+    const handleSaveCheckin = async (data: any) => {
+        if (!planData?.planId) return;
+
+        const payload = {
+            planId: planData.planId,
+            ...data
+        };
+
+        try {
+            const response = await fetch('/api/proxy/planner/plan-check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                // Save locally that this plan is checked in to hide the prompt
+                localStorage.setItem(`checkin_done_${planData.planId}`, 'true');
+                
+                // Mark as inactive in DB
+                await db.planMetadata.update(planData.planId, { isActive: 0 });
+
+                setNotification({
+                    title: language === 'es' ? '¡Reflexión Guardada!' : 'Reflection Saved!',
+                    message: language === 'es' ? 'Gracias por tus comentarios. Tu Chef AI ya está listo para preparar tu próximo menú.' : 'Thank you for your feedback. Your AI Chef is ready to prepare your next menu.',
+                    type: 'success'
+                });
+                setIsCheckinOpen(false);
+            } else {
+                throw new Error('Failed to save checkin');
+            }
+        } catch (err) {
+            console.error("Error saving checkin:", err);
+            setNotification({
+                title: 'Error',
+                message: language === 'es' ? 'No se pudo guardar la reflexión.' : 'Could not save reflection.',
+                type: 'error'
+            });
+        }
     };
+
+    // Calculate if we should show the check-in prompt
+    const shouldShowCheckinPrompt = React.useMemo(() => {
+        if (!planData?.meals || !planData?.planId || planData.isActive === 0) return false;
+        
+        // Check if already completed locally
+        if (localStorage.getItem(`checkin_done_${planData.planId}`) === 'true') return false;
+
+        const backendMeals = planData.meals.filter(m => !m.isNew);
+        if (backendMeals.length === 0) return false;
+        
+        const lastMealDateStr = backendMeals.reduce((max, m) => m.mealDate > max ? m.mealDate : max, '');
+        const lastMealDate = new Date(lastMealDateStr + 'T00:00:00');
+        
+        const todayCopy = new Date(today);
+        todayCopy.setHours(0,0,0,0);
+
+        // Show prompt if today is >= lastMealDate AND today <= lastMealDate + 3 days
+        const threeDaysAfter = new Date(lastMealDate);
+        threeDaysAfter.setDate(threeDaysAfter.getDate() + 3);
+
+        return todayCopy >= lastMealDate && todayCopy <= threeDaysAfter;
+    }, [planData, language, isCheckinOpen]);
+
+    // Handle plan expiration (3 days past end)
+    useEffect(() => {
+        const checkExpiration = async () => {
+            if (!planData?.planId || planData.isActive === 0) return;
+
+            const backendMeals = planData.meals.filter(m => !m.isNew);
+            if (backendMeals.length === 0) return;
+
+            const lastMealDateStr = backendMeals.reduce((max, m) => m.mealDate > max ? m.mealDate : max, '');
+            const lastMealDate = new Date(lastMealDateStr + 'T00:00:00');
+            
+            const expiryDate = new Date(lastMealDate);
+            expiryDate.setDate(expiryDate.getDate() + 3);
+
+            if (today > expiryDate) {
+                console.log("Plan expired, marking as inactive:", planData.planId);
+                await db.planMetadata.update(planData.planId, { isActive: 0 });
+                setPlanData(prev => prev ? { ...prev, isActive: 0 } : null);
+            }
+        };
+        checkExpiration();
+    }, [planData?.planId, planData?.isActive]);
 
     // Mini calendar change handler
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -807,9 +1234,13 @@ export function WeeklyPlanner() {
                             </div>
                         </div>
                         <h2 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-400">
-                            {t.planner?.concierge?.loading || 'Nuestros chefs están diseñando tu menú...'}
+                            {generationStatus || t.planner?.concierge?.loading || 'Nuestros chefs están diseñando tu menú...'}
                         </h2>
-                        <p className="text-muted-foreground">Por favor espera un momento mientras procesamos tus preferencias.</p>
+                        <p className="text-muted-foreground">
+                            {generationStatus 
+                                ? (language === 'es' ? 'Sincronizando con el Chef AI...' : 'Syncing with the AI Chef...')
+                                : (language === 'es' ? 'Por favor espera un momento mientras procesamos tus preferencias.' : 'Please wait a moment while we process your preferences.')}
+                        </p>
                     </div>
                 </div>
             )}
@@ -851,28 +1282,75 @@ export function WeeklyPlanner() {
                         <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-5 text-primary">
                             <Sparkles className="w-6 h-6" />
                         </div>
-                        <h2 className="text-xl font-bold mb-3">{t.planner?.consent?.title || 'Entrenamiento de IA'}</h2>
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                            {t.planner?.consent?.desc || 'Para ofrecerte mejores planes cada semana, analizamos y entrenamos nuestros modelos con los resultados generados.'}
+                        <h2 className="text-2xl font-black tracking-tight mb-3 text-foreground">
+                            {language === 'es' ? 'Tu Chef AI te espera' : 'Your AI Chef awaits'}
+                        </h2>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-6 font-medium">
+                            {mealsForNextWeek.length > 0 
+                                ? (language === 'es'
+                                    ? 'En Cacomi, tus preferencias son nuestra prioridad. Nuestro Chef AI integrará tus selecciones actuales en un plan nutricional balanceado. ¿Deseas continuar con estas recetas?'
+                                    : 'At Cacomi, your preferences are our priority. Our AI Chef will integrate your current selections into a balanced nutritional plan. Would you like to continue with these recipes?')
+                                : (language === 'es'
+                                    ? 'Tu Chef AI está listo para diseñar una experiencia culinaria única y balanceada para tu próxima semana. Analizaremos tus metas para crear el plan perfecto desde cero.'
+                                    : 'Your AI Chef is ready to design a unique and balanced culinary experience for your next week. We will analyze your goals to create the perfect plan from scratch.')
+                            }
                         </p>
 
-                        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-3 mb-4">
-                            <p className="text-[10px] text-destructive font-bold uppercase tracking-wider mb-1">⚠️ Atención</p>
-                            <p className="text-[11px] text-foreground/70 leading-normal">
-                                {language === 'es'
-                                    ? 'Generar un nuevo plan sobrescribirá o eliminará cualquier receta que hayas seleccionado previamente en esta semana.'
-                                    : 'Generating a new plan will overwrite or delete any recipes you have previously selected for this week.'}
-                            </p>
-                        </div>
-                        
-                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 mb-6">
-                            <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider mb-1">Próximamente</p>
-                            <p className="text-[11px] text-foreground/70 leading-normal">
-                                {language === 'es'
-                                    ? 'El respeto estricto al presupuesto semanal y la fijación de recetas favoritas están en desarrollo y llegarán pronto.'
-                                    : 'Strict weekly budget adherence and pinning favorite recipes are in development and coming soon.'}
-                            </p>
-                        </div>
+                        {mealsForNextWeek.length > 0 && (
+                            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 mb-6 shadow-inner">
+                                <p className="text-[10px] text-primary font-black uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <Utensils className="w-3 h-3" />
+                                    {language === 'es' ? 'Tu Selección Actual' : 'Your Current Selection'}
+                                </p>
+                                <div className="max-h-[180px] overflow-y-auto space-y-2.5 pr-2 scrollbar-hide">
+                                    {mealsForNextWeek.map((m, idx) => (
+                                        <div key={idx} className="flex items-center justify-between gap-3 text-[11px] group/item">
+                                            <div className="flex flex-col">
+                                                <span className="font-black text-foreground/90 uppercase text-[9px] tracking-tighter">
+                                                    {new Date(m.mealDate + 'T00:00:00').toLocaleDateString(language, { weekday: 'short', day: 'numeric' })} • {m.mealType}
+                                                </span>
+                                                <span className="text-muted-foreground font-medium truncate max-w-[200px]">{m.recipeName}</span>
+                                            </div>
+                                            <div className="h-px flex-1 bg-border/30 group-hover/item:bg-primary/20 transition-colors mx-1" />
+                                            <div className="flex items-center gap-2">
+                                                <span className="shrink-0 text-primary font-black text-[9px] uppercase tracking-widest">MANTENER</span>
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteMeal(m.id);
+                                                    }}
+                                                    className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
+                                                    title={language === 'es' ? 'Quitar de la lista' : 'Remove from list'}
+                                                >
+                                                    <Trash2 className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {mealsForNextWeek.length > 0 && (
+                            <div className="bg-destructive/5 border border-destructive/10 rounded-xl p-4 mb-6">
+                                <button 
+                                    onClick={handleClearAndGenerate}
+                                    className="w-full flex items-center justify-between group/scratch"
+                                >
+                                    <div className="text-left">
+                                        <p className="text-[10px] text-destructive font-black uppercase tracking-wider mb-0.5">
+                                            {language === 'es' ? '¿Plan desde cero?' : 'New start?'}
+                                        </p>
+                                        <p className="text-[11px] text-muted-foreground leading-snug">
+                                            {language === 'es' 
+                                                ? 'Haz clic aquí para borrar todo lo anterior y empezar una propuesta 100% nueva.' 
+                                                : 'Click here to clear everything and start a 100% new proposal.'}
+                                        </p>
+                                    </div>
+                                    <Trash2 className="w-4 h-4 text-destructive/40 group-hover/scratch:text-destructive transition-colors" />
+                                </button>
+                            </div>
+                        )}
                         
                         <label className="flex items-start gap-3 p-4 rounded-xl border border-border/50 bg-muted/20 cursor-pointer hover:bg-muted/40 transition-colors mb-6 group">
                             <input 
@@ -894,7 +1372,7 @@ export function WeeklyPlanner() {
                                 {t.planner?.consent?.cancelBtn || 'Cancelar'}
                             </button>
                             <button 
-                                onClick={confirmGeneration}
+                                onClick={() => confirmGeneration()}
                                 disabled={!consentGiven}
                                 className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                             >
@@ -1294,6 +1772,9 @@ export function WeeklyPlanner() {
                     {/* ─── Chef Note ─── */}
                     {aiChefMessage && <ChefNoteCard message={aiChefMessage} />}
 
+                    {/* ─── Reflection Nudge ─── */}
+                    {shouldShowCheckinPrompt && <ReflectionPrompt onCheckin={() => setIsCheckinOpen(true)} language={language} />}
+
                     {viewMode === 'DAY' && (
                         <div 
                             ref={dayPillsContainerRef}
@@ -1368,27 +1849,30 @@ export function WeeklyPlanner() {
                                             setIsSidebarOpen(true);
                                         }
                                     }}
-                                    onDropRecipe={(recipe, type, mealId) => handleSelectRecipeForSlot(recipe, formatDateToString(date), type, mealId)}
+                                    onDropRecipe={(recipe, date, type, mealId) => handleSelectRecipeForSlot(recipe, date, type, mealId)}
                                     onDeleteMeal={handleDeleteMeal}
+                                    onPinMeal={handleTogglePinMeal}
+                                    onPointerDown={handlePointerDown}
                                     pendingMealSlot={pendingMealSlot}
                                     viewMode={viewMode}
                                 />
                             ))}
                             </div>
-
-                            </div>
-                    ) : (
-                        // ─── DAY MODE ───
-                        <div className="animate-in fade-in duration-300">
-                            {(() => {
-                                const activeDate = calendarDays[selectedDateIndex];
-                                return (
-                                    <PlannerDay
-                                        date={activeDate}
-                                        meals={groupedMeals[formatDateToString(activeDate)] || []}
-                                        isEditable={isDayEditable(activeDate)}
-                                        onMealClick={(md) => setSelectedMeal(md)}
-                                        onAddMeal={(type) => {
+    
+                                </div>
+                        ) : (
+                            // ─── DAY MODE ───
+                            <div className="animate-in fade-in duration-300">
+                                {(() => {
+                                    const activeDate = calendarDays[selectedDateIndex];
+                                    return (
+                                        <PlannerDay
+                                            date={activeDate}
+                                            meals={groupedMeals[formatDateToString(activeDate)] || []}
+                                            isEditable={isDayEditable(activeDate)}
+                                            onMealClick={(md) => setSelectedMeal(md)}
+                                            onPointerDown={handlePointerDown}
+                                            onAddMeal={(type) => {
                                             const slotDate = formatDateToString(activeDate);
                                             if (pendingMealSlot?.date === slotDate && pendingMealSlot?.type === type) {
                                                 setPendingMealSlot(null);
@@ -1398,8 +1882,9 @@ export function WeeklyPlanner() {
                                                 setIsSidebarOpen(true);
                                             }
                                         }}
-                                        onDropRecipe={(recipe, type, mealId) => handleSelectRecipeForSlot(recipe, formatDateToString(activeDate), type, mealId)}
+                                        onDropRecipe={(recipe, date, type, mealId) => handleSelectRecipeForSlot(recipe, date, type, mealId)}
                                         onDeleteMeal={handleDeleteMeal}
+                                        onPinMeal={handleTogglePinMeal}
                                         pendingMealSlot={pendingMealSlot}
                                         viewMode={viewMode}
                                     />
@@ -1439,6 +1924,21 @@ export function WeeklyPlanner() {
                     </div>
                 )}
 
+                {/* ── TRASH CAN DROP ZONE ── */}
+                {isDraggingRecipe && draggingMealId && (
+                    <div 
+                        id="delete-drop-zone"
+                        className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[140]
+                                   flex flex-col items-center justify-center gap-2
+                                   w-28 h-28 rounded-full bg-destructive text-destructive-foreground
+                                   shadow-[0_0_40px_rgba(239,68,68,0.4)] border-4 border-white/20
+                                   animate-in slide-in-from-bottom-20 duration-500"
+                    >
+                        <Trash2 className="w-8 h-8 animate-bounce" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">{language === 'es' ? 'Eliminar' : 'Delete'}</span>
+                    </div>
+                )}
+
             <style dangerouslySetInnerHTML={{ __html: `
                 .scrollbar-hide::-webkit-scrollbar { display: none; }
                 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -1471,6 +1971,43 @@ export function WeeklyPlanner() {
                 onClose={() => setIsCheckinOpen(false)}
                 onSave={handleSaveCheckin}
             />
+
+            {/* ── CONFIRM DIALOG ── */}
+            {confirmDialog && (
+                <div 
+                    className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in"
+                    onClick={() => setConfirmDialog(null)}
+                >
+                    <div 
+                        className="bg-background border border-border/50 shadow-2xl rounded-[32px] p-8 max-w-sm w-full relative animate-in zoom-in-95 duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="w-14 h-14 bg-destructive/10 text-destructive rounded-2xl flex items-center justify-center mb-6">
+                            <Trash2 className="w-7 h-7" />
+                        </div>
+                        
+                        <h3 className="text-xl font-black mb-2 text-foreground">{confirmDialog.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-8">
+                            {confirmDialog.message}
+                        </p>
+                        
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => setConfirmDialog(null)}
+                                className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
+                            >
+                                {language === 'es' ? 'No, volver' : 'No, back'}
+                            </button>
+                            <button 
+                                onClick={confirmDialog.onConfirm}
+                                className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity"
+                            >
+                                {language === 'es' ? 'Sí, borrar' : 'Yes, delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

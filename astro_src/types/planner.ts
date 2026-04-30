@@ -4,6 +4,8 @@ export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 export type SelectionLogicCode = 'PROTEIN_FILL' | 'CALORIC_DENSITY' | 'PANTRY_CLEARANCE' | 'BUDGET_SAVER';
 
 export interface Meal {
+    id?: string; // Local UUID
+    mealId?: number | null;
     logId?: number | null;
     recipeUUID: string;
     recipeName: string;
@@ -11,12 +13,23 @@ export interface Meal {
     mealDate: string;
     mealType: MealType;
     portionMultiplier: number;
+    isNew?: number; // 0 or 1
+    isPinned?: number; // 0 or 1
+    isDeleted?: number; // 0 or 1
+    isSynced?: number; // 0 or 1
+
     proteinGrams: number;
     calories: number;
     estimatedCost: number;
     pantryUsage: number;
     selectionLogicCode: SelectionLogicCode;
     aiReasoning: string;
+    tracking?: {
+        isEating: boolean;
+        rating?: number;
+        satietyLevel?: 'HUNGRY' | 'SATISFIED' | 'STUFFED';
+        skippedReason?: string;
+    }
 }
 
 export interface PlanResponse {
@@ -31,6 +44,7 @@ export interface PlanResponse {
     targetProtein: number;
     weeklyBudget: number | null;
     status?: 'GENERATING' | 'COMPLETED' | string;
+    isActive?: number;
     meals: Meal[];
 }
 

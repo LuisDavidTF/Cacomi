@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ClockIcon, UserIcon, CalendarIcon, ChevronLeftIcon, HeartIcon } from '@components/ui/Icons';
+import { ClockIcon, UserIcon, CalendarIcon, ChevronLeftIcon, HeartIcon, FlameIcon, ActivityIcon, WheatIcon, DropletIcon } from '@components/ui/Icons';
 import { SmartImage } from '@components/ui/SmartImage';
 import { useSettings } from '@context/SettingsContext';
 import { RichText } from '@components/ui/RichText';
@@ -209,8 +209,40 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
 
                     </div>
 
-                    {/* Column 2 (Sidebar): Ingredients -> DOM Position 2 for Mobile */}
+                    {/* Column 2 (Sidebar): Nutrition & Ingredients -> DOM Position 2 for Mobile */}
                     <aside className="lg:col-start-2 lg:row-start-1 lg:row-span-2 min-w-0">
+                        {/* Nutrition Card */}
+                        {recipe.nutrition && (
+                            <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm mb-8 transition-all hover:shadow-md">
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 flex items-center">
+                                    <span className="w-1.5 h-5 bg-orange-500 rounded-full mr-3" />
+                                    {t.recipe?.nutrition || 'Información Nutricional'}
+                                </h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex flex-col items-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border border-orange-100 dark:border-orange-800/30">
+                                        <FlameIcon className="w-6 h-6 text-orange-500 mb-2" />
+                                        <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-tighter">{t.recipe?.calories || 'Calorías'}</span>
+                                        <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalCalories?.toFixed(0)}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800/30">
+                                        <ActivityIcon className="w-6 h-6 text-blue-500 mb-2" />
+                                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tighter">{t.recipe?.protein || 'Proteína'}</span>
+                                        <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalProtein?.toFixed(1)}g</span>
+                                    </div>
+                                    <div className="flex flex-col items-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-800/30">
+                                        <WheatIcon className="w-6 h-6 text-amber-500 mb-2" />
+                                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-tighter">{t.recipe?.carbs || 'Carbs'}</span>
+                                        <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalCarbs?.toFixed(1)}g</span>
+                                    </div>
+                                    <div className="flex flex-col items-center p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
+                                        <DropletIcon className="w-6 h-6 text-emerald-500 mb-2" />
+                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">{t.recipe?.fat || 'Grasas'}</span>
+                                        <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalFat?.toFixed(1)}g</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="bg-gray-50 dark:bg-gray-700/30 p-6 sm:p-8 rounded-3xl border border-gray-100 dark:border-gray-600 lg:sticky lg:top-8 shadow-sm">
                             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 border-b border-gray-200 dark:border-gray-600 pb-3 flex items-center">
                                 <span className="w-1.5 h-5 bg-purple-500 rounded-full mr-3" />

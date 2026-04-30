@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDateToString } from '@/lib/utils';
 import { useSettings } from '@context/SettingsContext';
 import { PlannerSlot } from './PlannerSlot';
 import { Plus } from 'lucide-react';
@@ -9,9 +10,11 @@ interface PlannerDayProps {
     isEditable?: boolean;
     onMealClick?: (meal: any) => void;
     onAddMeal?: (type: string) => void;
-    onDropRecipe?: (recipe: any, date: string, type: string, mealId?: string | number) => void;
+    onDropRecipe?: (recipe: any, date: string, type: string, mealId?: string) => void;
     onDeleteMeal?: (mealId: string) => void;
+    onPinMeal?: (mealId: string) => void;
     pendingMealSlot?: { date: string; type: string } | null;
+    onPointerDown?: (e: React.PointerEvent, recipe: any, mealId?: string) => void;
     viewMode?: 'WEEK' | 'DAY';
     id?: string;
 }
@@ -29,10 +32,10 @@ function SnackDivider({ isEditable, onClick, viewMode, vertical }: { isEditable:
     return (
         <div className={`relative flex items-center group/snack transition-all
                         ${vertical 
-                            ? 'flex-col py-0 px-1 h-auto min-h-[120px] self-stretch' 
+                            ? 'flex-row md:flex-col py-1 md:py-0 px-0 md:px-1 w-full md:w-auto md:h-auto md:min-h-[120px] md:self-stretch' 
                             : 'flex-row py-1 px-0 w-full'}`}>
             {/* Lines */}
-            <div className={`${vertical ? 'w-px flex-1' : 'h-px flex-1'}
+            <div className={`${vertical ? 'h-px md:w-px flex-1' : 'h-px flex-1'}
                             bg-primary/20 group-hover/snack:bg-primary/40
                             [@media(pointer:coarse)]:bg-primary/30
                             transition-colors`} />
@@ -55,13 +58,13 @@ function SnackDivider({ isEditable, onClick, viewMode, vertical }: { isEditable:
                            [@media(pointer:coarse)]:text-primary-foreground
                            [@media(pointer:coarse)]:shadow-md
                            [@media(pointer:coarse)]:shadow-primary/30
-                           ${vertical ? 'my-2 w-6 h-6 [@media(pointer:coarse)]:w-7 [@media(pointer:coarse)]:h-7' : 'mx-2 w-6 h-6 [@media(pointer:coarse)]:w-7 [@media(pointer:coarse)]:h-7'}`}
+                           ${vertical ? 'mx-2 md:mx-0 md:my-2 w-6 h-6 md:w-6 md:h-6 [@media(pointer:coarse)]:w-7 [@media(pointer:coarse)]:h-7' : 'mx-2 w-6 h-6 [@media(pointer:coarse)]:w-7 [@media(pointer:coarse)]:h-7'}`}
             >
                 <Plus className="w-3 h-3 [@media(pointer:coarse)]:w-3.5 [@media(pointer:coarse)]:h-3.5" />
             </button>
 
 
-            <div className={`${vertical ? 'w-px flex-1' : 'h-px flex-1'}
+            <div className={`${vertical ? 'h-px md:w-px flex-1' : 'h-px flex-1'}
                             bg-primary/20 group-hover/snack:bg-primary/40
                             [@media(pointer:coarse)]:bg-primary/30
                             transition-colors`} />
@@ -69,12 +72,49 @@ function SnackDivider({ isEditable, onClick, viewMode, vertical }: { isEditable:
     );
 }
 
-export function PlannerDay({ date, meals, isEditable = true, onMealClick, onAddMeal, onDropRecipe, onDeleteMeal, pendingMealSlot, viewMode = 'WEEK', id }: PlannerDayProps) {
+export function PlannerDay({ date, meals, isEditable = true, onMealClick, onAddMeal, onDropRecipe, onDeleteMeal, onPinMeal, onPointerDown, pendingMealSlot, viewMode = 'WEEK', id }: PlannerDayProps) {
 
     const { t } = useSettings();
     const dayName = date.toLocaleDateString('es-ES', { weekday: 'short' }).toUpperCase();
     const dayNumber = date.getDate();
     const isToday = new Date().toDateString() === date.toDateString();
+    const dateStr = formatDateToString(date);
+
+    // Group main meals to ensure they always have a slot
+    const breakfast = meals.find(m => m.mealType === 'BREAKFAST');
+    const lunch = meals.find(m => m.mealType === 'LUNCH');
+    const dinner = meals.find(m => m.mealType === 'DINNER');
+    // Snacks are extra slots
+    const snacks = meals.filter(m => m.mealType === 'SNACK');
+
+    const renderSlot = (type: 'breakfast' | 'lunch' | 'dinner' | 'snack', meal?: any) => {
+        const typeUpper = type.toUpperCase() as any;
+        const label = t.planner?.[type] || t.recipeTypes?.[typeUpper] || type;
+        const time = type === 'breakfast' ? '08:30' : type === 'lunch' ? '14:00' : type === 'dinner' ? '20:30' : '--:--';
+
+        return (
+            <div className={viewMode === 'DAY' ? 'w-full md:w-[calc(50%-2rem)] lg:w-[calc(33.33%-3rem)] max-w-[500px] grow shrink-0' : 'w-full'}>
+                <PlannerSlot 
+                    date={dateStr}
+                    type={type} 
+                    label={label} 
+                    time={time} 
+                    isEditable={isEditable} 
+                    recipe={meal ? {
+                        ...meal,
+                        name: meal.recipeName,
+                        image: meal.imageUrl
+                    } : undefined}
+                    onClick={meal ? () => onMealClick?.(meal) : () => onAddMeal?.(type)}
+                    onDropRecipe={(recipe) => onDropRecipe?.(recipe, dateStr, typeUpper, meal?.id)}
+                    onDelete={() => meal && onDeleteMeal?.(meal.id)}
+                    onPin={() => meal && onPinMeal?.(meal.id)}
+                    onPointerDown={(e, recipe) => onPointerDown?.(e, recipe, meal?.id)}
+                    isSelected={pendingMealSlot?.date === dateStr && pendingMealSlot?.type === type}
+                />
+            </div>
+        );
+    };
 
     return (
         <div id={id} className={`
@@ -118,110 +158,26 @@ export function PlannerDay({ date, meals, isEditable = true, onMealClick, onAddM
             </div>
 
             {/* Meal Slots with Snack Dividers between them */}
-            <div className={`relative z-10 w-full flex ${viewMode === 'DAY' ? 'flex-row flex-wrap gap-x-6 gap-y-10 justify-center items-stretch' : 'flex-col gap-1'}`}>
-                {meals.length > 0 ? (
-                    meals.map((meal: any, index: number) => (
-                        <React.Fragment key={meal.id || meal.logId || index}>
-                            <div className={viewMode === 'DAY' ? 'w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33.33%-2rem)] max-w-[500px] grow shrink-0' : 'w-full'}>
-                                <PlannerSlot 
-                                    date={date.toISOString().split('T')[0]}
-                                    type={meal.mealType.toLowerCase() as any} 
-                                    label={t.recipeTypes?.[meal.mealType?.toUpperCase()] || meal.mealType} 
-                                    // Backend doesn't provide time yet, using placeholders or omitting
-                                    time={meal.mealType === 'BREAKFAST' ? '08:30' : meal.mealType === 'LUNCH' ? '14:00' : meal.mealType === 'DINNER' ? '20:30' : '--:--'} 
-                                    isEditable={isEditable} 
-                                    recipe={{
-                                        ...meal,
-                                        name: meal.recipeName,
-                                        image: meal.imageUrl
-                                    }}
-                                    onClick={() => onMealClick?.(meal)}
-                                    onDropRecipe={(recipe) => onDropRecipe?.(recipe, date.toISOString().split('T')[0], meal.mealType, meal.id)}
-                                    onDelete={() => onDeleteMeal?.(meal.id)}
-                                    isSelected={pendingMealSlot?.date === date.toISOString().split('T')[0] && pendingMealSlot?.type === meal.mealType}
-                                />
-                            </div>
-                            {index < meals.length - 1 && (
-                                <div className={viewMode === 'DAY' ? 'hidden sm:flex items-center' : 'w-full'}>
-                                    <SnackDivider 
-                                        isEditable={isEditable} 
-                                        onClick={() => onAddMeal?.('snack')} 
-                                        viewMode={viewMode} 
-                                        vertical={viewMode === 'DAY'}
-                                    />
-                                </div>
-                            )}
-                            {/* Mobile divider for DAY mode */}
-                            {index < meals.length - 1 && viewMode === 'DAY' && (
-                                <div className="w-full sm:hidden">
-                                    <SnackDivider 
-                                        isEditable={isEditable} 
-                                        onClick={() => onAddMeal?.('snack')} 
-                                        viewMode={viewMode} 
-                                        vertical={false}
-                                    />
-                                </div>
-                            )}
-                        </React.Fragment>
-                    ))
-                ) : (
-                    // 3 basic meals for empty state
-                    isEditable && (
-                        <div className={`w-full flex ${viewMode === 'DAY' ? 'flex-row flex-wrap gap-x-6 gap-y-10 justify-center items-stretch' : 'flex-col gap-1'}`}>
-                            <div className={viewMode === 'DAY' ? 'w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33.33%-2rem)] max-w-[500px] grow shrink-0' : 'w-full'}>
-                                <PlannerSlot 
-                                    date={date.toISOString().split('T')[0]}
-                                    type="breakfast" 
-                                    label={t.planner?.breakfast} 
-                                    time="08:30" 
-                                    isEditable={isEditable} 
-                                    onClick={() => onAddMeal?.('breakfast')}
-                                    onDropRecipe={(recipe) => onDropRecipe?.(recipe, date.toISOString().split('T')[0], 'breakfast')}
-                                    isSelected={pendingMealSlot?.date === date.toISOString().split('T')[0] && pendingMealSlot?.type === 'breakfast'}
-                                />
-                            </div>
-                            <div className={viewMode === 'DAY' ? 'hidden sm:flex items-center' : 'w-full'}>
-                                <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={viewMode === 'DAY'} />
-                            </div>
-                            <div className="w-full sm:hidden">
-                                <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={false} />
-                            </div>
-                            
-                            <div className={viewMode === 'DAY' ? 'w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33.33%-2rem)] max-w-[500px] grow shrink-0' : 'w-full'}>
-                                <PlannerSlot 
-                                    date={date.toISOString().split('T')[0]}
-                                    type="lunch" 
-                                    label={t.planner?.lunch} 
-                                    time="14:00" 
-                                    isEditable={isEditable} 
-                                    onClick={() => onAddMeal?.('lunch')}
-                                    onDropRecipe={(recipe) => onDropRecipe?.(recipe, date.toISOString().split('T')[0], 'lunch')}
-                                    isSelected={pendingMealSlot?.date === date.toISOString().split('T')[0] && pendingMealSlot?.type === 'lunch'}
-                                />
-                            </div>
-                            <div className={viewMode === 'DAY' ? 'hidden sm:flex items-center' : 'w-full'}>
-                                <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={viewMode === 'DAY'} />
-                            </div>
-                            <div className="w-full sm:hidden">
-                                <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={false} />
-                            </div>
-                            
-                            <div className={viewMode === 'DAY' ? 'w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33.33%-2rem)] max-w-[500px] grow shrink-0' : 'w-full'}>
-                                <PlannerSlot 
-                                    date={date.toISOString().split('T')[0]}
-                                    type="dinner" 
-                                    label={t.planner?.dinner} 
-                                    time="20:30" 
-                                    isEditable={isEditable} 
-                                    onClick={() => onAddMeal?.('dinner')}
-                                    onDropRecipe={(recipe) => onDropRecipe?.(recipe, date.toISOString().split('T')[0], 'dinner')}
-                                    isSelected={pendingMealSlot?.date === date.toISOString().split('T')[0] && pendingMealSlot?.type === 'dinner'}
-                                />
-                            </div>
-                        </div>
-                    )
-                )}
+            <div className={`relative z-10 w-full flex ${viewMode === 'DAY' ? 'flex-row flex-wrap gap-4 md:gap-6 justify-center items-stretch' : 'flex-col gap-1'}`}>
                 
+                {renderSlot('breakfast', breakfast)}
+
+                <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={viewMode === 'DAY'} />
+                
+                {renderSlot('lunch', lunch)}
+
+                <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={viewMode === 'DAY'} />
+                
+                {renderSlot('dinner', dinner)}
+
+                {/* Additional Snacks from DB */}
+                {snacks.map((snack, idx) => (
+                    <React.Fragment key={snack.id || idx}>
+                         <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={viewMode === 'DAY'} />
+                         {renderSlot('snack', snack)}
+                    </React.Fragment>
+                ))}
+
                 {/* Final Add Button (Always available if editable) */}
                 {isEditable && (
                     <div className="w-full">
