@@ -215,6 +215,17 @@ export const translations = {
             ml: 'Mililitro(s)'
         },
 
+        share: {
+            title: 'Compartir Receta',
+            preview: 'Vista previa',
+            copyLink: 'Copiar enlace',
+            linkCopied: '¡Enlace copiado!',
+            shareWhatsApp: 'WhatsApp',
+            shareTelegram: 'Telegram',
+            shareFacebook: 'Facebook',
+            shareTwitter: 'Twitter (X)',
+            shareGeneric: 'Compartir'
+        },
         common: {
             appName: 'Cacomi',
             rights: 'Todos los derechos reservados.',
@@ -601,6 +612,17 @@ export const translations = {
             ml: 'Milliliter(s)'
         },
 
+        share: {
+            title: 'Share Recipe',
+            preview: 'Preview',
+            copyLink: 'Copy Link',
+            linkCopied: 'Link copied!',
+            shareWhatsApp: 'WhatsApp',
+            shareTelegram: 'Telegram',
+            shareFacebook: 'Facebook',
+            shareTwitter: 'Twitter (X)',
+            shareGeneric: 'Share'
+        },
         common: {
             appName: 'Cacomi',
             rights: 'All rights reserved.',
@@ -1124,6 +1146,17 @@ export const translations = {
             ml: 'Millilitre(s)'
         },
 
+        share: {
+            title: 'Partager la Recette',
+            preview: 'Aperçu',
+            copyLink: 'Copier le lien',
+            linkCopied: 'Lien copié !',
+            shareWhatsApp: 'WhatsApp',
+            shareTelegram: 'Telegram',
+            shareFacebook: 'Facebook',
+            shareTwitter: 'Twitter (X)',
+            shareGeneric: 'Partager'
+        },
         common: {
             appName: 'Cacomi',
             rights: 'Tous droits réservés.',

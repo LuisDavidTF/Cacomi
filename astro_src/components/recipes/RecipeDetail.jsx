@@ -9,6 +9,8 @@ import { CacheManager } from '@utils/cacheManager';
 import { useToast } from '@context/ToastContext';
 import { Button } from '@components/ui/Button';
 import { RecipeCard } from './RecipeCard';
+import { ShareIcon } from '@components/ui/Icons';
+import { ShareModal } from '@components/ui/ShareModal';
 import { slugify } from '@utils/slugify';
 import { getEnv } from '@utils/env';
 
@@ -22,6 +24,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
     const { showToast } = useToast();
     const [recipe, setRecipe] = useState(initialRecipe);
     const [isLoading, setIsLoading] = useState(!initialRecipe);
+    const [showShare, setShowShare] = useState(false);
 
     useEffect(() => {
         if (!initialRecipe && recipeId) {
@@ -171,6 +174,14 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                     </svg>
                                     {t.common?.saveOffline || 'Guardar Offline'}
                                 </Button>
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setShowShare(true)}
+                                    className="ml-3 border-0 bg-primary/20 backdrop-blur-md hover:bg-primary/40 text-white font-medium shadow-sm transition-all"
+                                >
+                                    <ShareIcon className="w-4 h-4 mr-2" />
+                                    {t.share?.shareGeneric || 'Compartir'}
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -182,17 +193,24 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                     {/* Column 1, Row 1: Description */}
                     <div className="space-y-8 lg:col-start-1 lg:row-start-1 min-w-0">
                         {/* Mobile Button */}
-                        <div className="flex sm:hidden w-full">
+                        <div className="flex sm:hidden w-full gap-2">
                             <Button
                                 variant="secondary"
                                 onClick={handleSaveOffline}
-                                className="w-full justify-center bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                                className="flex-grow justify-center bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="w-4 h-4 mr-2" viewBox="0 0 16 16">
                                     <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
                                     <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
                                 </svg>
-                                {t.common?.saveOffline || 'Guardar Offline'}
+                                {t.common?.saveOffline || 'Guardar'}
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                onClick={() => setShowShare(true)}
+                                className="bg-primary/10 text-primary border-primary/20"
+                            >
+                                <ShareIcon className="w-5 h-5" />
                             </Button>
                         </div>
                         {/* Description */}
@@ -373,6 +391,11 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                     )}
                 </div>
             </div>
+            <ShareModal 
+                isOpen={showShare} 
+                onClose={() => setShowShare(false)} 
+                recipe={recipe} 
+            />
         </article>
     );
 }

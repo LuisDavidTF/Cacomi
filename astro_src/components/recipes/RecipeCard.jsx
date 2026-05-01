@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '@context/AuthContext';
 import { useSettings } from '@context/SettingsContext';
-import { ClockIcon, EditIcon, TrashIcon, UserIcon, FlameIcon, ActivityIcon } from '@components/ui/Icons';
+import { ClockIcon, EditIcon, TrashIcon, UserIcon, FlameIcon, ActivityIcon, ShareIcon } from '@components/ui/Icons';
+import { ShareModal } from '@components/ui/ShareModal';
 
 export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const { user } = useAuth();
@@ -37,6 +38,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const protein = recipe.protein;
 
   const [imgSrc, setImgSrc] = useState(imageUrl);
+  const [showShare, setShowShare] = useState(false);
 
   const handleNavigate = () => {
     if (typeof window !== 'undefined') {
@@ -46,50 +48,61 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   };
 
   return (
-    <a 
-      href={viewHref}
-      onClick={handleNavigate}
-      className="group cursor-pointer bg-card dark:bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full overflow-hidden text-left"
-    >
-      {/* Image Container */}
-      <div className="relative w-full aspect-[4/3] overflow-hidden bg-muted">
-        <img
-          src={imgSrc}
-          alt={recipe.name}
-          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-in-out"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={() => setImgSrc('https://placehold.co/600x400/f3f4f6/9ca3af?text=Error+Carga')}
-        />
+    <>
+      <a 
+        href={viewHref}
+        onClick={handleNavigate}
+        className="group cursor-pointer bg-card dark:bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full overflow-hidden text-left"
+      >
+        {/* Image Container */}
+        <div className="relative w-full aspect-[4/3] overflow-hidden bg-muted">
+          <img
+            src={imgSrc}
+            alt={recipe.name}
+            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-in-out"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={() => setImgSrc('https://placehold.co/600x400/f3f4f6/9ca3af?text=Error+Carga')}
+          />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10 opacity-60 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10 opacity-60 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none" />
 
-        {/* Floating Badges */}
-        {translatedType && (
-          <div className="absolute top-3 right-3 z-10">
-            <span className="bg-white/95 backdrop-blur-md text-emerald-800 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-wider">
-              {translatedType}
-            </span>
-          </div>
-        )}
-
-        <div className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          {isOwner && (
-            <div className="flex gap-2">
-              <button 
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(recipe); }} 
-                className="bg-white/90 p-2 rounded-full text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"
-              >
-                <EditIcon className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(recipe); }} 
-                className="bg-white/90 p-2 rounded-full text-red-600 hover:bg-red-50 transition-colors shadow-sm"
-              >
-                <TrashIcon className="w-4 h-4" />
-              </button>
+          {/* Floating Badges */}
+          {translatedType && (
+            <div className="absolute top-3 right-3 z-10">
+              <span className="bg-white/95 backdrop-blur-md text-emerald-800 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-wider">
+                {translatedType}
+              </span>
             </div>
           )}
-        </div>
+
+          <div className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="flex gap-2">
+                <button 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowShare(true); }} 
+                    className="bg-white/90 p-2 rounded-full text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
+                    title={t.share.shareGeneric}
+                >
+                    <ShareIcon className="w-4 h-4" />
+                </button>
+
+                {isOwner && (
+                    <>
+                    <button 
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(recipe); }} 
+                        className="bg-white/90 p-2 rounded-full text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"
+                    >
+                        <EditIcon className="w-4 h-4" />
+                    </button>
+                    <button 
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(recipe); }} 
+                        className="bg-white/90 p-2 rounded-full text-red-600 hover:bg-red-50 transition-colors shadow-sm"
+                    >
+                        <TrashIcon className="w-4 h-4" />
+                    </button>
+                    </>
+                )}
+            </div>
+          </div>
 
         <div className="absolute bottom-4 left-4 right-4 z-10 text-white">
           <div className="flex items-center gap-4 text-xs font-medium mb-2">
@@ -146,6 +159,13 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
           </div>
         </div>
       </div>
-    </a>
+      </a>
+
+      <ShareModal 
+        isOpen={showShare} 
+        onClose={() => setShowShare(false)} 
+        recipe={recipe} 
+      />
+    </>
   );
 }
