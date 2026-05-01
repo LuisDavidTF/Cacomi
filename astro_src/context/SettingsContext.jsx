@@ -219,6 +219,9 @@ export const translations = {
             appName: 'Cacomi',
             rights: 'Todos los derechos reservados.',
             aboutLink: 'Acerca de',
+            instagramUrl: 'https://www.instagram.com/cacomi.app',
+            facebookUrl: 'https://www.facebook.com/people/Cacomi-Planificador-de-Comidas-con-IA/61589350700287',
+            followUs: 'Síguenos en redes sociales',
             edit: 'Editar',
             delete: 'Eliminar',
             cancel: 'Cancelar',
@@ -602,6 +605,9 @@ export const translations = {
             appName: 'Cacomi',
             rights: 'All rights reserved.',
             aboutLink: 'About Us',
+            instagramUrl: 'https://www.instagram.com/cacomi.app',
+            facebookUrl: 'https://www.facebook.com/people/Cacomi-Planificador-de-Comidas-con-IA/61589350700287',
+            followUs: 'Follow us',
             edit: 'Edit',
             delete: 'Delete',
             cancel: 'Cancel',
@@ -1119,8 +1125,12 @@ export const translations = {
         },
 
         common: {
+            appName: 'Cacomi',
             rights: 'Tous droits réservés.',
             aboutLink: 'À propos',
+            instagramUrl: 'https://www.instagram.com/cacomi.app',
+            facebookUrl: 'https://www.facebook.com/people/Cacomi-Planificador-de-Comidas-con-IA/61589350700287',
+            followUs: 'Suivez-nous',
             edit: 'Modifier',
             delete: 'Supprimer',
             cancel: 'Annuler',
@@ -1363,8 +1373,9 @@ export const translations = {
         },
         legal: {
             googleAiDisclaimer: 'Google LLC (Gemini API) : Traitement temporaire des préférences diététiques et des ingrédients pour générer des recettes via l\'IA. Le traitement est régi par les conditions d\'utilisation de Google AI Studio, qui peuvent inclure l\'utilisation de données anonymisées pour l\'amélioration du modèle dans sa version gratuite.',
-            internalTrainingClause: 'Cacomi peut utiliser des données d\'interaction anonymisées pour l\'entraînement et l\'optimisation de ses propres algorithmes de recommandation internes et l\'amélioration du service.'
-        }
+            internalTrainingClause: 'Cacomi peut utilizar des données d\'interaction anonymisées pour l\'entraînement et l\'optimisation de ses propres algorithmes de recommandation internes et l\'amélioration du service.'
+        },
+
     }
 };
 

@@ -186,13 +186,28 @@ const t = translations[lang] || translations.es;
 
                 <section id="contacto" class="pt-6 border-t border-border/40">
                     <h2 class="text-xl font-semibold mb-3">13. Contacto</h2>
-                    <p>
-                        Para cualquier duda, comentario o solicitud relacionada con estos términos, puedes ponerte en contacto con nuestro equipo de soporte técnico:
+                    <p class="mb-4">
+                        Para cualquier duda, comentario o solicitud relacionada con estos términos, puedes ponerte en contacto con nuestro equipo de soporte técnico a través de los siguientes canales:
                     </p>
-                    <div class="mt-4 p-4 bg-muted/20 rounded-lg border border-border inline-block">
-                        <span class="font-medium text-primary flex items-center gap-2">
-                            📧 Email: <SafeEmail client:load />
-                        </span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 bg-muted/20 rounded-lg border border-border flex items-center gap-3">
+                            <span class="text-2xl">📧</span>
+                            <div>
+                                <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Email</p>
+                                <SafeEmail client:load />
+                            </div>
+                        </div>
+                        <div class="p-4 bg-muted/20 rounded-lg border border-border flex items-center gap-3">
+                            <span class="text-2xl">📱</span>
+                            <div>
+                                <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t.common.followUs}</p>
+                                <div class="flex gap-3 mt-1">
+                                    <a href={t.common.instagramUrl} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline text-sm font-medium">Instagram</a>
+                                    <span class="text-muted-foreground/30">|</span>
+                                    <a href={t.common.facebookUrl} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline text-sm font-medium">Facebook</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </div>

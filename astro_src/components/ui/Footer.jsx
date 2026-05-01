@@ -2,12 +2,34 @@
 
 import React from 'react';
 import { useSettings } from '@context/SettingsContext';
+import { InstagramIcon, FacebookIcon } from './Icons';
 
 export function Footer() {
     const { t } = useSettings();
 
     return (
         <footer className="mt-16 pb-24 md:pb-8 text-center" role="contentinfo">
+            <div className="flex justify-center gap-6 mb-6">
+                <a 
+                    href={t.common?.instagramUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-[#E4405F] transition-all duration-300 hover:scale-110"
+                    aria-label="Instagram"
+                >
+                    <InstagramIcon className="w-5 h-5" />
+                </a>
+                <a 
+                    href={t.common?.facebookUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-[#1877F2] transition-all duration-300 hover:scale-110"
+                    aria-label="Facebook"
+                >
+                    <FacebookIcon className="w-5 h-5" />
+                </a>
+            </div>
+            
             <p className="text-gray-500 text-sm">
                 &copy; {new Date().getFullYear()} Cacomi. {t.common?.rights || 'Todos los derechos reservados.'}
             </p>
