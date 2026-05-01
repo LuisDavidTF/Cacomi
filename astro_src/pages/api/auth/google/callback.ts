@@ -11,7 +11,7 @@ export const GET: APIRoute = async ({ url, request }) => {
         // Forwarding the request to the backend callback
         // CRITICAL: We MUST forward the Cookie header (JSESSIONID, etc.)
         // so the backend can verify the OAuth2 'state' against the session.
-        const response = await fetch(`${BACKEND_URL}/auth/google/callback${queryParams}`, {
+        const response = await fetch(`${BACKEND_URL}/api/v2/auth/google/callback${queryParams}`, {
             method: 'GET',
             headers: {
                 'User-Agent': request.headers.get('User-Agent') || '',

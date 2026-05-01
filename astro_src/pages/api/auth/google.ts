@@ -8,7 +8,7 @@ export const GET: APIRoute = async ({ request, redirect }) => {
     try {
         // We fetch the initiation endpoint server-to-server
         // We forward cookies from the browser to ensure any existing session is maintained
-        const response = await fetch(`${BACKEND_URL}/auth/google`, {
+        const response = await fetch(`${BACKEND_URL}/api/v2/auth/google`, {
             method: 'GET',
             headers: {
                 'User-Agent': request.headers.get('User-Agent') || '',
