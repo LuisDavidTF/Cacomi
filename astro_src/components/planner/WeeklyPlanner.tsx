@@ -23,12 +23,13 @@ import { RecipeSidebar } from './RecipeSidebar';
 import { ChefNoteCard } from './ChefNoteCard';
 import { MealTrackingModal, type MealTrackingData } from './MealTrackingModal';
 import { WeeklyCheckinModal } from './WeeklyCheckinModal';
+import { BiometricModal } from './BiometricModal';
 import { PlannerDay } from './PlannerDay';
 import { NutritionalSummary } from './NutritionalSummary';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import type { PlanResponse, Meal, GroupedMeals } from '@/types/planner';
-import { db } from '@/lib/db';
+import { db, type LocalPlannedMeal } from '@/lib/db';
 import { generateUUIDv7, formatDateToString } from '@/lib/utils';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -213,6 +214,7 @@ export function WeeklyPlanner() {
 
     // AI & Tracking States
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isBiometricModalOpen, setIsBiometricModalOpen] = useState(false);
     const [aiChefMessage, setAiChefMessage] = useState<string | null>(null);
     const [selectedMeal, setSelectedMeal] = useState<MealTrackingData | null>(null);
     const [isCheckinOpen, setIsCheckinOpen] = useState(false);
@@ -545,25 +547,33 @@ export function WeeklyPlanner() {
 
     const pollStatus = async () => {
         try {
-            const res = await fetch('/api/proxy/planner/status');
-            if (res.ok) {
-                const data = await res.json();
-                // Expected data: { status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED', message?: string }
-                if (data.status === 'COMPLETED') {
+            // First check status to update the message
+            const statusRes = await fetch('/api/proxy/planner/status');
+            if (statusRes.ok) {
+                const statusData = await statusRes.json();
+                
+                // If it's PARTIAL, GENERATING or we suspect there might be data, fetch the plan too
+                if (statusData.status === 'PARTIAL' || statusData.status === 'GENERATING' || statusData.status === 'COMPLETED') {
+                    await fetchPlan(true);
+                }
+
+                if (statusData.status === 'COMPLETED') {
                     setGenerationStatus(null);
                     setIsGenerating(false);
-                    await fetchPlan(true);
-                } else if (data.status === 'FAILED') {
+                } else if (statusData.status === 'FAILED') {
                     setGenerationStatus(null);
                     setIsGenerating(false);
                     setNotification({
                         title: 'Error',
-                        message: data.message || (language === 'es' ? 'La generación del plan ha fallado.' : 'Plan generation failed.'),
+                        message: statusData.message || (language === 'es' ? 'La generación del plan ha fallado.' : 'Plan generation failed.'),
                         type: 'error'
                     });
                 } else {
-                    // Update progress message
-                    setGenerationStatus(data.message || (language === 'es' ? 'Estamos trabajando en ello...' : 'We are working on it...'));
+                    setGenerationStatus(statusData.message || (language === 'es' ? 'Estamos trabajando en ello...' : 'We are working on it...'));
+                    // Ensure local status is updated to keep background polling hooks in sync
+                    if (statusData.status && planData?.status !== statusData.status) {
+                        setPlanData(prev => prev ? { ...prev, status: statusData.status } : null);
+                    }
                 }
             }
         } catch (e) {
@@ -571,15 +581,54 @@ export function WeeklyPlanner() {
         }
     };
 
+    // Auto-resume generation state if status is active
+    useEffect(() => {
+        if (planData?.status === 'PENDING' || planData?.status === 'PROCESSING' || planData?.status === 'PARTIAL' || planData?.status === 'GENERATING') {
+            if (!isGenerating) {
+                console.log("Resuming generation state based on plan status:", planData.status);
+                setIsGenerating(true);
+            }
+        }
+    }, [planData?.status]);
+
+    // Concierge Polling Effect (30s interval as requested)
     useEffect(() => {
         let interval: any;
-        if (isGenerating && generationStatus) {
-            interval = setInterval(pollStatus, 4000); // Poll every 4 seconds
+        // Start polling if we are generating. 
+        // Initial interval: 30 seconds
+        if (isGenerating && (generationStatus || planData?.status === 'PARTIAL' || planData?.status === 'PROCESSING' || planData?.status === 'PENDING' || planData?.status === 'GENERATING')) {
+            
+            // Initial immediate check
+            pollStatus();
+
+            // If we already have partial data, we slow down polling because the backend will prioritize newer users
+            const pollingInterval = planData?.status === 'PARTIAL' ? 60000 : 30000; // 60s if partial, 30s otherwise
+            
+            interval = setInterval(pollStatus, pollingInterval);
         }
         return () => {
             if (interval) clearInterval(interval);
         };
-    }, [isGenerating, generationStatus]);
+    }, [isGenerating, generationStatus, planData?.status]);
+
+    // Background Polling Effect (Slower, when concierge is closed but plan is still generating)
+    useEffect(() => {
+        if (isGenerating) return; // Concierge effect handles it
+        
+        let interval: any;
+        const status = planData?.status;
+        
+        // Polling logic when the user is in the planner but the concierge modal is closed
+        if (status === 'PARTIAL') {
+            interval = setInterval(() => fetchPlan(true), 120000); // 2 minutes for partial background
+        } else if (status === 'PENDING' || status === 'PROCESSING') {
+            interval = setInterval(() => fetchPlan(true), 300000); // 5 minutes for waiting background
+        }
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [planData?.status, isGenerating]);
 
     const fetchPlan = async (force: boolean = false) => {
         if (!isAuthenticated) return; // Don't fetch if not logged in
@@ -588,57 +637,45 @@ export function WeeklyPlanner() {
             const response = await fetch('/api/proxy/planner');
             if (response.ok) {
                 const data: PlanResponse = await response.json();
+                console.log("Fetched Plan Data:", data);
                 
                 // 1. Save metadata separately
                 const { meals, ...metadata } = data;
                 
-                // Mark all other plans as inactive
-                await db.planMetadata.toCollection().modify({ isActive: 0 });
+                // If the plan is completed, partial or generating, we update our local data
+                if (data.status === 'COMPLETED' || data.status === 'PARTIAL' || data.status === 'GENERATING') {
+                    // Mark all other plans as inactive
+                    await db.planMetadata.toCollection().modify({ isActive: 0 });
 
-                await db.planMetadata.put({
-                    ...metadata,
-                    lastUpdated: new Date().toISOString(),
-                    isActive: 1
-                });
+                    await db.planMetadata.put({
+                        ...metadata,
+                        lastUpdated: new Date().toISOString(),
+                        isActive: 1
+                    });
 
-                // 2. Save individual meals
-                // We overwrite existing meals for this plan if they are already synced or if force is true
-                for (const meal of meals) {
-                    const existing = await db.plannedMeals
-                        .filter(m => 
-                            (m.mealId !== undefined && m.mealId !== null && m.mealId === meal.mealId) || 
-                            (m.logId !== undefined && m.logId !== null && m.logId === meal.logId) || 
-                            (m.planId === data.planId && m.mealDate === meal.mealDate && m.mealType === meal.mealType)
-                        )
-                        .first();
+                    // Sync meals to local DB
+                    for (const meal of meals) {
+                        const existing = await db.plannedMeals
+                            .where('mealDate').equals(meal.mealDate)
+                            .and(m => m.mealType === meal.mealType)
+                            .first();
 
-                    if (existing) {
-                        // Only overwrite if it hasn't been modified locally (isSynced === 1) OR if force is true
-                        if (existing.isSynced === 1 || force) {
+                        if (!existing) {
+                            await db.plannedMeals.add({
+                                ...meal,
+                                id: generateUUIDv7(),
+                                isSynced: 1,
+                                isDeleted: 0,
+                                isNew: 0
+                            } as LocalPlannedMeal);
+                        } else if (existing.isSynced === 1 || force) {
                             await db.plannedMeals.update(existing.id, {
                                 ...meal,
-                                planId: data.planId,
                                 isSynced: 1,
                                 isDeleted: 0
                             });
                         }
-                    } else {
-                        // New meal from backend
-                        await db.plannedMeals.add({
-                            ...meal,
-                            id: generateUUIDv7(),
-                            planId: data.planId,
-                            isSynced: 1,
-                            isDeleted: 0,
-                            isNew: 0
-                        });
                     }
-                }
-                
-                // 3. Final cleanup: reset deletion flags for any meal that is in the backend response
-                // but marked as deleted locally
-                if (force) {
-                    // Manual additions are PRESERVED as per user preference
                 }
                 
                 // Update state
@@ -646,11 +683,13 @@ export function WeeklyPlanner() {
                 const reconstructedPlan: PlanResponse = {
                     ...metadata,
                     isActive: 1,
+                    status: data.status, // Keep original status from backend
                     meals: allMeals
                 };
 
                 setPlanData(prev => {
-                    if (prev?.status === 'GENERATING' && data.status === 'COMPLETED') {
+                    const wasGenerating = prev?.status === 'GENERATING' || prev?.status === 'PROCESSING' || prev?.status === 'PENDING' || prev?.status === 'PARTIAL';
+                    if (wasGenerating && data.status === 'COMPLETED') {
                         setTimeout(() => {
                             setNotification({
                                 title: language === 'es' ? '¡Plan Listo!' : 'Plan Ready!',
@@ -705,31 +744,26 @@ export function WeeklyPlanner() {
 
     useEffect(() => {
         const bootstrap = async () => {
-            // Initial fast load from local DB
+            // Initial load from local DB
             await fallbackToLocal();
-            // Refresh from backend
-            fetchPlan();
+            
+            // Check if we need to fetch from backend
+            const activeMetadata = await db.planMetadata.where('isActive').equals(1).first();
+            
+            // Logic: fetch if no active plan or if the current plan is empty
+            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            
+            if (!activeMetadata || allMeals.length === 0) {
+                fetchPlan();
+            }
         };
 
         bootstrap();
         const hasSeenPlannerGuide = document.cookie.includes('seen_planner_guide=true');
         if (!hasSeenPlannerGuide) setShowOnboarding(true);
-    }, []);
+    }, [isAuthenticated]);
 
-    // Polling effect
-    useEffect(() => {
-        let interval: ReturnType<typeof setInterval>;
-        if (planData?.status === 'GENERATING') {
-            const hasMeals = planData?.meals && planData.meals.length > 0;
-            const delay = hasMeals ? 60 * 60 * 1000 : 60 * 1000; // 1 hr if has meals, else 1 min
-            interval = setInterval(() => {
-                fetchPlan();
-            }, delay);
-        }
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [planData?.status]);
+    // Remove old polling effect (we replaced it with the logic-based ones above)
 
 
 
@@ -947,9 +981,6 @@ export function WeeklyPlanner() {
     const confirmGeneration = async (skipPinned: boolean = false) => {
         setShowConsentModal(false);
 
-        console.log("AI Generation requested with consent:", consentGiven);
-        setIsGenerating(true);
-        
         try {
             // Target week: Tomorrow to Tomorrow + 6 days
             const tomorrow = new Date(today);
@@ -1001,12 +1032,13 @@ export function WeeklyPlanner() {
                             : 'You have already generated your menu for this week or used your Cacomi coins to generate recipes with AI and do not have enough left for the plan.',
                         type: 'warning'
                     });
-                } else if (data.message?.includes('metas')) {
+                } else if (data.message?.includes('metas') || data.message?.includes('biometric') || data.message?.includes('perfil') || data.message?.includes('necesarias')) {
+                    setIsBiometricModalOpen(true);
                     setNotification({
                         title: language === 'es' ? 'Perfil Incompleto' : 'Incomplete Profile',
                         message: language === 'es' 
-                            ? 'Aún no completas tu información nutricional o perfil. (Próximamente: Formulario de perfil)' 
-                            : 'You have not yet completed your nutritional information or profile. (Coming soon: Profile form)',
+                            ? 'Necesitamos conocer tus metas nutricionales para diseñar tu plan.' 
+                            : 'We need to know your nutritional goals to design your plan.',
                         type: 'info'
                     });
                 } else {
@@ -1031,6 +1063,8 @@ export function WeeklyPlanner() {
             if (data.message?.includes('encolado') || data.message?.includes('queued') || data.message?.includes('ID:')) {
                 setGenerationStatus(data.message);
                 setIsGenerating(true);
+                // Update local status to trigger polling effects
+                setPlanData(prev => prev ? { ...prev, status: 'PENDING' } : { ...DEFAULT_GUEST_PLAN, status: 'PENDING' } as PlanResponse);
                 // Polling useEffect will handle the rest
             } else {
                 await fetchPlan();
@@ -1160,6 +1194,20 @@ export function WeeklyPlanner() {
     };
 
     // Calculate if we should show the check-in prompt
+    const isLastDayOrAfter = React.useMemo(() => {
+        if (!planData?.meals || planData.isActive === 0) return true;
+        const backendMeals = planData.meals.filter(m => !m.isNew);
+        if (backendMeals.length === 0) return true;
+        
+        const lastMealDateStr = backendMeals.reduce((max, m) => m.mealDate > max ? m.mealDate : max, '');
+        const lastMealDate = new Date(lastMealDateStr + 'T00:00:00');
+        
+        const todayMidnight = new Date(today);
+        todayMidnight.setHours(0, 0, 0, 0);
+        
+        return todayMidnight >= lastMealDate;
+    }, [planData]);
+
     const shouldShowCheckinPrompt = React.useMemo(() => {
         if (!planData?.meals || !planData?.planId || planData.isActive === 0) return false;
         
@@ -1234,13 +1282,31 @@ export function WeeklyPlanner() {
                             </div>
                         </div>
                         <h2 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-400">
-                            {generationStatus || t.planner?.concierge?.loading || 'Nuestros chefs están diseñando tu menú...'}
+                            {generationStatus || t.planner?.concierge?.loading || (language === 'es' ? 'Nuestros chefs están diseñando tu menú...' : 'Our chefs are designing your menu...')}
                         </h2>
-                        <p className="text-muted-foreground">
-                            {generationStatus 
-                                ? (language === 'es' ? 'Sincronizando con el Chef AI...' : 'Syncing with the AI Chef...')
-                                : (language === 'es' ? 'Por favor espera un momento mientras procesamos tus preferencias.' : 'Please wait a moment while we process your preferences.')}
-                        </p>
+                        <div className="space-y-4">
+                            <p className="text-muted-foreground text-sm">
+                                {generationStatus 
+                                    ? (language === 'es' ? 'Sincronizando con el Chef AI...' : 'Syncing with the AI Chef...')
+                                    : (language === 'es' ? 'Estamos procesando tus preferencias en nuestra cocina inteligente.' : 'We are processing your preferences in our smart kitchen.')}
+                            </p>
+                            
+                            <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                                <p className="text-[11px] text-primary/80 leading-relaxed font-medium">
+                                    <Sparkles className="w-3 h-3 inline mr-1.5 mb-0.5" />
+                                    {language === 'es' 
+                                        ? 'Puedes navegar por la app mientras cocinamos tu plan. La generación continuará en segundo plano y verás los cambios la próxima vez que entres al planificador.' 
+                                        : 'You can browse the app while we cook your plan. Generation will continue in the background and you will see the changes next time you enter the planner.'}
+                                </p>
+                            </div>
+
+                            <button 
+                                onClick={() => setIsGenerating(false)}
+                                className="text-[11px] text-muted-foreground underline underline-offset-4 hover:text-primary transition-colors"
+                            >
+                                {language === 'es' ? 'Entendido, volver al calendario' : 'Got it, back to calendar'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -1327,6 +1393,27 @@ export function WeeklyPlanner() {
                                             </div>
                                         </div>
                                     ))}
+                                </div>
+
+                                {/* Beta / Pantry Priority Note */}
+                                <div className="mt-5 pt-4 border-t border-primary/10">
+                                    <div className="flex gap-3">
+                                        <div className="shrink-0 w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+                                            <Info className="w-4 h-4" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] leading-relaxed text-muted-foreground font-medium">
+                                                {language === 'es' 
+                                                    ? 'Nota Premium Beta: El Chef AI intentará respetar tus selecciones, pero si tienes ingredientes en tu despensa, podría priorizar su uso para evitar el desperdicio. Si alguna de tus recetas no aparece en el plan final, ¡no te preocupes! Podrás re-ajustarlas fácilmente después.'
+                                                    : 'Premium Beta Note: The AI Chef will try to respect your selections, but if you have ingredients in your pantry, it might prioritize using them to avoid waste. If any of your recipes don\'t appear in the final plan, don\'t worry! You can easily re-adjust them later.'}
+                                            </p>
+                                            <p className="text-[10px] leading-relaxed text-primary/60 italic">
+                                                {language === 'es'
+                                                    ? 'Tus datos anónimos nos ayudan a perfeccionar este modelo para ti.'
+                                                    : 'Your anonymous data helps us perfect this model for you.'}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -1582,10 +1669,22 @@ export function WeeklyPlanner() {
 
                                 {/* AI Button */}
                                 <div className="relative">
-                                    {planData?.status === 'GENERATING' ? (
+                                    {planData?.status === 'GENERATING' || planData?.status === 'PROCESSING' || planData?.status === 'PENDING' || planData?.status === 'PARTIAL' ? (
                                         <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary/10 text-primary rounded-xl font-bold text-sm border border-primary/20">
                                             <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                                             {language === 'es' ? 'Generando...' : 'Generating...'}
+                                        </div>
+                                    ) : (planData?.status === 'COMPLETED' && !isLastDayOrAfter) ? (
+                                        <div className="flex flex-col items-end gap-2">
+                                            <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-muted/30 text-muted-foreground rounded-xl font-bold text-sm border border-border/50 opacity-80">
+                                                <CheckCircle2 className="w-4 h-4 text-primary" />
+                                                {language === 'es' ? 'Plan Activo' : 'Active Plan'}
+                                            </div>
+                                            <p className="text-[10px] text-muted-foreground/60 text-right max-w-[200px] leading-tight font-medium italic">
+                                                {language === 'es' 
+                                                    ? 'Tu aventura culinaria está en marcha. Podrás generar una nueva propuesta una vez que tu menú actual esté por concluir.' 
+                                                    : 'Your culinary adventure is underway. You can generate a new proposal once your current menu is about to conclude.'}
+                                            </p>
                                         </div>
                                     ) : (
                                         <button
@@ -1643,21 +1742,38 @@ export function WeeklyPlanner() {
                                     <div className="flex items-center gap-1.5">
                                         <User className="w-3.5 h-3.5 text-primary" /> 
                                         <span className="text-foreground font-bold">{t.planner?.profileOverview || 'Perfil'}:</span>
-                                        <span>{planData.heightCm}cm, {planData.currentWeight}kg</span>
+                                        {(!planData?.heightCm || planData.heightCm === 0) ? (
+                                            <button 
+                                                onClick={() => setIsBiometricModalOpen(true)}
+                                                className="text-primary font-black uppercase tracking-widest text-[9px] hover:underline"
+                                            >
+                                                {language === 'es' ? 'Completar para planificar' : 'Complete to plan'}
+                                            </button>
+                                        ) : (
+                                            <span>{planData.heightCm}cm, {planData.currentWeight}kg</span>
+                                        )}
                                     </div>
                                     
                                     <div className="w-1 h-1 rounded-full bg-border" />
                                     
                                     <div className="flex items-center gap-1.5">
                                         <Target className="w-3.5 h-3.5 text-primary" /> 
-                                        <span className="uppercase tracking-widest text-[9px] font-bold">{planData.goal?.replace('_', ' ')}</span>
+                                        {(!planData?.goal) ? (
+                                            <span className="text-[9px] uppercase tracking-widest opacity-40">--</span>
+                                        ) : (
+                                            <span className="uppercase tracking-widest text-[9px] font-bold">{planData.goal?.replace('_', ' ')}</span>
+                                        )}
                                     </div>
 
                                     <div className="w-1 h-1 rounded-full bg-border hidden sm:block" />
                                     
                                     <div className="flex items-center gap-1.5 hidden sm:flex">
                                         <Activity className="w-3.5 h-3.5 text-primary" /> 
-                                        <span className="uppercase tracking-widest text-[9px] font-bold">{planData.activityLevel?.replace('_', ' ')}</span>
+                                        {(!planData?.activityLevel) ? (
+                                            <span className="text-[9px] uppercase tracking-widest opacity-40">--</span>
+                                        ) : (
+                                            <span className="uppercase tracking-widest text-[9px] font-bold">{planData.activityLevel?.replace('_', ' ')}</span>
+                                        )}
                                     </div>
                                 </div>
 
@@ -1970,6 +2086,19 @@ export function WeeklyPlanner() {
                 isOpen={isCheckinOpen}
                 onClose={() => setIsCheckinOpen(false)}
                 onSave={handleSaveCheckin}
+            />
+
+            <BiometricModal 
+                isOpen={isBiometricModalOpen}
+                onClose={() => setIsBiometricModalOpen(false)}
+                onSaveSuccess={() => {
+                    setNotification({
+                        title: language === 'es' ? 'Perfil Actualizado' : 'Profile Updated',
+                        message: language === 'es' ? '¡Genial! Ya puedes generar tu plan personalizado.' : 'Great! You can now generate your personalized plan.',
+                        type: 'success'
+                    });
+                }}
+                language={language}
             />
 
             {/* ── CONFIRM DIALOG ── */}

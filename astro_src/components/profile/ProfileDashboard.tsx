@@ -8,6 +8,8 @@ import { ViewAsToggle, VIEW_AS_OPTIONS, type ViewAsType } from "./ViewAsToggle";
 import { Button } from "@/components/shadcn/button";
 import { Camera, MapPin, CalendarDays, Link as LinkIcon, Activity } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
+import { BiometricModal } from "../planner/BiometricModal";
+import { Ruler } from "lucide-react";
 
 export function ProfileDashboard() {
     const { user, isLoading: isAuthLoading } = useAuth();
@@ -19,6 +21,7 @@ export function ProfileDashboard() {
     const [error, setError] = useState<string | null>(null);
     const [viewAs, setViewAs] = useState<ViewAsType>(VIEW_AS_OPTIONS.ME);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isBiometricModalOpen, setIsBiometricModalOpen] = useState(false);
 
     useEffect(() => {
         async function fetchProfile() {
@@ -109,6 +112,10 @@ export function ProfileDashboard() {
                                         {t?.nav?.comingSoon || 'Soon'}
                                     </span>
                                 </div>
+                                <Button onClick={() => setIsBiometricModalOpen(true)} variant="outline" className="rounded-full border-primary/30 text-primary">
+                                    <Ruler className="w-4 h-4 mr-2" />
+                                    {t?.profile?.biometric || "Metas Nutricionales"}
+                                </Button>
                                 <Button onClick={() => setIsEditModalOpen(true)} className="rounded-full">
                                     {t?.profile?.editProfile || "Editar Perfil"}
                                 </Button>
@@ -154,6 +161,15 @@ export function ProfileDashboard() {
                 onClose={() => setIsEditModalOpen(false)}
                 user={profileData}
                 onSave={handleSaveProfile}
+            />
+
+            <BiometricModal 
+                isOpen={isBiometricModalOpen}
+                onClose={() => setIsBiometricModalOpen(false)}
+                onSaveSuccess={() => {
+                    // Success!
+                }}
+                language={t?.language || 'es'}
             />
         </div>
     );

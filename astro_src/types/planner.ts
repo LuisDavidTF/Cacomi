@@ -43,7 +43,7 @@ export interface PlanResponse {
     targetWeight: number;
     targetProtein: number;
     weeklyBudget: number | null;
-    status?: 'GENERATING' | 'COMPLETED' | string;
+    status?: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'PARTIAL' | 'GENERATING' | string;
     isActive?: number;
     meals: Meal[];
 }

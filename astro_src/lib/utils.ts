@@ -9,7 +9,7 @@ export function generateUUIDv7(): string {
     const timestamp = Date.now();
     const timeHex = timestamp.toString(16).padStart(12, '0');
     const randomHex1 = Math.floor(Math.random() * 0x1000).toString(16).padStart(3, '0');
-    const randomHex2 = Math.floor(Math.random() * 0x4000000000000000).toString(16).padStart(15, '0');
+    const randomHex2 = Math.floor(Math.random() * 0x4000000000000000).toString(16).padStart(16, '0');
 
     return `${timeHex.slice(0, 8)}-${timeHex.slice(8, 12)}-7${randomHex1}-8${randomHex2.slice(1, 4)}-${randomHex2.slice(4)}`;
 }

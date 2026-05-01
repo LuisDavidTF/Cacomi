@@ -435,7 +435,8 @@ export const translations = {
             loading: 'Cargando perfil...',
             viewAsMe: 'Ver como yo',
             viewAsPublic: 'Público',
-            viewAs: 'Vista:'
+            viewAs: 'Vista:',
+            biometric: 'Metas Nutricionales'
         },
         admin: {
             title: 'Panel de Administrador',
@@ -874,7 +875,8 @@ export const translations = {
             loading: 'Loading profile...',
             viewAsMe: 'View as me',
             viewAsPublic: 'Public',
-            viewAs: 'View:'
+            viewAs: 'View:',
+            biometric: 'Nutritional Goals'
         },
         admin: {
             title: 'Admin Panel',
