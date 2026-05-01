@@ -7,15 +7,15 @@ export const translations = {
     es: {
         recipeTypes: {
             BREAKFAST: 'Desayuno',
-            LUNCH: 'Almuerzo',
-            DINNER: 'Cena',
             MAIN_COURSE: 'Plato Fuerte',
+            SNACK: 'Snack / Colación',
             SIDE_VEGETABLE: 'Guarnición de Verduras',
             SIDE_CARB: 'Cereales y Tubérculos',
             LEGUME: 'Leguminosas',
-            SNACK: 'Snack / Colación',
             SAUCE: 'Salsas y Aderezos',
-            SOUP: 'Sopas y Caldos'
+            SOUP: 'Sopas y Caldos',
+            LUNCH: 'Almuerzo',
+            DINNER: 'Cena'
         },
         about: {
             title: 'Acerca de Cacomi',
@@ -511,15 +511,15 @@ export const translations = {
     en: {
         recipeTypes: {
             BREAKFAST: 'Breakfast',
-            LUNCH: 'Lunch',
-            DINNER: 'Dinner',
             MAIN_COURSE: 'Main Course',
+            SNACK: 'Snack',
             SIDE_VEGETABLE: 'Vegetable Side',
             SIDE_CARB: 'Carbs / Grains',
             LEGUME: 'Legumes',
-            SNACK: 'Snack',
             SAUCE: 'Sauces & Dressings',
-            SOUP: 'Soups & Broths'
+            SOUP: 'Soups & Broths',
+            LUNCH: 'Lunch',
+            DINNER: 'Dinner'
         },
         about: {
             title: 'About Cacomi',
@@ -984,6 +984,18 @@ export const translations = {
         }
     },
     fr: {
+        recipeTypes: {
+            BREAKFAST: 'Petit-déjeuner',
+            MAIN_COURSE: 'Plat Principal',
+            SNACK: 'Collation / Snack',
+            SIDE_VEGETABLE: 'Accompagnement de Légumes',
+            SIDE_CARB: 'Céréales et Tubercules',
+            LEGUME: 'Légumineuses',
+            SAUCE: 'Sauces et Assaisonnements',
+            SOUP: 'Soupes et Bouillons',
+            LUNCH: 'Déjeuner',
+            DINNER: 'Dîner'
+        },
         about: {
             title: 'À propos de Cacomi',
             desc: 'Découvrez la mission, les valeurs et l\'avenir de Cacomi, votre assistant de cuisine IA.',
