@@ -53,12 +53,36 @@ export const GET: APIRoute = async ({ url, request }) => {
             return new Response(null, { status: 302, headers });
         }
 
-        // If no redirect, just proxy the body
+        // If no redirect, check if it's JSON with a token
+        const contentType = response.headers.get('Content-Type') || '';
         const body = await response.text();
+
+        if (contentType.includes('application/json')) {
+            try {
+                const data = JSON.parse(body);
+                if (data.accessToken) {
+                    // Set the cookie and redirect to home
+                    const headers = new Headers();
+                    // Forward any existing set-cookie from backend
+                    if (setCookie) headers.set('set-cookie', setCookie);
+                    
+                    // Manually set auth_token if it was returned in body
+                    // (Matches the cookie name used in middleware.ts)
+                    const cookieOptions = "Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600";
+                    headers.append('set-cookie', `auth_token=${data.accessToken}; ${cookieOptions}`);
+                    
+                    headers.set('Location', '/');
+                    return new Response(null, { status: 302, headers });
+                }
+            } catch (e) {
+                // Not valid JSON, fallback to showing body
+            }
+        }
+
         return new Response(body, {
             status: response.status,
             headers: {
-                'Content-Type': response.headers.get('Content-Type') || 'text/html',
+                'Content-Type': contentType || 'text/html',
                 'set-cookie': setCookie || ''
             }
         });
