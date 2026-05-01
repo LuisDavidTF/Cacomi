@@ -15,17 +15,81 @@ const extractRole = (u) => {
 
 export const useAuth = create((set, get) => ({
   user: null,
+  accessToken: null,
   isLoading: true,
   isAuthenticated: false,
+
+  fetchAuth: async (url, options = {}) => {
+    // Helper to get fresh headers with the latest token
+    const getHeaders = () => {
+      const { accessToken } = get();
+      const h = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      };
+      if (accessToken) {
+        h['Authorization'] = `Bearer ${accessToken}`;
+      }
+      return h;
+    };
+
+    let res = await fetch(url, { ...options, headers: getHeaders() });
+
+    // Handle 401: Attempt silent refresh
+    if (res.status === 401) {
+      try {
+        // Wait for any ongoing refresh or start a new one
+        const newAccessToken = await get().refreshSession();
+        
+        if (newAccessToken) {
+          // IMPORTANT: Re-read headers to ensure we use the NEW token
+          res = await fetch(url, { ...options, headers: getHeaders() });
+        }
+      } catch (refreshError) {
+        console.error("Silent refresh failed:", refreshError);
+      }
+    }
+
+    return res;
+  },
+
+  // Helper to prevent multiple concurrent refreshes
+  refreshPromise: null,
+
+  refreshSession: async () => {
+    // If a refresh is already in progress, return the existing promise
+    const currentPromise = get().refreshPromise;
+    if (currentPromise) return currentPromise;
+
+    const newPromise = (async () => {
+      try {
+        const res = await fetch('/api/refresh', { method: 'POST' });
+        if (!res.ok) throw new Error('Refresh failed');
+        
+        const { accessToken } = await res.json();
+        set({ accessToken, isAuthenticated: true });
+        return accessToken;
+      } catch (error) {
+        set({ user: null, accessToken: null, isAuthenticated: false });
+        return null;
+      } finally {
+        // Clear the promise when done
+        set({ refreshPromise: null });
+      }
+    })();
+
+    set({ refreshPromise: newPromise });
+    return newPromise;
+  },
 
   checkUserSession: async () => {
     set({ isLoading: true });
     try {
-      const res = await fetch('/api/me');
+      const { fetchAuth } = get();
+      const res = await fetchAuth('/api/me');
 
       if (res.status === 409) {
-        // Cuenta desactivada: limpiar sesión y redirigir a login
-        set({ user: null, isAuthenticated: false, isLoading: false });
+        set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false });
         if (typeof window !== 'undefined') {
           localStorage.removeItem('Cacomi_user_session');
           window.location.assign('/login');
@@ -34,7 +98,8 @@ export const useAuth = create((set, get) => ({
       }
 
       if (res.status === 401) {
-        set({ user: null, isAuthenticated: false, isLoading: false });
+        // If we reach here, refresh also failed or wasn't possible
+        set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false });
         if (typeof window !== 'undefined') {
           localStorage.removeItem('Cacomi_user_session');
         }
@@ -65,10 +130,10 @@ export const useAuth = create((set, get) => ({
         if (cachedUser) {
           set({ user: JSON.parse(cachedUser), isAuthenticated: true, isLoading: false });
         } else {
-          set({ user: null, isAuthenticated: false, isLoading: false });
+          set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false });
         }
       } else {
-        set({ user: null, isAuthenticated: false, isLoading: false });
+        set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false });
       }
     }
   },
@@ -86,55 +151,54 @@ export const useAuth = create((set, get) => ({
       throw new Error(data.message || 'Error al iniciar sesión');
     }
 
+    const { accessToken, user } = data;
+
     const safeUser = {
-      id: data.user.id,
-      name: data.user.name,
-      email: data.user.email,
-      profile_photo: data.user.profile_photo_url || data.user.profile_photo,
-      role: extractRole(data.user)
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      profile_photo: user.profile_photo_url || user.profile_photo,
+      role: extractRole(user)
     };
     localStorage.setItem('Cacomi_user_session', JSON.stringify(safeUser));
 
-    set({ user: safeUser, isAuthenticated: true });
+    set({ user: safeUser, accessToken, isAuthenticated: true });
     return safeUser;
   },
 
-  register: async (name, email, password, passwordConfirmation) => {
-    const res = await fetch('/api/register', {
+  setPassword: async (password) => {
+    const { fetchAuth } = get();
+    const res = await fetchAuth('/api/set-password', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ password }),
     });
 
-    const data = await res.json();
-
     if (!res.ok) {
-      throw {
-        message: data.message || 'Error en el registro',
-        status: res.status
-      };
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || 'Error al establecer contraseña');
     }
 
-    return data;
+    return await res.json();
   },
+
 
   logout: async (options = {}) => {
     const { returnUrl } = options;
 
     // Limpiamos el estado del cliente antes de navegar
-    set({ user: null, isAuthenticated: false });
+    set({ user: null, accessToken: null, isAuthenticated: false });
     if (typeof window !== 'undefined') {
       localStorage.removeItem('Cacomi_user_session');
       if (!returnUrl) {
         CacheManager.clearAll();
       }
 
-      // Navegamos al endpoint GET /api/logout que borra la cookie y redirige a /login
-      // en una sola respuesta HTTP. Esto es más fiable que un fetch POST + redirect manual
-      // porque elimina la condición de carrera donde la cookie persiste entre dos requests.
+      // Hit the logout endpoint first to clear cookies on server
+      await fetch('/api/logout', { method: 'POST' }).catch(() => {});
+
       const logoutUrl = returnUrl
-        ? `/api/logout?callbackUrl=${encodeURIComponent(returnUrl)}`
-        : '/api/logout';
+        ? `/login?callbackUrl=${encodeURIComponent(returnUrl)}`
+        : '/login';
 
       window.location.assign(logoutUrl);
     }

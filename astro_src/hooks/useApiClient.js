@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const useApiClient = () => {
-  const { logout } = useAuth();
+  const { logout, fetchAuth } = useAuth();
 
   const request = useCallback(async (endpoint, options = {}) => {
     const { body, ...customConfig } = options;
@@ -30,7 +30,8 @@ export const useApiClient = () => {
 
     for (let i = 0; i <= retries; i++) {
       try {
-        const response = await fetch(endpoint, config);
+        // Use fetchAuth instead of fetch to include JWT and handle silent refresh
+        const response = await fetchAuth(endpoint, config);
 
         if (response.status === 204) {
           return null;

@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+export const prerender = false;
+---
+
+<Layout title="Autenticación Exitosa" description="Procesando tu inicio de sesión...">
+  <div class="min-h-screen flex items-center justify-center bg-background">
+    <div class="text-center space-y-4">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+      <h2 class="text-2xl font-bold text-foreground">Procesando inicio de sesión...</h2>
+      <p class="text-muted-foreground">Serás redirigido en un momento.</p>
+    </div>
+  </div>
+
+  <script>
+    import { useAuth } from '@context/AuthContext';
+
+    // Extract token from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const callbackUrl = urlParams.get('callbackUrl') || '/';
+
+    if (token) {
+      // Update the Auth Store
+      // Note: We use the store directly since we are in a script
+      const auth = useAuth.getState();
+      
+      // We manually set the token and trigger a session check to get user info
+      useAuth.setState({ accessToken: token, isAuthenticated: true });
+      
+      // Perform session check to validate and get user details
+      auth.checkUserSession().then(() => {
+        window.location.href = callbackUrl;
+      }).catch(() => {
+        window.location.href = '/login?error=session_verification_failed';
+      });
+    } else {
+      window.location.href = '/login?error=no_token';
+    }
+  </script>
+</Layout>

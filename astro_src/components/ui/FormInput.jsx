@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const FormInput = ({ id, label, type = 'text', value, onChange, error, ...props }) => {
+export const FormInput = ({ id, label, type = 'text', value, onChange, error = null, ...props }) => {
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-foreground mb-1">

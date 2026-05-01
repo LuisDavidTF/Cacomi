@@ -1,9 +1,9 @@
 # 🍽️ Cacomi — Planificador de comidas
 
-Cacomi es una aplicación web moderna e inteligente para planificar comidas, gestionar tu despensa y generar recetas con IA. Construida con tecnologías de punta y optimizada para experiencia de escritorio y móvil con soporte offline completo.
+Cacomi es una aplicación web moderna e inteligente para planificar comidas, gestionar tu despensa y generar recetas con IA. Construida con tecnologías de punta y optimizada para ofrecer una experiencia premium en escritorio y móvil con soporte offline avanzado.
 
-> [!WARNING]
-> **Estado Beta**: Actualmente la plataforma se encuentra en fase de pruebas. Al momento del lanzamiento oficial, se realizará una limpieza completa de la base de datos (usuarios, recetas y despensa).
+> [!NOTE]
+> **Lanzamiento Oficial**: La plataforma ha completado su fase beta inicial. Explora, planifica y cocina con la potencia de Google Gemini.
 
 ## ✨ Features
 

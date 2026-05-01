@@ -23,13 +23,20 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-    const tokenCookie = cookies.get(TOKEN_NAME);
+    // 1. Prioritize Authorization header from frontend
+    const authHeader = request.headers.get('Authorization');
+    let token = '';
 
-    if (!tokenCookie) {
-        return new Response(JSON.stringify({ message: 'No autorizado' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+    } else {
+        // 2. Fallback to legacy cookie
+        token = cookies.get(TOKEN_NAME)?.value || '';
     }
 
-    const token = tokenCookie.value;
+    if (!token || token === 'undefined') {
+        return new Response(JSON.stringify({ message: 'No autorizado' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
     try {
         const body = await request.json();
         const data = await RecipeService.create(body, token);

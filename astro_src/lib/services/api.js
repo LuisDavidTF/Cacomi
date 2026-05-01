@@ -23,6 +23,10 @@ export class ApiService {
         try {
             const response = await fetch(url, config);
 
+            if (options.fullResponse) {
+                return response;
+            }
+
             // Handle 204 No Content
             if (response.status === 204) {
                 return null;

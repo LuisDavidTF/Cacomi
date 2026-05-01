@@ -6,7 +6,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { generateUUIDv7 } from '@/lib/utils';
 
 export function usePantry() {
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, fetchAuth } = useAuth();
     const items = useLiveQuery(
         () => db.pantryItems.where('isDeleted').equals(0).toArray()
     );
@@ -74,10 +74,9 @@ export function usePantry() {
                     };
                 });
 
-                const response = await fetch('/api/pantry', {
+                const response = await fetchAuth('/api/pantry', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ changes: validChanges })
+                    body: { changes: validChanges }
                 });
 
                 if (response.ok) {
@@ -280,7 +279,7 @@ export function usePantry() {
     const syncFromBackend = async () => {
         try {
             console.log('Bootstrapping: Syncing pantry from backend...');
-            const response = await fetch('/api/pantry');
+            const response = await fetchAuth('/api/pantry');
             if (response.ok) {
                 const data = await response.json();
                 if (data.items && Array.isArray(data.items)) {

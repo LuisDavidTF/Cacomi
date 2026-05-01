@@ -30,6 +30,8 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
     // Reconstruct the backend URL (ensuring clean slashes)
     const targetUrl = new URL(`${BACKEND_URL}/api/v2/${path}${url.search}`);
     
+    console.log(`[PROXY DEBUG] Method: ${request.method} | Path: ${path} | Target: ${targetUrl.toString()}`);
+    
     if (BACKEND_URL === 'http://localhost:8080' && import.meta.env.PROD) {
         console.warn(`[PROXY WARNING] BACKEND_URL not found, falling back to localhost in PROD!`);
     }
@@ -40,10 +42,28 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
     headers.delete('origin');
     headers.delete('referer');
 
-    // Inject Auth Token from HttpOnly cookie on the server
-    const token = cookies.get(TOKEN_NAME)?.value;
-    if (token && token !== 'undefined') {
-        headers.set('Authorization', `Bearer ${token}`);
+    // Inject Auth Token
+    // Priority 1: Authorization header from frontend (preferred for JWT)
+    // Priority 2: auth_token cookie (legacy)
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+        const token = cookies.get(TOKEN_NAME)?.value;
+        if (token && token !== 'undefined') {
+            headers.set('Authorization', `Bearer ${token}`);
+        }
+    }
+
+    // Proxy the refreshToken cookie if it exists to allow the backend to see it
+    const refreshToken = cookies.get('refreshToken')?.value;
+    if (refreshToken) {
+        // If the backend expects the cookie, we should send it.
+        // However, fetch in Node/Astro doesn't automatically send cookies.
+        // We append it to any existing Cookie header.
+        const existingCookie = headers.get('Cookie') || '';
+        const newCookie = existingCookie 
+            ? `${existingCookie}; refreshToken=${refreshToken}`
+            : `refreshToken=${refreshToken}`;
+        headers.set('Cookie', newCookie);
     }
 
     try {
@@ -58,10 +78,16 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
         // Return the response back to the client
         const responseData = await response.arrayBuffer();
         
-        // Pass through some key headers
+        // Pass through key headers
         const outHeaders = new Headers();
         const contentType = response.headers.get('content-type');
         if (contentType) outHeaders.set('content-type', contentType);
+        
+        // Forward Set-Cookie headers (essential for refreshToken and sessions)
+        const setCookie = response.headers.get('set-cookie');
+        if (setCookie) {
+            outHeaders.set('set-cookie', setCookie);
+        }
 
         return new Response(responseData, {
             status: response.status,

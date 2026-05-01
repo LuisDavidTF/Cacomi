@@ -238,6 +238,8 @@ export const translations = {
         auth: {
             loginTitle: 'Acceder',
             registerTitle: 'Crear Cuenta',
+            unifiedTitle: 'Tu Cocina Inteligente',
+            unifiedSubtitle: 'Entra o crea tu cuenta para empezar a cocinar mejor.',
             name: 'Nombre',
             nameReq: 'El nombre es requerido.',
             email: 'Email',
@@ -263,7 +265,11 @@ export const translations = {
             termsLink: 'Términos y Condiciones',
             privacyLink: 'Política de Privacidad',
             and: ' y ',
-            termsError: 'Debes aceptar los términos para continuar.'
+            termsError: 'Debes aceptar los términos para continuar.',
+            googleLogin: 'Continuar con Google',
+            setPassword: 'Establecer Contraseña',
+            setPasswordDesc: 'Añade una contraseña a tu cuenta para iniciar sesión con email en el futuro.',
+            setPasswordSuccess: 'Contraseña establecida correctamente.'
         },
 
         createRecipe: {
@@ -678,6 +684,8 @@ export const translations = {
         auth: {
             loginTitle: 'Log In',
             registerTitle: 'Create Account',
+            unifiedTitle: 'Your Smart Kitchen',
+            unifiedSubtitle: 'Log in or create an account to start cooking better.',
             name: 'Name',
             nameReq: 'Name is required.',
             email: 'Email',
@@ -703,7 +711,11 @@ export const translations = {
             termsLink: 'Terms and Conditions',
             privacyLink: 'Privacy Policy',
             and: ' and ',
-            termsError: 'You must accept the terms to continue.'
+            termsError: 'You must accept the terms to continue.',
+            googleLogin: 'Continue with Google',
+            setPassword: 'Set Password',
+            setPasswordDesc: 'Add a password to your account to log in with email in the future.',
+            setPasswordSuccess: 'Password set successfully.'
         },
 
         createRecipe: {
@@ -1123,7 +1135,11 @@ export const translations = {
             termsLink: 'Termes et Conditions',
             privacyLink: 'Politique de Confidentialité',
             and: ' et ',
-            termsError: 'Vous devez accepter les termes pour continuer.'
+            termsError: 'Vous devez accepter les termes pour continuer.',
+            googleLogin: 'Continuer avec Google',
+            setPassword: 'Définir le mot de passe',
+            setPasswordDesc: 'Ajoutez un mot de passe à votre compte pour vous connecter par e-mail à l\'avenir.',
+            setPasswordSuccess: 'Mot de passe défini avec succès.'
         },
 
         createRecipe: {

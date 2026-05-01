@@ -277,16 +277,10 @@ export function Navbar() {
                                     <div className="w-px h-5 bg-border/50 mx-1 hidden lg:block"></div>
                                     <a
                                         href="/login"
-                                        className="flex items-center text-sm lg:text-base font-medium px-4 lg:px-6 py-2 rounded-full text-foreground/80 hover:text-foreground hover:bg-muted/60 transition-colors"
+                                        className="flex items-center text-sm lg:text-base font-bold px-8 py-2.5 rounded-full text-primary-foreground bg-primary hover:opacity-90 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95"
                                     >
+                                        <LogIn className="w-4 h-4 mr-2" />
                                         {t?.nav?.login || 'Entrar'}
-                                    </a>
-
-                                    <a
-                                        href="/register"
-                                        className="flex items-center text-sm lg:text-base font-medium px-6 py-2 rounded-full text-primary-foreground bg-primary hover:opacity-90 shadow-sm hover:shadow-md transition-all hover:scale-[1.02]"
-                                    >
-                                        {t?.nav?.register || 'Crear Cuenta'}
                                     </a>
                                 </>
                             )}

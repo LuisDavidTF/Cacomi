@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Button = ({ children, onClick, type = 'button', variant = 'primary', isLoading = false, className = '', ...props }) => {
+export const Button = ({ children, onClick = undefined, type = 'button', variant = 'primary', isLoading = false, className = '', ...props }) => {
   /* 
     PREMIUM BUTTON DESIGN SYSTEM
     - Standardized Semantic Tokens

@@ -1,13 +1,4 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { AuthForm } from '@components/auth/AuthForm';
-
-export const prerender = false;
+// Redirecting to unified login page as requested by user
+return Astro.redirect('/login');
 ---
-
-<Layout title="Regístrate" description="Crea tu cuenta en Cacomi y empieza a organizar tus recetas favoritas hoy mismo.">
-  <div class="min-h-screen flex items-center justify-center">
-    <AuthForm isRegister={true} client:load />
-  </div>
-</Layout>
-

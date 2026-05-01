@@ -9,7 +9,8 @@ import { Button } from "@/components/shadcn/button";
 import { Camera, MapPin, CalendarDays, Link as LinkIcon, Activity } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 import { BiometricModal } from "../planner/BiometricModal";
-import { Ruler } from "lucide-react";
+import { Ruler, KeyRound } from "lucide-react";
+import { SetPasswordModal } from "./SetPasswordModal";
 
 export function ProfileDashboard() {
     const { user, isLoading: isAuthLoading } = useAuth();
@@ -22,6 +23,7 @@ export function ProfileDashboard() {
     const [viewAs, setViewAs] = useState<ViewAsType>(VIEW_AS_OPTIONS.ME);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isBiometricModalOpen, setIsBiometricModalOpen] = useState(false);
+    const [isSetPasswordModalOpen, setIsSetPasswordModalOpen] = useState(false);
 
     useEffect(() => {
         async function fetchProfile() {
@@ -119,6 +121,9 @@ export function ProfileDashboard() {
                                 <Button onClick={() => setIsEditModalOpen(true)} className="rounded-full">
                                     {t?.profile?.editProfile || "Editar Perfil"}
                                 </Button>
+                                <Button onClick={() => setIsSetPasswordModalOpen(true)} variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary/70 hover:text-primary transition-colors" title={t?.auth?.setPassword}>
+                                    <KeyRound className="w-5 h-5" />
+                                </Button>
                             </div>
                         )}
                     </div>
@@ -170,6 +175,11 @@ export function ProfileDashboard() {
                     // Success!
                 }}
                 language={t?.language || 'es'}
+            />
+
+            <SetPasswordModal 
+                isOpen={isSetPasswordModalOpen} 
+                onClose={() => setIsSetPasswordModalOpen(false)} 
             />
         </div>
     );

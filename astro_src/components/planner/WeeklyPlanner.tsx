@@ -169,7 +169,7 @@ function CustomCalendarModal({ isOpen, onClose, selectedDate, onSelect, language
 // ─── Component ─────────────────────────────────────────────────────────────
 export function WeeklyPlanner() {
     const { t, language } = useSettings();
-    const { isAuthenticated } = useAuth();
+    const { user, fetchAuth, isAuthenticated } = useAuth();
     const [currentVisibleDate, setCurrentVisibleDate] = useState<Date>(today);
     const [futureDaysLimit, setFutureDaysLimit] = useState(30);
     
@@ -548,7 +548,7 @@ export function WeeklyPlanner() {
     const pollStatus = async () => {
         try {
             // First check status to update the message
-            const statusRes = await fetch('/api/proxy/planner/status');
+            const statusRes = await fetchAuth('/api/proxy/planner/status');
             if (statusRes.ok) {
                 const statusData = await statusRes.json();
                 
@@ -634,7 +634,7 @@ export function WeeklyPlanner() {
         if (!isAuthenticated) return; // Don't fetch if not logged in
         
         try {
-            const response = await fetch('/api/proxy/planner');
+            const response = await fetchAuth('/api/proxy/planner');
             if (response.ok) {
                 const data: PlanResponse = await response.json();
                 console.log("Fetched Plan Data:", data);
@@ -1008,15 +1008,12 @@ export function WeeklyPlanner() {
                 recipePublicId: m.recipeUUID
             }));
 
-            const response = await fetch('/api/proxy/planner/request', {
+            const response = await fetchAuth('/api/proxy/planner/request', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
+                body: {
                     weeklyBudget: planData?.weeklyBudget || 900,
                     pinnedMeals
-                })
+                }
             });
             
             const text = await response.text();
@@ -1106,12 +1103,9 @@ export function WeeklyPlanner() {
             }
 
             // Case 2: Backend meal (Numeric ID)
-            const response = await fetch('/api/proxy/planner/meal-check', {
+            const response = await fetchAuth('/api/proxy/planner/meal-check', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
+                body: data
             });
 
             if (response.ok) {
@@ -1159,12 +1153,9 @@ export function WeeklyPlanner() {
         };
 
         try {
-            const response = await fetch('/api/proxy/planner/plan-check', {
+            const response = await fetchAuth('/api/proxy/planner/plan-check', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
+                body: payload
             });
 
             if (response.ok) {

@@ -1,27 +1,30 @@
 import type { APIRoute } from 'astro';
+import { AuthService } from '@/lib/services/auth';
 
-const TOKEN_NAME = 'auth_token';
-
-/** Borra la cookie de autenticación de forma robusta.
- *  Usa set() con maxAge=0 y expires=epoch en lugar de delete(),
- *  ya que delete() no siempre envía el Set-Cookie header correctamente
- *  en el adapter de Vercel.
- */
-function clearAuthCookie(cookies: Parameters<APIRoute>[0]['cookies']) {
+/** Borra las cookies de autenticación de forma robusta. */
+function clearAuthCookies(cookies: Parameters<APIRoute>[0]['cookies']) {
     const cookieOptions = {
         path: '/',
-        secure: import.meta.env.PROD,
+        secure: true,
         httpOnly: true,
-        sameSite: 'lax' as const,
+        sameSite: 'strict' as const,
         maxAge: 0,
         expires: new Date(0),
     };
-    // Sobreescribimos con valor vacío y expiración inmediata
-    cookies.set(TOKEN_NAME, '', cookieOptions);
+    
+    cookies.set('refreshToken', '', cookieOptions);
+    cookies.set('auth_token', '', cookieOptions); // Legacy support
 }
 
 export const POST: APIRoute = async ({ cookies }) => {
-    clearAuthCookie(cookies);
+    try {
+        const refreshToken = cookies.get('refreshToken')?.value;
+        if (refreshToken) {
+            await AuthService.logout(`refreshToken=${refreshToken}`).catch(() => {});
+        }
+    } catch (e) {}
+
+    clearAuthCookies(cookies);
 
     return new Response(JSON.stringify({ message: 'Sesión cerrada' }), {
         status: 200,
@@ -30,13 +33,16 @@ export const POST: APIRoute = async ({ cookies }) => {
 };
 
 export const GET: APIRoute = async ({ request, cookies, redirect }) => {
-    clearAuthCookie(cookies);
+    const refreshToken = cookies.get('refreshToken')?.value;
+    if (refreshToken) {
+        await AuthService.logout(`refreshToken=${refreshToken}`).catch(() => {});
+    }
+
+    clearAuthCookies(cookies);
 
     const url = new URL(request.url);
     const callbackUrl = url.searchParams.get('callbackUrl');
 
-    // Usamos path relativo para evitar que request.url (URL interna del lambda en Vercel)
-    // construya una URL absoluta con hostname incorrecto (ej: https://localhost/login)
     const loginPath = callbackUrl
         ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
         : '/login';

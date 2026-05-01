@@ -3,6 +3,7 @@ import { AppProviders } from '@components/providers/AppProviders';
 import { Navbar } from '@components/ui/Navbar';
 import { Footer } from '@components/ui/Footer';
 import { LegalsConsent } from '@components/ui/LegalsConsent';
+import { SplashScreen } from '@components/ui/SplashScreen';
 import { ViewTransitions } from 'astro:transitions';
 import '../layouts/globals.css';
 
@@ -15,8 +16,8 @@ interface Props {
 }
 
 const { 
-	title = 'Cacomi - Planificador de comidas',
-	description = 'Cacomi: El instinto de comer sano. Planifica tus comidas de manera inteligente y eficiente.',
+	title = 'Cacomi - Cocina Inteligente y Planificación de Comidas',
+	description = 'Cacomi: El asistente de cocina con IA que gestiona tu despensa y planifica tus comidas de forma inteligente para ahorrar tiempo y dinero.',
 	image = '/og-image.jpg', // Placeholder image URL for Open Graph
 	canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url),
 	type = 'website',
@@ -103,6 +104,7 @@ const adminPathPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/
 	</head>
 	<body class="min-h-screen font-sans antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300" data-admin-path={`/${adminPathPrefix}`}>
 		<AppProviders client:load>
+			<SplashScreen client:load />
 			<div class="flex flex-col min-h-screen">
 				<Navbar client:load />
 

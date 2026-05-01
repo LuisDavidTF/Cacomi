@@ -1,11 +1,12 @@
 {
-    "name": "Cacomi: Planeador de comidas",
+    "name": "Cacomi",
     "short_name": "Cacomi",
-    "description": "Planifica tus comidas de manera inteligente y eficiente con el instinto de comer sano.",
+    "description": "Tu asistente de cocina inteligente. Planifica tus comidas y gestiona tu despensa con IA.",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#010006",
     "theme_color": "#010006",
+    "orientation": "portrait",
     "icons": [
         {
             "src": "/icon.png",

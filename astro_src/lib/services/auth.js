@@ -5,13 +5,32 @@ export const AuthService = {
         return ApiService.request('/auth/login', {
             method: 'POST',
             body: credentials,
+            fullResponse: true
         });
     },
 
-    register: async (data) => {
-        return ApiService.request('/auth/register', {
+    refresh: async (cookieHeader) => {
+        return ApiService.request('/auth/refresh', {
             method: 'POST',
-            body: data,
+            headers: cookieHeader ? { Cookie: cookieHeader } : {},
+            fullResponse: true
+        });
+    },
+
+    setPassword: async (password, token) => {
+        return ApiService.request('/auth/set-password', {
+            method: 'POST',
+            body: { password },
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    },
+
+    logout: async (cookieHeader) => {
+        return ApiService.request('/auth/logout', {
+            method: 'POST',
+            headers: cookieHeader ? { Cookie: cookieHeader } : {},
         });
     },
 
