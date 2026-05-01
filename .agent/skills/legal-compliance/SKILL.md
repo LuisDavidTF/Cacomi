@@ -12,6 +12,7 @@ metadata:
     - "Release feature to main"
     - "Modify database schema"
     - "Add new cookie"
+    - "Modify privacy.astro or terms.astro"
 allowed-tools: GrepSearch, ViewFile
 ---
 
@@ -57,3 +58,11 @@ If requested, generate a brief report:
 - **Clause 5.1 (AI)**: "Health & Allergy Warning" -> Must be on all AI recipe generations.
 - **Clause 7 (Liability)**: "Software provided AS IS" -> Standard footer/settings link.
 - **Privacy Section 3**: "International Transfer" -> Vercel/Neon/Koyeb storage verification.
+
+## 5. Legal Versioning (CRITICAL)
+
+Whenever `privacy.astro` or `terms.astro` are modified, you MUST create a point-in-time backup to maintain a historical record of changes:
+
+1. **Location**: `legal_archive/` (at project root).
+2. **Format**: `policy-YYYY-MM-DD.astro` or `terms-YYYY-MM-DD.astro`.
+3. **Execution**: Ensure the directory exists before saving the new version.
