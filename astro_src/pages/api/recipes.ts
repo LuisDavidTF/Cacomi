@@ -14,9 +14,9 @@ export const GET: APIRoute = async ({ request }) => {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error: any) {
-        const status = error.status || 500;
-        return new Response(JSON.stringify({ message: error.message || 'Error interno del servidor', error: error.message }), {
-            status,
+        console.error("API ERROR:", error);
+        return new Response(JSON.stringify({ message: 'Error interno del servidor' }), {
+            status: error.status || 500,
             headers: { 'Content-Type': 'application/json' }
         });
     }
@@ -46,9 +46,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error: any) {
-        const status = error.status || 500;
-        return new Response(JSON.stringify({ message: error.message || 'Error interno del servidor', error: error.message }), {
-            status,
+        console.error("API ERROR:", error);
+        return new Response(JSON.stringify({ message: 'Error interno del servidor' }), {
+            status: error.status || 500,
             headers: { 'Content-Type': 'application/json' }
         });
     }

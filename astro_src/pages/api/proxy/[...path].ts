@@ -75,9 +75,6 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
             redirect: 'follow'
         });
 
-        // Return the response back to the client
-        const responseData = await response.arrayBuffer();
-        
         // Pass through key headers
         const outHeaders = new Headers();
         const contentType = response.headers.get('content-type');
@@ -89,6 +86,19 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
             outHeaders.set('set-cookie', setCookie);
         }
 
+        // Special handling for 204 No Content and other body-less statuses
+        // The Response constructor throws if a body is provided for these statuses
+        const noBodyStatuses = [204, 205, 304];
+        if (noBodyStatuses.includes(response.status)) {
+            return new Response(null, {
+                status: response.status,
+                headers: outHeaders
+            });
+        }
+
+        // Return the response back to the client
+        const responseData = await response.arrayBuffer();
+        
         return new Response(responseData, {
             status: response.status,
             headers: outHeaders
@@ -100,11 +110,9 @@ export const ALL: APIRoute = async ({ request, params, cookies, url }) => {
         // Differentiate between configuration and connection errors
         const isConfigError = !rawEnvUrl || rawEnvUrl === 'http://localhost:8080';
         
+        // SECURITY: Do NOT expose the targetUrl or error details to the client
         return new Response(JSON.stringify({ 
-            error: isConfigError ? 'Error de configuración del servidor' : 'Error de comunicación con el backend', 
-            details: error.message,
-            path: path,
-            target: targetUrl.origin // Only return origin for safety
+            error: isConfigError ? 'Error de configuración del servidor' : 'Error de comunicación con el backend'
         }), { 
             status: 502,
             headers: { 'Content-Type': 'application/json' }

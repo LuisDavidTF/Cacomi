@@ -416,7 +416,10 @@ export function WeeklyPlanner() {
             }
             
             // Reconstruct plan data with the changes
-            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            const allMeals = await db.plannedMeals
+                .where('planId').equals(planData?.planId || 0)
+                .and(m => m.isDeleted === 0)
+                .toArray();
             
             setPlanData(prev => {
                 const basePlan = prev || { ...DEFAULT_GUEST_PLAN, meals: [] };
@@ -455,7 +458,10 @@ export function WeeklyPlanner() {
             }
             
             // Update local state
-            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            const allMeals = await db.plannedMeals
+                .where('planId').equals(planData?.planId || 0)
+                .and(m => m.isDeleted === 0)
+                .toArray();
             setPlanData(prev => {
                 const basePlan = prev || { ...DEFAULT_GUEST_PLAN, meals: [] };
                 return { ...basePlan, meals: allMeals };
@@ -480,7 +486,10 @@ export function WeeklyPlanner() {
             await db.plannedMeals.update(mealId, { isPinned: newPinnedStatus });
             
             // Update local state
-            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            const allMeals = await db.plannedMeals
+                .where('planId').equals(planData?.planId || 0)
+                .and(m => m.isDeleted === 0)
+                .toArray();
             setPlanData(prev => {
                 const basePlan = prev || { ...DEFAULT_GUEST_PLAN, meals: [] };
                 return { ...basePlan, meals: allMeals };
@@ -501,7 +510,7 @@ export function WeeklyPlanner() {
     // Detect local changes
     useEffect(() => {
         const checkLocalChanges = async () => {
-            if (!planData?.planId) return;
+            if (planData?.planId === undefined || planData?.planId === null) return;
             const changes = await db.plannedMeals
                 .where('planId').equals(planData.planId)
                 .filter(m => m.isSynced === 0 || m.isDeleted === 1)
@@ -510,6 +519,31 @@ export function WeeklyPlanner() {
         };
         checkLocalChanges();
     }, [planData]);
+
+    // Data repair for orphaned meals (missing planId)
+    useEffect(() => {
+        const repairOrphanedMeals = async () => {
+            if (planData?.planId === undefined || planData?.planId === null) return;
+            
+            const orphans = await db.plannedMeals
+                .filter(m => m.planId === undefined || m.planId === null)
+                .toArray();
+            
+            if (orphans.length > 0) {
+                console.log(`Repairing ${orphans.length} orphaned meals...`);
+                for (const meal of orphans) {
+                    await db.plannedMeals.update(meal.id, { planId: planData.planId });
+                }
+                // Trigger a re-check of local changes if any were repaired as deleted/unsynced
+                const changes = await db.plannedMeals
+                    .where('planId').equals(planData.planId)
+                    .filter(m => m.isSynced === 0 || m.isDeleted === 1)
+                    .count();
+                setHasLocalChanges(changes > 0);
+            }
+        };
+        repairOrphanedMeals();
+    }, [planData?.planId]);
 
     const handleRestorePlan = () => {
         setShowRestoreConfirm(true);
@@ -663,6 +697,7 @@ export function WeeklyPlanner() {
                         if (!existing) {
                             await db.plannedMeals.add({
                                 ...meal,
+                                planId: data.planId,
                                 id: generateUUIDv7(),
                                 isSynced: 1,
                                 isDeleted: 0,
@@ -671,6 +706,7 @@ export function WeeklyPlanner() {
                         } else if (existing.isSynced === 1 || force) {
                             await db.plannedMeals.update(existing.id, {
                                 ...meal,
+                                planId: data.planId,
                                 isSynced: 1,
                                 isDeleted: 0
                             });
@@ -679,7 +715,10 @@ export function WeeklyPlanner() {
                 }
                 
                 // Update state
-                const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                const allMeals = await db.plannedMeals
+                    .where('planId').equals(data.planId)
+                    .and(m => m.isDeleted === 0)
+                    .toArray();
                 const reconstructedPlan: PlanResponse = {
                     ...metadata,
                     isActive: 1,
@@ -715,7 +754,10 @@ export function WeeklyPlanner() {
         const activeMetadata = await db.planMetadata.where('isActive').equals(1).first();
         
         if (activeMetadata) {
-            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            const allMeals = await db.plannedMeals
+                .where('planId').equals(activeMetadata.planId)
+                .and(m => m.isDeleted === 0)
+                .toArray();
             setPlanData({
                 ...activeMetadata,
                 meals: allMeals
@@ -725,7 +767,10 @@ export function WeeklyPlanner() {
             const allMetadata = await db.planMetadata.toArray();
             if (allMetadata.length > 0) {
                 const latestMetadata = allMetadata.sort((a, b) => b.planId - a.planId)[0];
-                const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                const allMeals = await db.plannedMeals
+                .where('planId').equals(planData?.planId || 0)
+                .and(m => m.isDeleted === 0)
+                .toArray();
                 
                 setPlanData({
                     ...latestMetadata,
@@ -733,7 +778,10 @@ export function WeeklyPlanner() {
                 } as PlanResponse);
             } else {
                 // No plan found at all -> Initialize with guest plan
-                const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                const allMeals = await db.plannedMeals
+                .where('planId').equals(planData?.planId || 0)
+                .and(m => m.isDeleted === 0)
+                .toArray();
                 setPlanData({
                     ...DEFAULT_GUEST_PLAN,
                     meals: allMeals
@@ -751,7 +799,10 @@ export function WeeklyPlanner() {
             const activeMetadata = await db.planMetadata.where('isActive').equals(1).first();
             
             // Logic: fetch if no active plan or if the current plan is empty
-            const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+            const allMeals = await db.plannedMeals
+                .where('planId').equals(planData?.planId || 0)
+                .and(m => m.isDeleted === 0)
+                .toArray();
             
             if (!activeMetadata || allMeals.length === 0) {
                 fetchPlan();
@@ -816,31 +867,28 @@ export function WeeklyPlanner() {
         }
     }, [planData]);
 
-    // Auto-scroll to today
+    // Auto-scroll when switching to WEEK mode
     useEffect(() => {
         if (viewMode === 'WEEK' && scrollContainerRef.current && calendarDays.length > 0) {
-            const todayStr = new Date().toDateString();
-            const todayIdx = calendarDays.findIndex(d => d.toDateString() === todayStr);
+            const selectedDate = calendarDays[selectedDateIndex];
             
-            if (todayIdx !== -1) {
-                // Use a slight delay to ensure cards are rendered
-                setTimeout(() => {
-                    const todayEl = document.getElementById(`day-${todayIdx}`);
-                    if (todayEl && scrollContainerRef.current) {
-                        const container = scrollContainerRef.current;
-                        const containerWidth = container.offsetWidth;
-                        const elementOffset = todayEl.offsetLeft;
-                        const elementWidth = todayEl.offsetWidth;
-                        
-                        container.scrollTo({
-                            left: elementOffset - (containerWidth / 2) + (elementWidth / 2),
-                            behavior: 'smooth'
-                        });
-                    }
-                }, 100);
-            }
+            // Use a slight delay to ensure cards are rendered
+            setTimeout(() => {
+                scrollToDate(selectedDate, 'auto');
+            }, 100);
         }
     }, [viewMode, calendarDays]);
+
+    // Auto-scroll pills when in DAY mode
+    useEffect(() => {
+        if (viewMode === 'DAY' && dayPillsContainerRef.current && calendarDays.length > 0) {
+            const selectedDate = calendarDays[selectedDateIndex];
+            // Use a slight delay to ensure pills are rendered/visible
+            setTimeout(() => {
+                scrollToDate(selectedDate, 'auto');
+            }, 100);
+        }
+    }, [viewMode, selectedDateIndex]);
 
     // Initialize scroll to today
     useEffect(() => {
@@ -876,7 +924,11 @@ export function WeeklyPlanner() {
         const element = document.getElementById(`day-${dateStr}`);
         if (element && scrollContainerRef.current) {
             const container = scrollContainerRef.current;
-            const scrollPos = element.offsetLeft - container.offsetLeft;
+            const containerWidth = container.offsetWidth;
+            const elementOffset = element.offsetLeft;
+            const elementWidth = element.offsetWidth;
+            
+            const scrollPos = elementOffset - (containerWidth / 2) + (elementWidth / 2);
             container.scrollTo({ left: scrollPos, behavior });
         }
         setCurrentVisibleDate(date);
@@ -889,7 +941,8 @@ export function WeeklyPlanner() {
             // Fast math calculation for the visible day to avoid layout thrashing
             const childWidth = (children[0] as HTMLElement).offsetWidth;
             const gap = 20; // 20px for gap-5
-            const idx = Math.max(0, Math.min(calendarDays.length - 1, Math.floor((scrollLeft + 10) / (childWidth + gap))));
+            const centerX = scrollLeft + scrollContainerRef.current.offsetWidth / 2;
+            const idx = Math.max(0, Math.min(calendarDays.length - 1, Math.floor(centerX / (childWidth + gap))));
             const newDate = calendarDays[idx];
             
             // Expand calendar if approaching the end (e.g. 5 days away)
@@ -908,9 +961,13 @@ export function WeeklyPlanner() {
 
     const getCurrentScrollDate = () => {
         if (!scrollContainerRef.current || !scrollContainerRef.current.children.length) return currentVisibleDate;
-        const { scrollLeft } = scrollContainerRef.current;
-        const childWidth = (scrollContainerRef.current.children[0] as HTMLElement).offsetWidth;
-        const idx = Math.max(0, Math.min(calendarDays.length - 1, Math.floor((scrollLeft + 10) / (childWidth + 20))));
+        const { scrollLeft, offsetWidth, children } = scrollContainerRef.current;
+        const childWidth = (children[0] as HTMLElement).offsetWidth;
+        const gap = 20;
+        
+        const centerX = scrollLeft + offsetWidth / 2;
+        const idx = Math.max(0, Math.min(calendarDays.length - 1, Math.floor(centerX / (childWidth + gap))));
+        
         return calendarDays[idx];
     };
 
@@ -968,7 +1025,10 @@ export function WeeklyPlanner() {
                         .modify({ isDeleted: 1, isSynced: 0 });
 
                     // Refresh local state to update the modal list
-                    const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                    const allMeals = await db.plannedMeals
+                .where('planId').equals(planData?.planId || 0)
+                .and(m => m.isDeleted === 0)
+                .toArray();
                     setPlanData(prev => prev ? { ...prev, meals: allMeals } : null);
                     setConfirmDialog(null);
                 } catch (err) {
@@ -1090,7 +1150,10 @@ export function WeeklyPlanner() {
                 });
                 
                 // Update local state
-                const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                const allMeals = await db.plannedMeals
+                .where('planId').equals(planData?.planId || 0)
+                .and(m => m.isDeleted === 0)
+                .toArray();
                 setPlanData(prev => prev ? { ...prev, meals: allMeals } : null);
 
                 setNotification({
@@ -1120,7 +1183,10 @@ export function WeeklyPlanner() {
                     });
                     
                     // Update state to reflect tracking change
-                    const allMeals = await db.plannedMeals.where('isDeleted').equals(0).toArray();
+                    const allMeals = await db.plannedMeals
+                        .where('planId').equals(planData?.planId || 0)
+                        .and(m => m.isDeleted === 0)
+                        .toArray();
                     setPlanData(prev => prev ? { ...prev, meals: allMeals } : null);
                 }
 
@@ -1145,7 +1211,7 @@ export function WeeklyPlanner() {
     };
 
     const handleSaveCheckin = async (data: any) => {
-        if (!planData?.planId) return;
+        if (planData?.planId === undefined || planData?.planId === null) return;
 
         const payload = {
             planId: planData.planId,
@@ -1200,7 +1266,7 @@ export function WeeklyPlanner() {
     }, [planData]);
 
     const shouldShowCheckinPrompt = React.useMemo(() => {
-        if (!planData?.meals || !planData?.planId || planData.isActive === 0) return false;
+        if (!planData?.meals || (planData?.planId === undefined || planData?.planId === null) || planData.isActive === 0) return false;
         
         // Check if already completed locally
         if (localStorage.getItem(`checkin_done_${planData.planId}`) === 'true') return false;
@@ -1224,7 +1290,7 @@ export function WeeklyPlanner() {
     // Handle plan expiration (3 days past end)
     useEffect(() => {
         const checkExpiration = async () => {
-            if (!planData?.planId || planData.isActive === 0) return;
+            if ((planData?.planId === undefined || planData?.planId === null) || planData.isActive === 0) return;
 
             const backendMeals = planData.meals.filter(m => !m.isNew);
             if (backendMeals.length === 0) return;
@@ -1640,11 +1706,9 @@ export function WeeklyPlanner() {
                                     <button 
                                         onClick={() => {
                                             setViewMode('DAY');
-                                            const todayMidnight = new Date();
-                                            todayMidnight.setHours(0, 0, 0, 0);
-                                            const todayIdx = calendarDays.findIndex(d => d.getTime() === todayMidnight.getTime());
-                                            if (todayIdx !== -1) setSelectedDateIndex(todayIdx);
-                                            else setSelectedDateIndex(15);
+                                            const visibleDate = getCurrentScrollDate();
+                                            const idx = calendarDays.findIndex(d => d.toDateString() === visibleDate.toDateString());
+                                            if (idx !== -1) setSelectedDateIndex(idx);
                                         }}
                                         className={`px-3.5 py-1.5 text-xs sm:text-sm font-black rounded-lg transition-all ${viewMode === 'DAY' ? 'bg-background shadow-md text-primary ring-1 ring-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-background/40'}`}
                                     >

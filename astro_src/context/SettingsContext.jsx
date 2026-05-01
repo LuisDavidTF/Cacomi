@@ -269,7 +269,18 @@ export const translations = {
             googleLogin: 'Continuar con Google',
             setPassword: 'Establecer Contraseña',
             setPasswordDesc: 'Añade una contraseña a tu cuenta para iniciar sesión con email en el futuro.',
-            setPasswordSuccess: 'Contraseña establecida correctamente.'
+            setPasswordSuccess: 'Contraseña establecida correctamente.',
+            changePassword: 'Cambiar Contraseña',
+            changePasswordDesc: 'Tu cuenta ya está vinculada a una contraseña, pero puedes cambiarla aquí.',
+            currentPassword: 'Contraseña Actual',
+            newPassword: 'Nueva Contraseña',
+            changePasswordSuccess: 'Contraseña actualizada correctamente.',
+            passwordSafeError: 'La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, un número y un símbolo.',
+            reqLength: 'Mínimo 8 caracteres',
+            reqUpper: 'Una mayúscula',
+            reqLower: 'Una minúscula',
+            reqNumber: 'Un número',
+            reqSymbol: 'Un símbolo (!@#$%^&*)'
         },
 
         createRecipe: {
@@ -715,7 +726,18 @@ export const translations = {
             googleLogin: 'Continue with Google',
             setPassword: 'Set Password',
             setPasswordDesc: 'Add a password to your account to log in with email in the future.',
-            setPasswordSuccess: 'Password set successfully.'
+            setPasswordSuccess: 'Password set successfully.',
+            changePassword: 'Change Password',
+            changePasswordDesc: 'Your account is already linked to a password, but you can change it here.',
+            currentPassword: 'Current Password',
+            newPassword: 'New Password',
+            changePasswordSuccess: 'Password updated successfully.',
+            passwordSafeError: 'Password must have at least 8 characters, including uppercase, lowercase, a number, and a symbol.',
+            reqLength: 'At least 8 characters',
+            reqUpper: 'One uppercase letter',
+            reqLower: 'One lowercase letter',
+            reqNumber: 'One number',
+            reqSymbol: 'One symbol (!@#$%^&*)'
         },
 
         createRecipe: {

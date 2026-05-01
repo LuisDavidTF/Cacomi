@@ -20,12 +20,14 @@ export const useAuth = create((set, get) => ({
   isAuthenticated: false,
 
   fetchAuth: async (url, options = {}) => {
+    const { body, headers: customHeaders, ...restOptions } = options;
+    
     // Helper to get fresh headers with the latest token
     const getHeaders = () => {
       const { accessToken } = get();
       const h = {
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...customHeaders,
       };
       if (accessToken) {
         h['Authorization'] = `Bearer ${accessToken}`;
@@ -33,17 +35,42 @@ export const useAuth = create((set, get) => ({
       return h;
     };
 
-    let res = await fetch(url, { ...options, headers: getHeaders() });
+    // Helper to process body based on headers
+    const processBody = (b, h) => {
+        if (b && typeof b === 'object' && !(b instanceof FormData) && !(b instanceof Blob) && !(b instanceof ArrayBuffer)) {
+            const contentType = h.get('Content-Type');
+            if (contentType && contentType.toLowerCase().includes('application/json')) {
+                return JSON.stringify(b);
+            }
+        }
+        return b;
+    };
+
+    const initialHeaders = getHeaders();
+    const h = new Headers(initialHeaders);
+    const processedBody = processBody(body, h);
+
+    let res = await fetch(url, { 
+        ...restOptions, 
+        body: processedBody, 
+        headers: initialHeaders 
+    });
 
     // Handle 401: Attempt silent refresh
     if (res.status === 401) {
       try {
-        // Wait for any ongoing refresh or start a new one
         const newAccessToken = await get().refreshSession();
         
         if (newAccessToken) {
-          // IMPORTANT: Re-read headers to ensure we use the NEW token
-          res = await fetch(url, { ...options, headers: getHeaders() });
+          const freshHeaders = getHeaders();
+          const freshH = new Headers(freshHeaders);
+          const freshProcessedBody = processBody(body, freshH);
+          
+          res = await fetch(url, { 
+              ...restOptions, 
+              body: freshProcessedBody, 
+              headers: freshHeaders 
+          });
         }
       } catch (refreshError) {
         console.error("Silent refresh failed:", refreshError);
@@ -170,7 +197,7 @@ export const useAuth = create((set, get) => ({
     const { fetchAuth } = get();
     const res = await fetchAuth('/api/set-password', {
       method: 'POST',
-      body: JSON.stringify({ password }),
+      body: { password },
     });
 
     if (!res.ok) {
@@ -178,6 +205,23 @@ export const useAuth = create((set, get) => ({
       throw new Error(data.message || 'Error al establecer contraseña');
     }
 
+    if (res.status === 204) return { success: true };
+    return await res.json();
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    const { fetchAuth } = get();
+    const res = await fetchAuth('/api/proxy/users/me/password', {
+      method: 'POST',
+      body: { currentPassword, newPassword },
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || 'Error al cambiar contraseña');
+    }
+
+    if (res.status === 204) return { success: true };
     return await res.json();
   },
 

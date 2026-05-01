@@ -30,9 +30,10 @@ export const GET: APIRoute = async ({ request, cookies }) => {
         });
     } catch (error: any) {
         console.error("PANTRY API GET ERROR:", error);
-        const status = error.status || 500;
-        return new Response(JSON.stringify({ message: error.message || 'Error interno del servidor', error: error.message, details: error }), {
-            status,
+        return new Response(JSON.stringify({ 
+            message: 'Error al obtener la despensa' 
+        }), {
+            status: error.status || 500,
             headers: { 'Content-Type': 'application/json' }
         });
     }
@@ -64,9 +65,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         });
     } catch (error: any) {
         console.error("PANTRY API POST ERROR:", error);
-        const status = error.status || 500;
-        return new Response(JSON.stringify({ message: error.message || 'Error interno del servidor', error: error.message, details: error }), {
-            status,
+        return new Response(JSON.stringify({ 
+            message: 'Error al sincronizar la despensa' 
+        }), {
+            status: error.status || 500,
             headers: { 'Content-Type': 'application/json' }
         });
     }

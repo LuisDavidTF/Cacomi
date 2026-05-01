@@ -21,9 +21,9 @@ export const GET: APIRoute = async ({ request }) => {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error: any) {
-        const status = error.status || 500;
-        return new Response(JSON.stringify({ message: error.message || 'Error interno del servidor', error: error.message }), {
-            status,
+        console.error("SEARCH BY CATEGORY API ERROR:", error);
+        return new Response(JSON.stringify({ message: 'Error al buscar recetas' }), {
+            status: error.status || 500,
             headers: { 'Content-Type': 'application/json' }
         });
     }

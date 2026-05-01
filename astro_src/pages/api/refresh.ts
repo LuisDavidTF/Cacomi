@@ -48,7 +48,8 @@ export const POST: APIRoute = async ({ cookies }) => {
         });
 
     } catch (error: any) {
-        return new Response(JSON.stringify({ message: 'Error interno del servidor', error: error.message }), {
+        console.error("REFRESH API ERROR:", error);
+        return new Response(JSON.stringify({ message: 'Error interno del servidor' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
         });

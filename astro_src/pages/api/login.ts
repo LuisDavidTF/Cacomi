@@ -59,14 +59,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         });
 
     } catch (error: any) {
-        if (error.status) {
-            return new Response(JSON.stringify({ message: error.message || 'Error de autenticación' }), {
-                status: error.status,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-        return new Response(JSON.stringify({ message: 'Error interno del servidor', error: error.message }), {
-            status: 500,
+        console.error("LOGIN API ERROR:", error);
+        const status = error.status || 500;
+        const message = status === 500 ? 'Error interno del servidor' : (error.message || 'Error de autenticación');
+        
+        return new Response(JSON.stringify({ message }), {
+            status,
             headers: { 'Content-Type': 'application/json' }
         });
     }
