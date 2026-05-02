@@ -59,12 +59,7 @@ export function RecipeForm({ recipeId }) {
         </p>
       </div>
 
-      {/* AI Feature - Only for Create Mode */}
-      {!isEditMode && (
-        <div className="mb-8">
-          <MagicGenerator onDraftGenerated={handlers.handleDraftLoaded} />
-        </div>
-      )}
+
 
       <form onSubmit={handlers.submit} className="space-y-8">
 
@@ -163,18 +158,17 @@ export function RecipeForm({ recipeId }) {
               <option value="SOUP">{t.recipeTypes?.SOUP || 'Sopas y Caldos'}</option>
             </select>
           </div>
-          <div>
-            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
+          <div className="flex flex-col justify-center">
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">
               {t.createRecipe.visibility}
             </label>
-            <select
-              value={formData.visibility}
-              onChange={(e) => handlers.setFieldValue('visibility', e.target.value)}
-              className="w-full bg-background border border-input rounded-md text-sm py-2 px-3 focus:ring-ring focus:border-ring text-foreground"
-            >
-              <option value="public">{t.createRecipe.public}</option>
-              <option value="private">{t.createRecipe.private}</option>
-            </select>
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                {t.createRecipe.public}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">
+                Todas las recetas en Cacomi son públicas para inspirar a la comunidad.
+            </p>
           </div>
         </div>
 
@@ -184,17 +178,18 @@ export function RecipeForm({ recipeId }) {
           </div>
         )}
 
-        {/* --- Legal Disclaimers --- */}
-        {formData.visibility === 'public' && (
-          <div className="bg-muted/30 p-4 border border-border/50 rounded-lg text-xs text-muted-foreground space-y-2 mt-4">
-            <p className="flex items-start gap-2">
-              <svg className="w-4 h-4 shrink-0 mt-0.5 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <span>{t.createRecipe.disclaimerTransfer}</span>
-            </p>
-          </div>
-        )}
+        {/* --- Legal Disclaimers (Always visible) --- */}
+        <div className="bg-muted/30 p-4 border border-border/50 rounded-lg text-xs text-muted-foreground space-y-3 mt-4">
+          <p className="flex items-start gap-2">
+            <svg className="w-4 h-4 shrink-0 mt-0.5 text-amber-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <span>{t.createRecipe.disclaimerTransfer}</span>
+          </p>
+          <p className="flex items-start gap-2 pl-6 italic opacity-80">
+            Nota: Al ser contenido público, esta receta permanecerá en la plataforma incluso si decides eliminar tu cuenta, para no romper los planes de comida de otros usuarios.
+          </p>
+        </div>
 
         {/* --- Action Buttons --- */}
         <div className="flex gap-4 pt-4">

@@ -18,7 +18,8 @@ import {
     Home,
     ShoppingBasket,
     CalendarDays,
-    Activity
+    Activity,
+    Download
 } from 'lucide-react';
 
 export function Navbar() {
@@ -205,6 +206,18 @@ export function Navbar() {
                                                 >
                                                     <User className="w-5 h-5 mr-3 opacity-70" />
                                                     {t?.nav?.profile || 'Mi Perfil'}
+                                                </a>
+
+                                                <a
+                                                    href="/saved-recipes"
+                                                    className={`flex items-center px-3 py-2 text-sm lg:text-base rounded-xl transition-colors ${currentPath === '/saved-recipes' ? 'bg-primary/10 text-primary font-medium pointer-events-none' : 'text-foreground/80 hover:bg-muted hover:text-foreground'}`}
+                                                    onClick={(e) => {
+                                                        setIsProfileDropdownOpen(false);
+                                                        if (currentPath === '/saved-recipes') e.preventDefault();
+                                                    }}
+                                                >
+                                                    <Download className="w-5 h-5 mr-3 opacity-70" />
+                                                    {t?.profile?.savedRecipes || 'Recetas Guardadas'}
                                                 </a>
 
                                                 <a
@@ -410,6 +423,10 @@ export function Navbar() {
                             <a href="/profile" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/profile') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
                                 <User className="w-6 h-6 mr-3 opacity-70" />
                                 {t?.nav?.profile || 'Mi Perfil'}
+                            </a>
+                            <a href="/saved-recipes" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/saved-recipes') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                <Download className="w-6 h-6 mr-3 opacity-70" />
+                                {t?.profile?.savedRecipes || 'Recetas Guardadas'}
                             </a>
                             <a href="/profile/health-progress" className="relative flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base pointer-events-none cursor-not-allowed overflow-hidden" onClick={() => setIsMobileMenuOpen(false)}>
                                 <div className="flex items-center flex-1 opacity-60">

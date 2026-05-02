@@ -242,7 +242,7 @@ export function useRecipeForm(recipeId) {
       name: formData.name,
       description: formData.description,
       type: formData.type,
-      visibility: formData.visibility,
+      visibility: 'public', // Force all recipes to be public
       preparationTimeMinutes: parseInt(formData.preparationTime, 10),
       imageUrl: (formData.imageUrl || '').trim(),
 

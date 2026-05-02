@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/shadcn/card';
 import { Plus } from 'lucide-react';
 import { AddIngredientModal } from './AddIngredientModal';
 import { useSettings } from '@/context/SettingsContext';
+import { NativeAdCard } from '../ads/NativeAdCard';
 
 interface PantryListProps {
     items: LocalPantryItem[];
@@ -21,8 +22,6 @@ export function PantryList({ items, onUpdate, onRemove, onAdd, pauseSync, resume
     const { t } = useSettings();
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
 
-    // React 19: No useMemo for simple grouping needed if React Compiler interprets it, 
-    // but explicit grouping function is cleaner.
     const groupedItems = (() => {
         const groups = new Map<number, LocalPantryItem[]>();
 
@@ -77,7 +76,7 @@ export function PantryList({ items, onUpdate, onRemove, onAdd, pauseSync, resume
                             expirationDate: data.expirationDate
                         });
                     } finally {
-                        resumeSync(); // CRITICAL: Ensure sync resumes after adding
+                        resumeSync();
                     }
                 }}
             />
@@ -88,19 +87,24 @@ export function PantryList({ items, onUpdate, onRemove, onAdd, pauseSync, resume
                         {t.pantry.noIngredients}
                     </div>
                 ) : (
-                    groupedItems.map(group => (
-                        <PantryItemGroup
-                            key={group.ingredientId || group.name}
-                            ingredientId={group.ingredientId}
-                            name={group.name}
-                            items={group.items}
-                            onUpdate={onUpdate}
-                            onRemove={onRemove}
-                            onAddBatch={onAdd}
-                            pauseSync={pauseSync}
-                            resumeSync={resumeSync}
-                        />
-                    ))
+                    <>
+                        {groupedItems.map(group => (
+                            <PantryItemGroup
+                                key={group.ingredientId || group.name}
+                                ingredientId={group.ingredientId}
+                                name={group.name}
+                                items={group.items}
+                                onUpdate={onUpdate}
+                                onRemove={onRemove}
+                                onAddBatch={onAdd}
+                                pauseSync={pauseSync}
+                                resumeSync={resumeSync}
+                            />
+                        ))}
+                        <div className="pt-8 opacity-80 transition-opacity hover:opacity-100">
+                             <NativeAdCard adSlotId="pantry-footer-ad" variant="banner" />
+                        </div>
+                    </>
                 )}
             </div>
         </div>

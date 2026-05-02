@@ -3,8 +3,8 @@ import { AppProviders } from '@components/providers/AppProviders';
 import { Navbar } from '@components/ui/Navbar';
 import { Footer } from '@components/ui/Footer';
 import { LegalsConsent } from '@components/ui/LegalsConsent';
-import { SplashScreen } from '@components/ui/SplashScreen';
 import { ViewTransitions } from 'astro:transitions';
+import { ADMIN_PATH_PREFIX } from 'astro:env/server';
 import '../layouts/globals.css';
 
 interface Props {
@@ -25,7 +25,7 @@ const {
 
 const enableAds = import.meta.env.PUBLIC_ENABLE_ADS === 'true';
 // Secret admin path prefix — server-side only, never exposed to JS bundle via PUBLIC_
-const adminPathPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
+const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
 
 ---
 
@@ -104,7 +104,6 @@ const adminPathPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/
 	</head>
 	<body class="min-h-screen font-sans antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300" data-admin-path={`/${adminPathPrefix}`}>
 		<AppProviders client:load>
-			<SplashScreen client:load />
 			<div class="flex flex-col min-h-screen">
 				<Navbar client:load />
 

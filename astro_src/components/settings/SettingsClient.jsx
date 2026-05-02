@@ -8,6 +8,8 @@ import { useToast } from '@context/ToastContext';
 import { CacheManager } from '@utils/cacheManager';
 import { useApiClient } from '@hooks/useApiClient';
 import { Modal } from '@components/ui/Modal';
+import { StorageHelper } from '@utils/storageHelper';
+import { Database, ShoppingBasket, Calendar, Box, Trash2 } from 'lucide-react';
 
 function SettingsSection({ title, children }) {
     return (
@@ -27,35 +29,46 @@ export default function SettingsPage() {
     const { showToast } = useToast();
     const { isAuthenticated } = useAuth();
     const apiClient = useApiClient();
-    const [isClearing, setIsClearing] = useState(false);
+    const [isClearing, setIsClearing] = useState(null); // category being cleared
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [stats, setStats] = useState({ feedCount: 0, visitedCount: 0 });
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, category: null });
+    const [storageBreakdown, setStorageBreakdown] = useState({
+        total: 0,
+        categories: { app: 0, pantry: 0, recipes: 0, planner: 0 }
+    });
+
+    const loadStorageData = async () => {
+        const breakdown = await StorageHelper.getStorageBreakdown();
+        setStorageBreakdown(breakdown);
+    };
 
     useEffect(() => {
-        // Load stats
-        const s = CacheManager.getStats();
-        setStats(s);
+        loadStorageData();
     }, []);
 
     const handleThemeChange = (newTheme) => {
-        // Context handles persistence and application
         setTheme(newTheme);
     };
 
-    const handleClearCache = async () => {
-        if (!confirm('¿Estás seguro?')) return;
+    const handleClearCategory = async (category) => {
+        setConfirmModal({ isOpen: true, category });
+    };
 
-        setIsClearing(true);
+    const executeClear = async () => {
+        const { category } = confirmModal;
+        if (!category) return;
+
+        setIsClearing(category);
+        setConfirmModal({ isOpen: false, category: null });
         try {
-            await clearCache();
-            CacheManager.clearAll(); // Ensure utility clears its keys too
+            await StorageHelper.clearCategory(category);
+            await loadStorageData();
             showToast(t.settings.clearing, 'success');
-            setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
             showToast('Error', 'error');
         } finally {
-            setIsClearing(false);
+            setIsClearing(null);
         }
     };
 
@@ -173,23 +186,79 @@ export default function SettingsPage() {
 
             {/* ALMACENAMIENTO OFFLINE */}
             <SettingsSection title={t.settings.storage}>
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-muted-foreground">{t.settings.usage}</span>
-                    <span className="text-sm font-bold text-foreground">{stats.feedCount + stats.visitedCount} {t.settings.recipes}</span>
+                    <span className="text-xl font-black text-foreground">{StorageHelper.formatBytes(storageBreakdown.total)}</span>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2.5 mb-6">
-                    <div
-                        className="bg-primary h-2.5 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(((stats.feedCount + stats.visitedCount) / 250) * 100, 100)}%` }}
-                    ></div>
+                
+                {/* Segmented Bar */}
+                <div className="w-full bg-muted rounded-full h-4 mb-8 overflow-hidden flex">
+                    {storageBreakdown.total > 0 ? (
+                        <>
+                            <div 
+                                className="bg-indigo-500 h-full transition-all duration-500" 
+                                style={{ width: `${(storageBreakdown.categories.app / storageBreakdown.total) * 100}%` }}
+                                title={`App: ${StorageHelper.formatBytes(storageBreakdown.categories.app)}`}
+                            />
+                            <div 
+                                className="bg-emerald-500 h-full transition-all duration-500" 
+                                style={{ width: `${(storageBreakdown.categories.recipes / storageBreakdown.total) * 100}%` }}
+                                title={`Recipes: ${StorageHelper.formatBytes(storageBreakdown.categories.recipes)}`}
+                            />
+                            <div 
+                                className="bg-amber-500 h-full transition-all duration-500" 
+                                style={{ width: `${(storageBreakdown.categories.pantry / storageBreakdown.total) * 100}%` }}
+                                title={`Pantry: ${StorageHelper.formatBytes(storageBreakdown.categories.pantry)}`}
+                            />
+                            <div 
+                                className="bg-pink-500 h-full transition-all duration-500" 
+                                style={{ width: `${(storageBreakdown.categories.planner / storageBreakdown.total) * 100}%` }}
+                                title={`Planner: ${StorageHelper.formatBytes(storageBreakdown.categories.planner)}`}
+                            />
+                        </>
+                    ) : (
+                        <div className="w-full h-full bg-muted" />
+                    )}
                 </div>
 
-                <div className="flex justify-end">
-                    <Button variant="danger" onClick={handleClearCache} disabled={isClearing} size="sm" className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-                        {isClearing ? t.settings.clearing : t.settings.clear}
-                    </Button>
+                {/* Category Details */}
+                <div className="space-y-4">
+                    {[
+                        { id: 'app', label: t.settings.app, size: storageBreakdown.categories.app, icon: Database, color: 'text-indigo-500', canClear: false },
+                        { id: 'recipes', label: t.settings.recipes, size: storageBreakdown.categories.recipes, icon: Box, color: 'text-emerald-500', canClear: true },
+                        { id: 'pantry', label: t.settings.pantry, size: storageBreakdown.categories.pantry, icon: ShoppingBasket, color: 'text-amber-500', canClear: true },
+                        { id: 'planner', label: t.settings.planner, size: storageBreakdown.categories.planner, icon: Calendar, color: 'text-pink-500', canClear: true }
+                    ].map((cat) => (
+                        <div key={cat.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/50">
+                            <div className="flex items-center gap-3">
+                                <div className={`p-2 rounded-lg bg-background shadow-sm ${cat.color}`}>
+                                    <cat.icon className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-foreground leading-none mb-1">{cat.label}</p>
+                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{StorageHelper.formatBytes(cat.size)}</p>
+                                </div>
+                            </div>
+                            
+                            {cat.canClear && cat.size > 0 && (
+                                <button
+                                    onClick={() => handleClearCategory(cat.id)}
+                                    disabled={isClearing === cat.id}
+                                    className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all"
+                                    title={t.settings.clear}
+                                >
+                                    {isClearing === cat.id ? (
+                                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                        <Trash2 className="w-4 h-4" />
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    ))}
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 text-center">
+
+                <p className="text-[10px] text-muted-foreground mt-6 text-center uppercase tracking-[0.2em] opacity-60">
                     {t.settings.storageDesc}
                 </p>
             </SettingsSection>
@@ -237,7 +306,7 @@ export default function SettingsPage() {
                     <p className="text-sm text-muted-foreground">
                         {language === 'es' ? '¿Estás seguro de que deseas eliminar tu cuenta permanentemente? Esta acción no se puede deshacer y perderás el acceso a todas tus recetas privadas e inventario.' :
                             language === 'en' ? 'Are you sure you want to permanently delete your account? This action cannot be undone and you will lose access to all your private recipes and inventory.' :
-                                'Êtes-vous sûr de vouloir supprimer votre compte définitivement ? Cette action est irréversible et vous perdrez l\'accès à toutes vos recettes privées et à votre inventaire.'}
+                                'Êtes-vous sûr de vouloir supprimer votre compte définitivement ? Cette action est irréversible et vous perdrez l\'accès à toutes vos recetas privées et à votre inventaire.'}
                     </p>
                     <div className="flex justify-end gap-3 pt-4">
                         <Button
@@ -259,7 +328,61 @@ export default function SettingsPage() {
                     </div>
                 </div>
             </Modal>
+
+            {/* Modal de confirmación de limpieza de almacenamiento (PSICOLOGÍA APLICADA) */}
+            <Modal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ isOpen: false, category: null })}
+                title={language === 'es' ? '¿Limpiar estos datos?' : 'Clear this data?'}
+            >
+                <div className="space-y-4">
+                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+                        {confirmModal.category === 'recipes' && (
+                            <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed">
+                                {language === 'es' 
+                                    ? 'Perderás el acceso instantáneo sin conexión a tus recetas favoritas. La IA tendrá que volver a aprender tus gustos desde cero. ¿Seguro que quieres borrar esta valiosa biblioteca?' 
+                                    : 'You will lose instant offline access to your favorite recipes. The AI will have to relearn your tastes from scratch. Are you sure you want to delete this valuable library?'}
+                            </p>
+                        )}
+                        {confirmModal.category === 'pantry' && (
+                            <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed">
+                                {language === 'es' 
+                                    ? 'Si borras tu despensa, Cacomi dejará de saber qué tienes en casa. No podremos sugerirte recetas mágicas basadas en tus ingredientes actuales. ¡Tendrás que registrar todo de nuevo!' 
+                                    : 'If you clear your pantry, Cacomi will stop knowing what you have at home. We won\'t be able to suggest magic recipes based on your current ingredients. You\'ll have to re-register everything!'}
+                            </p>
+                        )}
+                        {confirmModal.category === 'planner' && (
+                            <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed">
+                                {language === 'es' 
+                                    ? 'Tu planificación semanal te ayuda a comer mejor y ahorrar tiempo. Borrarla significa perder tu organización de los próximos días. ¿Prefieres improvisar?' 
+                                    : 'Your weekly planning helps you eat better and save time. Clearing it means losing your organization for the coming days. Would you rather improvise?'}
+                            </p>
+                        )}
+                    </div>
+                    
+                    <p className="text-xs text-muted-foreground italic px-2">
+                        {language === 'es' 
+                            ? 'Nota: Siempre puedes volver a descargar estos datos, pero borrarlos ahora interrumpirá tu experiencia inteligente.'
+                            : 'Note: You can always re-download this data, but clearing it now will interrupt your smart experience.'}
+                    </p>
+
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setConfirmModal({ isOpen: false, category: null })}
+                        >
+                            {language === 'es' ? 'Mantener mis datos' : 'Keep my data'}
+                        </Button>
+                        <Button
+                            variant="danger"
+                            onClick={executeClear}
+                            className="bg-destructive/10 text-destructive hover:bg-destructive hover:text-white border-destructive/20"
+                        >
+                            {language === 'es' ? 'Sí, borrar por espacio' : 'Yes, clear for space'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }
-

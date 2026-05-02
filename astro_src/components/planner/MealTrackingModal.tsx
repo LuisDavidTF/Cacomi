@@ -178,37 +178,43 @@ export function MealTrackingModal({ isOpen, onClose, mealData, onSave }: MealTra
                                     {mealData.recipeName}
                                 </h2>
                                 
-                                <div className={`grid grid-cols-3 gap-2 sm:gap-4 mb-8 py-4 px-4 bg-black/30 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl transition-all duration-500 ${isViewingRecipe ? 'scale-90 origin-left' : ''}`}>
-                                    <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0">
-                                        <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/50 tracking-widest mb-1 truncate w-full">
-                                            {trackingTexts?.stats?.energy || 'Energía'}
-                                        </span>
-                                        <div className="flex items-center gap-1.5 text-white font-black text-sm sm:text-base truncate w-full">
-                                            <Flame className="w-3.5 h-3.5 sm:w-4 h-4 text-orange-400 shrink-0" />
-                                            <span>{displayCalories?.toFixed(0)}</span> <span className="text-[9px] font-medium opacity-60">KCAL</span>
+                                {(displayCalories > 0 || displayProtein > 0) ? (
+                                    <div className={`grid grid-cols-3 gap-2 sm:gap-4 mb-8 py-4 px-4 bg-black/30 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl transition-all duration-500 ${isViewingRecipe ? 'scale-90 origin-left' : ''}`}>
+                                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0">
+                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/50 tracking-widest mb-1 truncate w-full">
+                                                {trackingTexts?.stats?.energy || 'Energía'}
+                                            </span>
+                                            <div className="flex items-center gap-1.5 text-white font-black text-sm sm:text-base truncate w-full">
+                                                <Flame className="w-3.5 h-3.5 sm:w-4 h-4 text-orange-400 shrink-0" />
+                                                <span>{displayCalories?.toFixed(0)}</span> <span className="text-[9px] font-medium opacity-60">KCAL</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4 min-w-0">
+                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/50 tracking-widest mb-1 truncate w-full">
+                                                {trackingTexts?.stats?.protein || 'Proteína'}
+                                            </span>
+                                            <div className="flex items-center gap-1.5 text-white font-black text-sm sm:text-base truncate w-full">
+                                                <Beef className="w-3.5 h-3.5 sm:w-4 h-4 text-blue-400 shrink-0" />
+                                                <span>{displayProtein?.toFixed(0)}</span><span className="text-[9px] font-medium opacity-60">G</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4 min-w-0">
+                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/50 tracking-widest mb-1 truncate w-full">
+                                                {trackingTexts?.stats?.cost || 'Costo'}
+                                            </span>
+                                            <div className="flex items-center gap-1.5 text-white font-black text-sm sm:text-base truncate w-full">
+                                                <Coins className="w-3.5 h-3.5 sm:w-4 h-4 text-emerald-400 shrink-0" />
+                                                <span className="text-[9px] font-medium opacity-60">$</span><span>{displayCost?.toFixed(2)}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    
-                                    <div className="flex flex-col items-center sm:items-start text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4 min-w-0">
-                                        <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/50 tracking-widest mb-1 truncate w-full">
-                                            {trackingTexts?.stats?.protein || 'Proteína'}
-                                        </span>
-                                        <div className="flex items-center gap-1.5 text-white font-black text-sm sm:text-base truncate w-full">
-                                            <Beef className="w-3.5 h-3.5 sm:w-4 h-4 text-blue-400 shrink-0" />
-                                            <span>{displayProtein?.toFixed(0)}</span><span className="text-[9px] font-medium opacity-60">G</span>
-                                        </div>
+                                ) : (
+                                    <div className="mb-8 p-4 bg-amber-500/20 backdrop-blur-3xl border border-amber-500/30 rounded-3xl text-white text-[11px] sm:text-xs font-bold italic text-center animate-pulse shadow-2xl">
+                                        Esta comida aún no ha sido calculada por Cacomi, espera al día de mañana para conocer su información nutricional.
                                     </div>
-                                    
-                                    <div className="flex flex-col items-center sm:items-start text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4 min-w-0">
-                                        <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/50 tracking-widest mb-1 truncate w-full">
-                                            {trackingTexts?.stats?.cost || 'Costo'}
-                                        </span>
-                                        <div className="flex items-center gap-1.5 text-white font-black text-sm sm:text-base truncate w-full">
-                                            <Coins className="w-3.5 h-3.5 sm:w-4 h-4 text-emerald-400 shrink-0" />
-                                            <span className="text-[9px] font-medium opacity-60">$</span><span>{displayCost?.toFixed(2)}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                )}
 
 
 
@@ -400,16 +406,20 @@ export function MealTrackingModal({ isOpen, onClose, mealData, onSave }: MealTra
                                     </>
                                 )}
 
-                                {/* AI Consent Status Info Box */}
-                                <div className="pt-6 mt-6 border-t border-border/40 animate-in fade-in duration-700">
-                                    <div className="flex items-start gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl transition-colors hover:bg-muted/50">
-                                        <input type="checkbox" checked={true} readOnly className="mt-1 shrink-0 w-3.5 h-3.5 rounded-sm border-border text-primary opacity-60 focus:ring-0" />
-                                        <p className="text-[11px] text-muted-foreground/80 leading-relaxed font-medium">
-                                            {t.planner?.consent?.acceptedStatus || 'Aceptaste compartir los datos anonimizados de este plan para ayudarnos a mejorar nuestros modelos. Puedes cambiar tus preferencias en '}
-                                            <a href="/settings" className="text-primary hover:underline font-bold transition-colors">Configuración</a>.
-                                        </p>
+                                {mealData.isNew !== 1 && (
+                                    <div className="pt-6 mt-6 border-t border-border/40 animate-in fade-in duration-700">
+                                        <div className="flex items-start gap-3 p-4 bg-primary/5 border border-primary/20 rounded-2xl transition-all hover:bg-primary/10 group">
+                                            <div className="mt-1 shrink-0 w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
+                                                <Sparkles className="w-2.5 h-2.5 text-primary" />
+                                            </div>
+                                            <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
+                                                {language === 'es' 
+                                                    ? 'Al generar este plan, aceptaste compartir datos anonimizados. Tu feedback es la brújula de nuestra IA: cada "Meal Check" nos ayuda a perfeccionar tus planes futuros para que sean exactamente lo que necesitas. ¡Gracias por mejorar con nosotros!'
+                                                    : 'By generating this plan, you agreed to share anonymized data. Your feedback is our AI\'s compass: each "Meal Check" helps us perfect your future plans to be exactly what you need. Thanks for improving with us!'}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                             </div>
                         </div>
@@ -420,10 +430,19 @@ export function MealTrackingModal({ isOpen, onClose, mealData, onSave }: MealTra
                     <div className="p-4 border-t border-border/30 bg-muted/10 shrink-0">
                         <button
                             onClick={handleSave}
-                            className="w-full py-3.5 bg-primary text-primary-foreground rounded-xl font-bold shadow-md shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
+                            disabled={mealData.isNew !== 1 && isEating && rating === 0}
+                            className={`w-full py-3.5 rounded-xl font-bold shadow-md transition-all active:scale-[0.98]
+                                ${mealData.isNew !== 1 && isEating && rating === 0 
+                                    ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-60' 
+                                    : 'bg-primary text-primary-foreground shadow-primary/20 hover:opacity-90'}`}
                         >
                             {trackingTexts?.save || 'Guardar'}
                         </button>
+                        {mealData.isNew !== 1 && isEating && rating === 0 && (
+                            <p className="text-[10px] text-center text-destructive font-bold mt-2 animate-pulse uppercase tracking-widest">
+                                {language === 'es' ? 'Por favor califica tu comida' : 'Please rate your meal'}
+                            </p>
+                        )}
                     </div>
                 </div> {/* <-- Closes Left Side: Tracking Form */}
 

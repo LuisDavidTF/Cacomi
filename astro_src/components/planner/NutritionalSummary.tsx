@@ -17,14 +17,16 @@ export function NutritionalSummary({
 }: NutritionalSummaryProps) {
     const { t } = useSettings();
 
-    // Calculate average calories/protein per day (or just total if preferred)
-    // For this UI, showing the "Average planned" vs "Goal" is most intuitive
+    // Group meals by date to count unique days
+    const uniqueDays = new Set(meals.map(m => m.mealDate)).size;
+    const daysToDivide = Math.max(1, uniqueDays);
+
     const totalCalories = meals.reduce((sum, m) => sum + (m.calories || 0), 0);
     const totalProtein = meals.reduce((sum, m) => sum + (m.proteinGrams || 0), 0);
     
-    // We assume 7 days for the weekly average
-    const avgCalories = Math.round(totalCalories / 7);
-    const avgProtein = Math.round(totalProtein / 7);
+    // Average based on planned days (more intuitive for partial weeks)
+    const avgCalories = Math.round(totalCalories / daysToDivide);
+    const avgProtein = Math.round(totalProtein / daysToDivide);
 
     const proteinPercentage = Math.min(Math.round((avgProtein / targetProtein) * 100), 100);
 

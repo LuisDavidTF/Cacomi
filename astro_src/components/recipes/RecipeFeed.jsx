@@ -17,8 +17,12 @@ import { Button } from '@components/ui/Button';
 import { Spinner } from '@components/ui/Spinner';
 import { LoadingState } from '@components/ui/LoadingState';
 import { ErrorState } from '@components/ui/ErrorState';
+import { OfflineHelper } from '@components/ui/OfflineHelper';
+import { db } from '@/lib/db';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { WifiOff, Download } from 'lucide-react';
 
-export function RecipeFeed({ initialData = null }) {
+export function RecipeFeed({ initialData = null, forceSavedMode = false }) {
   // Use our new custom hook for data logic
   const {
     recipes,
@@ -32,7 +36,7 @@ export function RecipeFeed({ initialData = null }) {
     removeRecipe,
     isErrorLoadingMore,
     retryLoadMore
-  } = useRecipeFeed({ initialData });
+  } = useRecipeFeed({ initialData, forceSavedMode });
 
   const [deleteModalState, setDeleteModalState] = useState({ isOpen: false, recipe: null });
   const [activeCategory, setActiveCategory] = useState(null);
@@ -42,11 +46,51 @@ export function RecipeFeed({ initialData = null }) {
   const [hasMoreCategory, setHasMoreCategory] = useState(false);
   const [isCategoryLoadingMore, setIsCategoryLoadingMore] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const isSavedMode = forceSavedMode || isOffline || activeCategory === 'SAVED_OFFLINE';
   const categoryDropdownRef = useRef(null);
+
+  // Sync offline status and logging for debug
+  useEffect(() => {
+      console.log("[RecipeFeed] Initial recipes:", recipes.length, "Status:", status, "ForceSavedMode:", forceSavedMode);
+      
+      if (typeof navigator !== 'undefined') {
+          console.log("[RecipeFeed] Navigator.onLine:", navigator.onLine);
+          setIsOffline(!navigator.onLine);
+      }
+      
+      const handleOnline = () => { console.log("[RecipeFeed] Go Online"); setIsOffline(false); };
+      const handleOffline = () => { console.log("[RecipeFeed] Go Offline"); setIsOffline(true); };
+      
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+      return () => {
+          window.removeEventListener('online', handleOnline);
+          window.removeEventListener('offline', handleOffline);
+      };
+  }, []);
+
+  useEffect(() => {
+    console.log("[RecipeFeed] State Update - isOffline:", isOffline, "isSavedMode:", isSavedMode);
+  }, [isOffline, isSavedMode]);
+
+  // Fetch saved recipes from Dexie for offline mode
+  const savedRecipes = useLiveQuery(
+      () => db.savedRecipes.toArray(),
+      []
+  ) || [];
 
   const api = useApiClient();
   const { showToast } = useToast();
   const { t, language } = useSettings();
+
+  const feedTitle = isSavedMode 
+    ? (language === 'es' ? 'Recetas Guardadas' : 'Saved Recipes')
+    : t.feed.title;
+
+  const feedSubtitle = isSavedMode
+    ? (language === 'es' ? 'Accede a tus recetas descargadas en cualquier momento, incluso sin conexión.' : 'Access your downloaded recipes anytime, even without a connection.')
+    : t.feed.subtitle;
 
   // Construir la lista de categorías dinámica a partir de las traducciones
   const categories = Object.entries(t.recipeTypes || {}).map(([key, label]) => ({
@@ -67,7 +111,7 @@ export function RecipeFeed({ initialData = null }) {
 
   // Fetch category data when activeCategory or categoryPage changes
   useEffect(() => {
-      if (!activeCategory) {
+      if (!activeCategory || isSavedMode || activeCategory === 'SAVED_OFFLINE') {
           setCategoryRecipes([]);
           setCategoryPage(0);
           setHasMoreCategory(false);
@@ -161,7 +205,8 @@ export function RecipeFeed({ initialData = null }) {
 
   useEffect(() => {
     // Stop observing if status is bad, no more items, OR if we hit an error (manual retry needed)
-    if (status !== 'success' || !hasMore || isErrorLoadingMore) return;
+    // CRITICAL: Stop observing if we are in saved mode to prevent cursors/API calls
+    if (status !== 'success' || !hasMore || isErrorLoadingMore || isSavedMode) return;
 
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting) {
@@ -213,39 +258,80 @@ export function RecipeFeed({ initialData = null }) {
       {/* Header Section - Always visible */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground leading-tight">{t.feed.title}</h1>
+          <h1 className="text-3xl font-bold text-foreground leading-tight">{feedTitle}</h1>
           <p className="text-lg text-muted-foreground mt-1">
-            {t.feed.subtitle}
+            {feedSubtitle}
           </p>
         </div>
 
 
-        {/* Manual Refresh Action (Desktop/Non-Touch Only) */}
-        <Button
-          variant="primary"
-          onClick={fetchInitialRecipes}
-          className="hidden md:flex items-center gap-2 self-start sm:self-end text-sm shadow-sm"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          {t.feed.update}
-        </Button>
+        <div className="hidden md:flex flex-none lg:flex-1 items-center justify-end space-x-2 lg:space-x-3">
+          {/* Manual Refresh Action (Desktop/Non-Touch Only) */}
+          <Button
+            variant="primary"
+            onClick={fetchInitialRecipes}
+            disabled={isSavedMode}
+            className={`hidden md:flex items-center gap-2 self-start sm:self-end text-sm shadow-sm ${isSavedMode ? 'opacity-50 grayscale' : ''}`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            {t.feed.update}
+          </Button>
+        </div>
       </div>
 
+      <OfflineHelper />
+
+      {isOffline && (
+        <div className="mb-8 p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex flex-col sm:flex-row items-center gap-4 animate-in slide-in-from-top-4 duration-500">
+            <div className="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-500/20">
+                <WifiOff className="w-6 h-6" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+                <h3 className="text-lg font-bold text-indigo-700 dark:text-indigo-400">
+                    {language === 'es' ? 'Modo Offline: Mostrando tus Recetas Guardadas' : 'Offline Mode: Showing Your Saved Recipes'}
+                </h3>
+                <p className="text-sm text-indigo-600/80 dark:text-indigo-300/80">
+                    {language === 'es' 
+                        ? 'No tienes conexión a internet. Solo se muestran las recetas que descargaste previamente para uso offline.' 
+                        : 'No internet connection. Only showing recipes you previously downloaded for offline use.'}
+                </p>
+            </div>
+            <div className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-xs font-black uppercase tracking-widest">
+                {savedRecipes.length} {language === 'es' ? 'Recetas' : 'Recipes'}
+            </div>
+        </div>
+      )}
+
       {/* Category Filter */}
-      <div className="mb-8">
+      {!isSavedMode && (
+        <div className="mb-8">
           <div className="flex flex-wrap gap-2.5 sm:gap-3">
+              {/* Saved Recipes Pill (Priority) */}
+              <button
+                  onClick={() => handleCategoryToggle('SAVED_OFFLINE')}
+                  className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-black transition-all shadow-sm flex items-center gap-2 ${
+                      activeCategory === 'SAVED_OFFLINE' || isSavedMode
+                      ? 'bg-indigo-600 text-white shadow-indigo-200 scale-105 border-indigo-600' 
+                      : 'bg-indigo-50 border border-indigo-100 text-indigo-600 hover:bg-indigo-100'
+                  }`}
+              >
+                  <Download className="w-3.5 h-3.5" />
+                  {language === 'es' ? 'Guardados (Offline)' : 'Saved (Offline)'}
+              </button>
+
               {/* Todo Button */}
               <button
                   onClick={() => handleCategoryToggle(null)}
+                  disabled={isOffline}
                   className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-black transition-all shadow-sm ${
-                      !activeCategory 
+                      !activeCategory && !isOffline
                       ? 'bg-primary text-primary-foreground shadow-primary/30 scale-105 border-primary' 
                       : 'bg-background border border-border text-muted-foreground hover:bg-muted hover:text-foreground'
-                  }`}
+                  } ${isOffline ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                  {language === 'es' ? 'Todo' : 'All'}
+                  {language === 'es' ? 'Explorar Todo' : 'Explore All'}
               </button>
 
               {categories.filter(cat => activeCategory === cat.id || categories.indexOf(cat) < 3).map((cat) => (
@@ -289,7 +375,8 @@ export function RecipeFeed({ initialData = null }) {
                   </div>
               </div>
           </div>
-      </div>
+        </div>
+      )}
 
       {/* Content Area - Switches based on status */}
       {
@@ -297,16 +384,6 @@ export function RecipeFeed({ initialData = null }) {
           <LoadingState showSlowLoadMessage={showSlowLoadMessage} />
         ) : status === 'error' ? (
           <ErrorState message={errorMessage} onRetry={fetchInitialRecipes} />
-        ) : recipes.length === 0 ? (
-          <div className="text-center py-20 bg-card rounded-xl border border-dashed border-border shadow-sm">
-            <p className="text-muted-foreground text-lg mb-4">{t.feed.empty}</p>
-            <Button
-              className="mt-2"
-              onClick={() => window.location.href = '/create-recipe'}
-            >
-              {t.feed.createFirst}
-            </Button>
-          </div>
         ) : activeCategory && isCategoryLoading ? (
             <div className="flex flex-col items-center justify-center py-20 opacity-60">
                 <Spinner />
@@ -314,13 +391,41 @@ export function RecipeFeed({ initialData = null }) {
                     {language === 'es' ? 'Cargando Categoría...' : 'Loading Category...'}
                 </p>
             </div>
-        ) : activeCategory && categoryRecipes.length === 0 ? (
-            <div className="text-center py-20 bg-card rounded-xl border border-dashed border-border shadow-sm">
-                <p className="text-muted-foreground text-lg mb-4">{language === 'es' ? 'No hay recetas en esta categoría.' : 'No recipes in this category.'}</p>
+        ) : (isSavedMode ? savedRecipes : (activeCategory ? categoryRecipes : recipes)).length === 0 ? (
+            <div className="text-center py-20 bg-card rounded-xl border border-dashed border-border shadow-sm flex flex-col items-center">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                    {isSavedMode ? <Download className="w-8 h-8 text-muted-foreground" /> : <WifiOff className="w-8 h-8 text-muted-foreground" />}
+                </div>
+                <p className="text-muted-foreground text-lg mb-2 font-bold">
+                    {isSavedMode 
+                        ? (language === 'es' ? 'No tienes recetas guardadas' : 'No saved recipes') 
+                        : (activeCategory 
+                            ? (language === 'es' ? 'No hay recetas en esta categoría' : 'No recipes in this category')
+                            : (language === 'es' ? 'No hay recetas todavía' : 'No recipes yet')
+                          )
+                    }
+                </p>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    {isSavedMode 
+                        ? (language === 'es' ? 'Pulsa el icono de descarga en cualquier receta para verla aquí sin internet.' : 'Click the download icon on any recipe to see it here without internet.')
+                        : (activeCategory
+                            ? (language === 'es' ? 'Intenta con otra categoría o refresca el feed.' : 'Intenta refrescar el feed o crea una receta.')
+                            : (language === 'es' ? '¡Sé el primero en crear una receta deliciosa!' : 'Be the first to create a delicious recipe!')
+                          )
+                    }
+                </p>
+                {!isSavedMode && !activeCategory && (
+                    <Button
+                        className="mt-6"
+                        onClick={() => window.location.href = '/create-recipe'}
+                    >
+                        {t.feed.createFirst}
+                    </Button>
+                )}
             </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-            {(activeCategory ? categoryRecipes : recipes).map((recipe, index) => {
+            {(isSavedMode ? savedRecipes : (activeCategory ? categoryRecipes : recipes)).map((recipe, index) => {
               // Insert Ad every 6 items (index 5, 11, 17...) if ads are enabled
               // 0-based index: 5 is the 6th item.
               const PUBLIC_ENABLE_ADS = getEnv('PUBLIC_ENABLE_ADS') || getEnv('NEXT_PUBLIC_ENABLE_ADS');

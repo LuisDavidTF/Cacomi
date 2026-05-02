@@ -66,14 +66,33 @@ export const useApiClient = () => {
         if (isNetworkError || isOffline || error.message === 'Error en la solicitud a la API') {
 
           // --- MANUAL OFFLINE FALLBACK ---
-          if (typeof window !== 'undefined' && 'caches' in window) {
-            try {
-              const cachedResponse = await caches.match(endpoint);
-              if (cachedResponse) {
-                return await cachedResponse.json();
+          if (typeof window !== 'undefined') {
+            // 1. Try Dexie for specific recipe detail
+            const recipeDetailMatch = endpoint.match(/\/api\/recipes\/([^\/\?]+)/);
+            if (recipeDetailMatch) {
+              const recipeId = recipeDetailMatch[1];
+              try {
+                const { db } = await import('@/lib/db');
+                const localRecipe = await db.savedRecipes.get(recipeId);
+                if (localRecipe) {
+                  console.log("[Offline Fallback] Found recipe in Dexie:", recipeId);
+                  return localRecipe;
+                }
+              } catch (dbErr) {
+                console.warn("[Offline Fallback] Dexie check failed:", dbErr);
               }
-            } catch (cacheErr) {
-              console.warn("[Offline Fallback] Cache check failed:", cacheErr);
+            }
+
+            // 2. Try Cache API (standard fallback)
+            if ('caches' in window) {
+              try {
+                const cachedResponse = await caches.match(endpoint);
+                if (cachedResponse) {
+                  return await cachedResponse.json();
+                }
+              } catch (cacheErr) {
+                console.warn("[Offline Fallback] Cache check failed:", cacheErr);
+              }
             }
           }
         }

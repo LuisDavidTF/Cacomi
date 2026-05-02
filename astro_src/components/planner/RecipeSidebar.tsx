@@ -1,8 +1,12 @@
+/** @jsxImportSource react */
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, Loader2, Info, Plus, ChevronRight } from 'lucide-react';
 import { useSettings } from '@context/SettingsContext';
 import { useRecipeFeed } from '@hooks/useRecipeFeed';
 import { slugify } from '@utils/slugify';
+import { db } from '@/lib/db';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { NativeAdCard } from '../ads/NativeAdCard';
 
 interface RecipeSidebarProps {
     isMobile?: boolean;
@@ -34,9 +38,6 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showAllCategories]);
     
-    // Fallback to feed recipes if no search query or category is active
-    const displayRecipes = query || activeCategory ? searchResults : feedRecipes;
-
     // Search by Name
     useEffect(() => {
         if (!query.trim() && !activeCategory) {
@@ -44,7 +45,7 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
             return;
         }
         
-        if (activeCategory) return; // category search is handled separately to avoid conflicts
+        if (activeCategory) return;
         
         const timer = setTimeout(async () => {
             setIsSearching(true);
@@ -66,7 +67,7 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
 
     // Search by Category
     useEffect(() => {
-        if (!activeCategory) return;
+        if (!activeCategory || activeCategory === 'SAVED_OFFLINE') return;
 
         const fetchCategory = async () => {
             setIsSearching(true);
@@ -86,32 +87,38 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
         fetchCategory();
     }, [activeCategory]);
 
-    const handleCategoryToggle = (category: string) => {
-        if (activeCategory === category) {
-            setActiveCategory(null);
-        } else {
-            setQuery(''); // clear text search when selecting a category
-            setActiveCategory(category);
-        }
-    };
-
-    // Construir la lista de categorías dinámica a partir de las traducciones
-    const categories = Object.entries(t.recipeTypes || {}).map(([key, label]) => ({
-        id: key,
-        label: label as string
-    }));
-
     const handleDragStart = (e: React.DragEvent, recipe: any) => {
         e.dataTransfer.setData('recipe', JSON.stringify(recipe));
         e.dataTransfer.effectAllowed = 'move';
         onDragStateChange?.(true);
-        
-        // Optional: improve mobile drag ghost if possible, but native is limited
     };
 
     const handleDragEnd = () => {
         onDragStateChange?.(false);
     };
+
+    const categories = [
+        { id: 'SAVED_OFFLINE', label: language === 'es' ? 'Guardados' : 'Saved' },
+        ...Object.entries(t.recipeTypes || {}).map(([key, label]) => ({
+            id: key,
+            label: label as string
+        }))
+    ];
+
+    const handleCategoryToggle = (category: string | null) => {
+        if (activeCategory === category) {
+            setActiveCategory(null);
+        } else {
+            setQuery('');
+            setActiveCategory(category);
+        }
+    };
+
+    const savedRecipes = useLiveQuery(() => db.savedRecipes.toArray(), []) || [];
+    
+    const displayRecipes = activeCategory === 'SAVED_OFFLINE' 
+        ? savedRecipes 
+        : (query || activeCategory ? searchResults : feedRecipes);
 
     return (
         <div className={`bg-muted/20 md:bg-muted/30 border border-border/40 md:border-border/50 rounded-[2.5rem] p-6 md:p-6 space-y-6 md:space-y-8 animate-in slide-in-from-right duration-700 flex flex-col h-full max-h-[96vh] mb-2 ${isMobile ? 'border-none bg-transparent p-0 max-h-none' : ''}`}>
@@ -145,7 +152,6 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
                 </div>
 
                 <div className="flex flex-wrap gap-2.5">
-                    {/* Todo Button */}
                     <button
                         onClick={() => handleCategoryToggle(null)}
                         className={`px-4 py-1.5 rounded-full text-xs font-black transition-all shadow-sm ${
@@ -179,7 +185,6 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
                             {language === 'es' ? 'Ver más...' : 'See more...'}
                         </button>
                         
-                        {/* Dropdown for remaining categories */}
                         <div className={`absolute top-full mt-2 left-0 bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-xl ring-1 ring-black/5 p-3 z-40 w-56 transition-all origin-top-left ${showAllCategories ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
                             <div className="flex flex-wrap gap-2">
                                 {categories.filter(cat => activeCategory !== cat.id && categories.indexOf(cat) >= 3).map(cat => (
@@ -207,59 +212,67 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
                         <p className="text-xs font-bold uppercase tracking-widest text-primary">{language === 'es' ? 'Cargando...' : 'Loading...'}</p>
                     </div>
                 ) : displayRecipes.length > 0 ? (
-                    <>
-                        {displayRecipes.map((recipe) => (
-                            <div 
-                                key={recipe.publicId || recipe.id} 
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, recipe)}
-                                onDragEnd={handleDragEnd}
-                                onPointerDown={(e) => onPointerDown?.(e, recipe)}
-                                onClick={() => selectionMode && onSelectRecipe?.(recipe)}
-                                className={`group relative p-3 bg-background rounded-2xl border border-border/50 shadow-sm transition-all cursor-grab active:cursor-grabbing select-none
-                                    ${selectionMode ? 'animate-shake border-primary/30 ring-2 ring-primary/5 hover:scale-[1.02] hover:border-primary cursor-pointer' : 'hover:shadow-md hover:border-primary/30'}
-                                `}
-                            >
-                                <div className="flex gap-3 items-center">
-                                    <div className="relative shrink-0">
-                                        <img 
-                                            src={recipe.imageUrl || 'https://placehold.co/100x100?text=Receta'} 
-                                            alt={recipe.name} 
-                                            className="w-14 h-14 rounded-xl object-cover"
-                                        />
-                                        {selectionMode && (
-                                            <div className="absolute -top-1 -right-1 bg-primary text-white rounded-full p-0.5 shadow-lg">
-                                                <Plus className="w-3 h-3" />
+                    <div className="space-y-4">
+                        {displayRecipes.map((recipe, index) => (
+                            <React.Fragment key={recipe.publicId || recipe.id || index}>
+                                <div 
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, recipe)}
+                                    onDragEnd={handleDragEnd}
+                                    onPointerDown={(e) => onPointerDown?.(e, recipe)}
+                                    onClick={() => selectionMode && onSelectRecipe?.(recipe)}
+                                    className={`group relative p-3 bg-background rounded-2xl border border-border/50 shadow-sm transition-all cursor-grab active:cursor-grabbing select-none
+                                        ${selectionMode ? 'animate-shake border-primary/30 ring-2 ring-primary/5 hover:scale-[1.02] hover:border-primary cursor-pointer' : 'hover:shadow-md hover:border-primary/30'}
+                                    `}
+                                >
+                                    <div className="flex gap-3 items-center">
+                                        <div className="relative shrink-0">
+                                            <img 
+                                                src={recipe.imageUrl || 'https://placehold.co/100x100?text=Receta'} 
+                                                alt={recipe.name} 
+                                                className="w-14 h-14 rounded-xl object-cover"
+                                            />
+                                            {selectionMode && (
+                                                <div className="absolute -top-1 -right-1 bg-primary text-white rounded-full p-0.5 shadow-lg">
+                                                    <Plus className="w-3 h-3" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-sm text-foreground leading-tight line-clamp-2 group-hover:text-primary transition-colors pr-8">
+                                                {recipe.name}
+                                            </h4>
+                                            <div className="flex flex-wrap gap-2 mt-1.5">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-primary/10 px-1.5 py-0.5 rounded-md">
+                                                    {t.recipeTypes?.[recipe.mealType?.toUpperCase()] || recipe.mealType}
+                                                </span>
+                                                <span className="text-[10px] text-muted-foreground flex items-center">
+                                                    {(recipe.calories > 0 || recipe.protein > 0 || recipe.proteinGrams > 0) ? (
+                                                        <>
+                                                            {Math.round(recipe.calories || 0)} kcal
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-amber-600 dark:text-amber-400 font-bold animate-pulse">
+                                                            {language === 'es' ? 'Pendiente...' : 'Pending...'}
+                                                        </span>
+                                                    )}
+                                                </span>
                                             </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-sm text-foreground leading-tight line-clamp-2 group-hover:text-primary transition-colors pr-8">
-                                            {recipe.name}
-                                        </h4>
-                                        <div className="flex flex-wrap gap-2 mt-1.5">
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-primary/10 px-1.5 py-0.5 rounded-md">
-                                                {t.recipeTypes?.[recipe.mealType?.toUpperCase()] || recipe.mealType}
-                                            </span>
-                                            <span className="text-[10px] text-muted-foreground flex items-center">
-                                                {recipe.calories ? Math.round(recipe.calories) + ' kcal' : ''}
-                                            </span>
+                                        </div>
+                                        
+                                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <a 
+                                                href={`/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="p-2 bg-muted/80 hover:bg-primary hover:text-white rounded-lg transition-all"
+                                                title={language === 'es' ? 'Ver receta' : 'View recipe'}
+                                            >
+                                                <Info className="w-4 h-4" />
+                                            </a>
                                         </div>
                                     </div>
-                                    
-                                    {/* Action Buttons */}
-                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <a 
-                                            href={`/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="p-2 bg-muted/80 hover:bg-primary hover:text-white rounded-lg transition-all"
-                                            title={language === 'es' ? 'Ver receta' : 'View recipe'}
-                                        >
-                                            <Info className="w-4 h-4" />
-                                        </a>
-                                    </div>
                                 </div>
-                            </div>
+                            </React.Fragment>
                         ))}
                         
                         {!query && !activeCategory && hasMoreFeed && (
@@ -271,12 +284,16 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
                                 {isLoadingMore ? '...' : (language === 'es' ? 'Cargar más' : 'Load more')}
                             </button>
                         )}
-                    </>
+                    </div>
                 ) : (
                     <p className="text-xs text-muted-foreground text-center py-10 italic">
                         {t.planner?.noRecipesFound || 'No se encontraron recetas.'}
                     </p>
                 )}
+            </div>
+
+            <div className="shrink-0 pt-4 border-t border-border/40">
+                <NativeAdCard adSlotId="sidebar-fixed-bottom" variant="sidebar" />
             </div>
         </div>
     );

@@ -8,7 +8,7 @@ import { ShareModal } from '@components/ui/ShareModal';
 
 export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const { user } = useAuth();
-  const { t } = useSettings();
+  const { t, language } = useSettings();
   // Safe accessor for user ID comparison - Robust against String/Int mismatches and undefined
   // FALLBACK: Name comparison (requested by user due to missing API IDs)
   // Normalized to handle "Luis" vs "luis" and potential missing fields
@@ -105,7 +105,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
           </div>
 
         <div className="absolute bottom-4 left-4 right-4 z-10 text-white">
-          <div className="flex items-center gap-4 text-xs font-medium mb-2">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-medium mb-2">
             {prepTime > 0 && (
               <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
                 <ClockIcon className="w-3.5 h-3.5 mr-1.5 text-emerald-400" />
@@ -118,17 +118,26 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
                 {authorName}
               </span>
             )}
-            {calories > 0 && (
-              <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm" title="Calorías">
-                <FlameIcon className="w-3.5 h-3.5 mr-1.5 text-orange-400" />
-                {calories} kcal
-              </span>
-            )}
-            {protein > 0 && (
-              <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm" title="Proteína">
-                <ActivityIcon className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
-                {protein}g
-              </span>
+            {calories > 0 || protein > 0 ? (
+                <>
+                {calories > 0 && (
+                  <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm" title="Calorías">
+                    <FlameIcon className="w-3.5 h-3.5 mr-1.5 text-orange-400" />
+                    {calories} kcal
+                  </span>
+                )}
+                {protein > 0 && (
+                  <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm" title="Proteína">
+                    <ActivityIcon className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
+                    {protein}g
+                  </span>
+                )}
+                </>
+            ) : (
+                <span className="flex items-center bg-amber-500/80 text-[10px] px-2 py-1 rounded-md backdrop-blur-sm text-white font-bold animate-pulse">
+                    <ActivityIcon className="w-3 h-3 mr-1.5" />
+                    {language === 'es' ? 'Calculando info nutricional...' : 'Calculating nutrition...'}
+                </span>
             )}
           </div>
 

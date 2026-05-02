@@ -31,9 +31,11 @@ export function decodeJwtPayload(token: string): Record<string, unknown> | null 
 function isAdminPayload(payload: Record<string, unknown>): boolean {
     const roles = payload.roles;
     if (Array.isArray(roles)) {
-        return roles.some(role => 
-            role && typeof role === 'object' && role.authority === 'ROLE_ADMIN'
-        );
+        return roles.some(role => {
+            if (typeof role === 'string') return role === 'ROLE_ADMIN';
+            if (role && typeof role === 'object') return (role as any).authority === 'ROLE_ADMIN';
+            return false;
+        });
     }
     return false;
 }

@@ -10,7 +10,7 @@ import { feedCache } from '@utils/feedCache';
  */
 const STORAGE_KEY = 'Cacomi_feed_cache';
 
-export function useRecipeFeed({ initialData } = {}) {
+export function useRecipeFeed({ initialData, forceSavedMode = false } = {}) {
     // Helper to load from storage safely
     // const loadFromStorage = () => { ... } // Replaced by feedCache.get()
 
@@ -38,7 +38,7 @@ export function useRecipeFeed({ initialData } = {}) {
 
     // Pagination
     const [nextCursor, setNextCursor] = useState(initialCursor);
-    const [hasMore, setHasMore] = useState(!!initialCursor || initialRecipes.length === 0);
+    const [hasMore, setHasMore] = useState(forceSavedMode ? false : (!!initialCursor || initialRecipes.length === 0));
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isErrorLoadingMore, setIsErrorLoadingMore] = useState(false);
 
@@ -106,7 +106,7 @@ export function useRecipeFeed({ initialData } = {}) {
                     console.log('Restoring full feed from cache (SSR empty)');
                     // Restore cursor state too since we are adopting the full cache
                     setNextCursor(cached.nextCursor);
-                    setHasMore(cached.hasMore);
+                    setHasMore(forceSavedMode ? false : cached.hasMore);
                     setStatus('success');
                     return cached.recipes;
                 }
@@ -128,7 +128,7 @@ export function useRecipeFeed({ initialData } = {}) {
                     // We expanded the list, so we should trust the CACHE's pagination state (nextCursor) 
                     // because it corresponds to the longer list.
                     setNextCursor(cached.nextCursor);
-                    setHasMore(cached.hasMore);
+                    setHasMore(forceSavedMode ? false : cached.hasMore);
                     return [...currentRecipes, ...uniqueCached];
                 }
 
@@ -140,7 +140,7 @@ export function useRecipeFeed({ initialData } = {}) {
     // LISTEN FOR INITIAL DATA UPDATES (e.g. router.refresh())
     // When props change, we want to update the "Top" of the list with the new fresh data.
     useEffect(() => {
-        if (initialData?.data && initialData.data.length > 0) {
+        if (!forceSavedMode && initialData?.data && initialData.data.length > 0) {
             setRecipes(prev => {
                 const fresh = initialData.data;
                 const freshIds = new Set(fresh.map(r => r.id));
@@ -260,10 +260,10 @@ export function useRecipeFeed({ initialData } = {}) {
 
     // Initial load effect
     useEffect(() => {
-        if (!initialFetchedRef.current && recipes.length === 0) {
+        if (!forceSavedMode && !initialFetchedRef.current && recipes.length === 0) {
             fetchInitialRecipes();
         }
-    }, [fetchInitialRecipes, recipes.length]);
+    }, [fetchInitialRecipes, recipes.length, forceSavedMode]);
 
     return {
         recipes,

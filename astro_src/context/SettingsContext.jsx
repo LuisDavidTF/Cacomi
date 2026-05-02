@@ -165,6 +165,7 @@ export const translations = {
             pinTooltip: 'Fijar receta para que la IA no la cambie',
             unpinTooltip: 'Desfijar receta',
             generateConfirm: '¿Quieres generar un nuevo plan? Se usarán 50 Cacomi Coins.',
+            offlineNotice: 'Tu comodidad es nuestra prioridad. Tu plan semanal se guarda automáticamente en este dispositivo para que nunca pierdas el ritmo, con o sin conexión. Todas las recetas (IA y manuales) están disponibles para consulta offline.'
         },
 
         landing: {
@@ -341,7 +342,7 @@ export const translations = {
             noPermission: 'Redirigiendo... No tienes permiso.',
             deleteStep: 'Eliminar paso',
             disclaimerRetention: 'Al desactivar/eliminar tu cuenta, conservaremos tus datos temporalmente por 30 días para fines legales y de políticas de la plataforma antes de su eliminación definitiva.',
-            disclaimerTransfer: 'Si pones una receta pública, al desactivar/eliminar tu cuenta, las recetas que ya estén guardadas por otros usuarios podrían transferirse a la comunidad de Cacomi para mantener la integridad de sus recetarios.'
+            disclaimerTransfer: 'Al desactivar/eliminar tu cuenta, las recetas que ya estén guardadas por otros usuarios podrían transferirse a la comunidad de Cacomi para mantener la integridad de sus recetarios.'
         },
 
         feed: {
@@ -403,11 +404,13 @@ export const translations = {
             wifiDesc: 'Ahorra datos móviles.',
             storage: 'Almacenamiento Offline',
             usage: 'Uso actual',
-            recipes: 'recetas',
+            recipes: 'Recetas',
+            pantry: 'Despensa',
+            planner: 'Planificador',
+            app: 'Aplicación / Caché',
             clear: 'Borrar descargas',
             clearing: 'Liberando...',
-
-            storageDesc: 'Cacomi administra el espacio automáticamente.',
+            storageDesc: 'Espacio ocupado por datos descargados para uso offline.',
             account: 'Cuenta y Privacidad',
             deleteAccount: 'Eliminar mi cuenta',
             deleteAccountDesc: 'Solicitar la baja permanente de tus datos.',
@@ -442,7 +445,8 @@ export const translations = {
             cancel: 'Cancelar',
             save: 'Guardar',
             saving: 'Guardando...',
-            unknownIngredient: 'Ingrediente desconocido'
+            unknownIngredient: 'Ingrediente desconocido',
+            offlineNotice: 'Cacomi es superior porque piensa en ti: guardamos tu despensa localmente para que puedas consultarla sin internet. Cuando recuperes la conexión, sincronizaremos tus cambios automáticamente.'
         },
 
         profile: {
@@ -722,6 +726,7 @@ export const translations = {
             pinTooltip: 'Pin recipe so AI does not change it',
             unpinTooltip: 'Unpin recipe',
             generateConfirm: 'Do you want to generate a new plan? 50 Cacomi Coins will be used.',
+            offlineNotice: 'Your convenience is our priority. Your weekly plan is automatically saved on this device so you never miss a beat, with or without a connection. All recipes (AI & manual) are available for offline reference.'
         },
 
         auth: {
@@ -816,7 +821,7 @@ export const translations = {
             noPermission: 'Redirecting... You do not have permission.',
             deleteStep: 'Delete step',
             disclaimerRetention: 'Upon account deactivation/deletion, we will temporarily retain your data for 30 days for legal and platform policy purposes before permanent deletion.',
-            disclaimerTransfer: 'If you set a recipe to public, upon account deactivation/deletion, recipes already saved by other users may be transferred to the Cacomi community to maintain their cookbooks\' integrity.'
+            disclaimerTransfer: 'Upon account deactivation/deletion, recipes already saved by other users may be transferred to the Cacomi community to maintain their cookbooks\' integrity.'
         },
 
         feed: {
@@ -878,11 +883,13 @@ export const translations = {
             wifiDesc: 'Save mobile data.',
             storage: 'Offline Storage',
             usage: 'Current usage',
-            recipes: 'recipes',
+            recipes: 'Recipes',
+            pantry: 'Pantry',
+            planner: 'Planner',
+            app: 'App / Cache',
             clear: 'Clear downloads',
             clearing: 'Clearing...',
-
-            storageDesc: 'Cacomi manages space automatically.',
+            storageDesc: 'Space occupied by data downloaded for offline use.',
             account: 'Account & Privacy',
             deleteAccount: 'Delete my account',
             deleteAccountDesc: 'Request permanent deletion of your data.',
@@ -917,7 +924,8 @@ export const translations = {
             cancel: 'Cancel',
             save: 'Save',
             saving: 'Saving...',
-            unknownIngredient: 'Unknown ingredient'
+            unknownIngredient: 'Unknown ingredient',
+            offlineNotice: 'Cacomi is superior because it thinks of you: we save your pantry locally so you can consult it without internet. Once connection is restored, we will sync your changes automatically.'
         },
 
         profile: {
@@ -1269,7 +1277,7 @@ export const translations = {
             noPermission: 'Redirection... Vous n\'avez pas la permission.',
             deleteStep: 'Supprimer l\'étape',
             disclaimerRetention: 'Dès la désactivation/suppression du compte, nous conserverons temporairement vos données pendant 30 jours à des fins légales et de politique de la plateforme avant suppression définitive.',
-            disclaimerTransfer: 'Si vous rendez une recette publique, lors de la désactivation/suppression du compte, les recettes déjà enregistrées par d\'autres utilisateurs peuvent être transférées à la communauté Cacomi.'
+            disclaimerTransfer: 'Lors de la désactivation/suppression du compte, les recettes déjà enregistrées par d\'autres utilisateurs peuvent être transférées à la communauté Cacomi.'
         },
 
         feed: {

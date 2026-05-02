@@ -29,22 +29,24 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             });
         }
 
+        // Handle Auth Token Cookie for Middleware
+        cookies.set(TOKEN_NAME, accessToken, {
+            httpOnly: true,
+            secure: import.meta.env.PROD,
+            maxAge: MAX_AGE,
+            path: '/',
+            sameSite: 'lax', // Use lax for better cross-page transitions
+        });
+
         // Handle Refresh Token Cookie from backend
-        // We look for the 'set-cookie' header from the backend response
         const backendCookies = response.headers.get('set-cookie');
         if (backendCookies) {
-            // We can either parse and re-set it, or if it's already structured, 
-            // we manually set our refreshToken cookie if it's not present.
-            // For robustness, we'll ensure the refreshToken cookie is set for the frontend.
-            
-            // Simple check: if backend set a refreshToken, we make sure it's proxied.
-            // Note: In some environments, multiple set-cookie headers might be joined by commas.
             if (backendCookies.includes('refreshToken=')) {
                 const match = backendCookies.match(/refreshToken=([^;]+)/);
                 if (match) {
                     cookies.set('refreshToken', match[1], {
                         httpOnly: true,
-                        secure: true,
+                        secure: import.meta.env.PROD,
                         maxAge: 60 * 60 * 24 * 7, // 7 days
                         path: '/',
                         sameSite: 'strict',

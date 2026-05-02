@@ -13,6 +13,9 @@ import { ShareIcon } from '@components/ui/Icons';
 import { ShareModal } from '@components/ui/ShareModal';
 import { slugify } from '@utils/slugify';
 import { getEnv } from '@utils/env';
+import { db } from '@/lib/db';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { CloudDownload, CheckCircle2, Loader2 } from 'lucide-react';
 
 /**
  * RecipeDetail Component
@@ -20,27 +23,130 @@ import { getEnv } from '@utils/env';
  * from the previous Next.js implementation.
  */
 export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
-    const { t } = useSettings();
+    const { t, language } = useSettings();
     const { showToast } = useToast();
     const [recipe, setRecipe] = useState(initialRecipe);
     const [isLoading, setIsLoading] = useState(!initialRecipe);
     const [showShare, setShowShare] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    // Dexie: Check if recipe is downloaded
+    const isDownloaded = useLiveQuery(
+        async () => {
+            if (!recipe) return false;
+            const id = recipe.publicId || recipe.id;
+            const match = await db.savedRecipes.get(String(id));
+            return !!match;
+        },
+        [recipe]
+    );
+
+    const toggleDownload = async () => {
+        if (!recipe) return;
+        const id = String(recipe.publicId || recipe.id);
+        
+        if (isDownloaded) {
+            await db.savedRecipes.delete(id);
+            showToast(language === 'es' ? 'Eliminado de tus guardados' : 'Removed from saved recipes', 'info');
+        } else {
+            setIsDownloading(true);
+            try {
+                // Ensure we save the FULL recipe data
+                await db.savedRecipes.put({
+                    ...recipe,
+                    id,
+                    savedAt: new Date().toISOString()
+                });
+
+                // Also try to cache the page HTML for full offline navigation support
+                if ('caches' in window) {
+                    try {
+                        const cache = await caches.open('pages');
+                        const req = new Request(window.location.pathname);
+                        const resp = await fetch(req);
+                        if (resp.ok) {
+                            await cache.put(req, resp.clone());
+                        }
+                    } catch (e) {
+                        console.warn('HTML cache failed, but data is in Dexie', e);
+                    }
+                }
+
+                showToast(language === 'es' ? 'Receta guardada para uso offline' : 'Recipe saved for offline use', 'success');
+            } catch (err) {
+                console.error("Save error", err);
+                showToast('Error al guardar', 'error');
+            } finally {
+                setIsDownloading(false);
+            }
+        }
+    };
 
     useEffect(() => {
-        if (!initialRecipe && recipeId) {
+        const loadRecipe = async () => {
+            if (initialRecipe) {
+                setRecipe(initialRecipe);
+                setIsLoading(false);
+                return;
+            }
+
+            if (!recipeId) {
+                setIsLoading(false);
+                return;
+            }
+
+            // 1. Try RAM Cache
             const visited = CacheManager.getVisitedRecipe(recipeId);
             if (visited) {
                 setRecipe(visited);
-            } else {
-                const feed = CacheManager.getFeed();
-                const feedRecipe = feed?.recipes?.find(r => String(r.id) === String(recipeId));
-                if (feedRecipe) setRecipe(feedRecipe);
+                setIsLoading(false);
+                return;
             }
-            setIsLoading(false);
-        } else if (initialRecipe) {
-            setRecipe(initialRecipe);
-            setIsLoading(false);
-        }
+
+            // 2. Try Offline Dexie Storage (Crucial for Planner offline access)
+            try {
+                const offlineRecipe = await db.savedRecipes.get(String(recipeId));
+                if (offlineRecipe) {
+                    console.log("[Offline] Loaded recipe from Dexie:", recipeId);
+                    setRecipe(offlineRecipe);
+                    setIsLoading(false);
+                    return;
+                }
+            } catch (err) {
+                console.error("Dexie access error", err);
+            }
+
+            // 3. Try Feed Cache
+            const feed = CacheManager.getFeed();
+            const feedRecipe = feed?.recipes?.find(r => String(r.id) === String(recipeId));
+            if (feedRecipe) {
+                setRecipe(feedRecipe);
+                setIsLoading(false);
+                return;
+            }
+
+            // 4. Fetch from API if online
+            if (typeof navigator !== 'undefined' && navigator.onLine) {
+                setIsLoading(true);
+                try {
+                    const res = await fetch(`/api/recipes/${recipeId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        setRecipe(data);
+                        // Auto-save to RAM cache
+                        CacheManager.saveVisitedRecipe(data);
+                    }
+                } catch (err) {
+                    console.error("Fetch error", err);
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
+                setIsLoading(false);
+            }
+        };
+
+        loadRecipe();
     }, [initialRecipe, recipeId]);
 
     // Google Ads Initialization
@@ -162,22 +268,29 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                             </div>
 
                             {/* Desktop Button */}
-                            <div className="hidden sm:flex mt-6">
+                            <div className="hidden sm:flex mt-6 gap-3">
                                 <Button
                                     variant="secondary"
-                                    onClick={handleSaveOffline}
-                                    className="border-0 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white font-medium shadow-sm transition-all"
+                                    onClick={toggleDownload}
+                                    disabled={isDownloading}
+                                    className={`border-0 backdrop-blur-md font-medium shadow-sm transition-all ${isDownloaded ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-white/20 hover:bg-white/30 text-white'}`}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="w-4 h-4 mr-2" viewBox="0 0 16 16">
-                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-                                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
-                                    </svg>
-                                    {t.common?.saveOffline || 'Guardar Offline'}
+                                    {isDownloading ? (
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    ) : isDownloaded ? (
+                                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    ) : (
+                                        <CloudDownload className="w-4 h-4 mr-2" />
+                                    )}
+                                    {isDownloaded 
+                                        ? (language === 'es' ? 'Guardado Offline' : 'Saved Offline')
+                                        : (language === 'es' ? 'Descargar Receta' : 'Download Recipe')
+                                    }
                                 </Button>
                                 <Button
                                     variant="secondary"
                                     onClick={() => setShowShare(true)}
-                                    className="ml-3 border-0 bg-primary/20 backdrop-blur-md hover:bg-primary/40 text-white font-medium shadow-sm transition-all"
+                                    className="border-0 bg-primary/20 backdrop-blur-md hover:bg-primary/40 text-white font-medium shadow-sm transition-all"
                                 >
                                     <ShareIcon className="w-4 h-4 mr-2" />
                                     {t.share?.shareGeneric || 'Compartir'}
@@ -196,14 +309,21 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                         <div className="flex sm:hidden w-full gap-2">
                             <Button
                                 variant="secondary"
-                                onClick={handleSaveOffline}
-                                className="flex-grow justify-center bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                                onClick={toggleDownload}
+                                disabled={isDownloading}
+                                className={`flex-grow justify-center border-0 font-medium transition-all ${isDownloaded ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="w-4 h-4 mr-2" viewBox="0 0 16 16">
-                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-                                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
-                                </svg>
-                                {t.common?.saveOffline || 'Guardar'}
+                                {isDownloading ? (
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : isDownloaded ? (
+                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                ) : (
+                                    <CloudDownload className="w-4 h-4 mr-2" />
+                                )}
+                                {isDownloaded 
+                                    ? (language === 'es' ? 'Guardado' : 'Saved')
+                                    : (language === 'es' ? 'Guardar' : 'Save')
+                                }
                             </Button>
                             <Button
                                 variant="secondary"
@@ -236,28 +356,34 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                     <span className="w-1.5 h-5 bg-orange-500 rounded-full mr-3" />
                                     {t.recipe?.nutrition || 'Información Nutricional'}
                                 </h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="flex flex-col items-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border border-orange-100 dark:border-orange-800/30">
-                                        <FlameIcon className="w-6 h-6 text-orange-500 mb-2" />
-                                        <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-tighter">{t.recipe?.calories || 'Calorías'}</span>
-                                        <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalCalories?.toFixed(0)}</span>
+                                {(recipe.nutrition.totalCalories > 0 || recipe.nutrition.totalProtein > 0) ? (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="flex flex-col items-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border border-orange-100 dark:border-orange-800/30">
+                                            <FlameIcon className="w-6 h-6 text-orange-500 mb-2" />
+                                            <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-tighter">{t.recipe?.calories || 'Calorías'}</span>
+                                            <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalCalories?.toFixed(0)}</span>
+                                        </div>
+                                        <div className="flex flex-col items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800/30">
+                                            <ActivityIcon className="w-6 h-6 text-blue-500 mb-2" />
+                                            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tighter">{t.recipe?.protein || 'Proteína'}</span>
+                                            <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalProtein?.toFixed(1)}g</span>
+                                        </div>
+                                        <div className="flex flex-col items-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-800/30">
+                                            <WheatIcon className="w-6 h-6 text-amber-500 mb-2" />
+                                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-tighter">{t.recipe?.carbs || 'Carbs'}</span>
+                                            <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalCarbs?.toFixed(1)}g</span>
+                                        </div>
+                                        <div className="flex flex-col items-center p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
+                                            <DropletIcon className="w-6 h-6 text-emerald-500 mb-2" />
+                                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">{t.recipe?.fat || 'Grasas'}</span>
+                                            <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalFat?.toFixed(1)}g</span>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800/30">
-                                        <ActivityIcon className="w-6 h-6 text-blue-500 mb-2" />
-                                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tighter">{t.recipe?.protein || 'Proteína'}</span>
-                                        <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalProtein?.toFixed(1)}g</span>
+                                ) : (
+                                    <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-sm italic text-center animate-pulse">
+                                        Esta comida aún no ha sido calculada por Cacomi, espera al día de mañana para conocer su información nutricional.
                                     </div>
-                                    <div className="flex flex-col items-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-800/30">
-                                        <WheatIcon className="w-6 h-6 text-amber-500 mb-2" />
-                                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-tighter">{t.recipe?.carbs || 'Carbs'}</span>
-                                        <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalCarbs?.toFixed(1)}g</span>
-                                    </div>
-                                    <div className="flex flex-col items-center p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
-                                        <DropletIcon className="w-6 h-6 text-emerald-500 mb-2" />
-                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">{t.recipe?.fat || 'Grasas'}</span>
-                                        <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalFat?.toFixed(1)}g</span>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         )}
 

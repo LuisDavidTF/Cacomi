@@ -15,7 +15,8 @@ import {
     CheckCircle2,
     RotateCcw,
     Trash2,
-    Utensils
+    Utensils,
+    WifiOff
 } from 'lucide-react';
 import { useSettings } from '@context/SettingsContext';
 import { useAuth } from '@context/AuthContext';
@@ -26,6 +27,7 @@ import { WeeklyCheckinModal } from './WeeklyCheckinModal';
 import { BiometricModal } from './BiometricModal';
 import { PlannerDay } from './PlannerDay';
 import { NutritionalSummary } from './NutritionalSummary';
+import { NativeAdCard } from '../ads/NativeAdCard';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import type { PlanResponse, Meal, GroupedMeals } from '@/types/planner';
@@ -171,6 +173,7 @@ export function WeeklyPlanner() {
     const { t, language } = useSettings();
     const { user, fetchAuth, isAuthenticated } = useAuth();
     const [currentVisibleDate, setCurrentVisibleDate] = useState<Date>(today);
+    const [focusedDate, setFocusedDate] = useState<Date>(today);
     const [futureDaysLimit, setFutureDaysLimit] = useState(30);
     
     // Generate calendar (-15 to +futureDaysLimit from today)
@@ -255,6 +258,78 @@ export function WeeklyPlanner() {
         message: string;
         onConfirm: () => void;
     } | null>(null);
+
+    const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+
+    useEffect(() => {
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
+    const ensureRecipeDetailSaved = async (recipe: any) => {
+        if (!recipe) return;
+        const id = String(recipe.publicId || recipe.id || recipe.recipeUUID);
+        
+        try {
+            // Check if already in savedRecipes with ingredients
+            const existing = await db.savedRecipes.get(id);
+            if (existing && existing.ingredients && existing.ingredients.length > 0) {
+                return;
+            }
+
+            // If online, fetch full details to ensure offline parity
+            if (navigator.onLine && isAuthenticated) {
+                const response = await fetchAuth(`/api/recipes/${id}`);
+                if (response.ok) {
+                    const fullRecipe = await response.json();
+                    await db.savedRecipes.put({
+                        ...fullRecipe,
+                        id,
+                        savedAt: new Date().toISOString()
+                    });
+                    console.log(`[Offline Sync] Full recipe saved: ${fullRecipe.name}`);
+                }
+            } else if (recipe.ingredients || recipe.instructions) {
+                // If we happen to have data but no connection, save what we have
+                 await db.savedRecipes.put({
+                    ...recipe,
+                    id,
+                    name: recipe.name || recipe.recipeName,
+                    savedAt: new Date().toISOString()
+                });
+            }
+        } catch (err) {
+            console.error(`[Offline Sync] Error saving recipe ${id}:`, err);
+        }
+    };
+
+    // Background Sync: Proactively download full recipe details for any meal in the plan
+    useEffect(() => {
+        if (planData?.meals && planData.meals.length > 0 && !isOffline) {
+            const uniqueRecipeIds = Array.from(new Set(planData.meals.map(m => m.recipeUUID)));
+            
+            const syncRecipes = async () => {
+                console.log(`[Offline Sync] Checking ${uniqueRecipeIds.length} recipes from plan...`);
+                for (const rid of uniqueRecipeIds) {
+                    const meal = planData.meals.find(m => m.recipeUUID === rid);
+                    // No await here to allow parallel background processing (or minimal sequential delay)
+                    ensureRecipeDetailSaved({
+                        id: rid,
+                        name: meal?.recipeName,
+                        imageUrl: meal?.imageUrl
+                    });
+                }
+            };
+            
+            syncRecipes();
+        }
+    }, [planData?.meals, isOffline, isAuthenticated]);
 
     // Custom Pointer Drag Logic (for Mobile/Tablet)
     useEffect(() => {
@@ -414,6 +489,9 @@ export function WeeklyPlanner() {
                 };
                 await db.plannedMeals.add(newMeal);
             }
+            
+            // Ensure full recipe is available offline
+            await ensureRecipeDetailSaved(recipe);
             
             // Reconstruct plan data with the changes
             const allMeals = await db.plannedMeals
@@ -712,6 +790,14 @@ export function WeeklyPlanner() {
                             });
                         }
                     }
+
+                    // Background Sync: Ensure all recipes in the plan are available offline
+                    const uniqueRecipeIds = Array.from(new Set(meals.map(m => m.recipeUUID)));
+                    for (const rid of uniqueRecipeIds) {
+                        const m = meals.find(meal => meal.recipeUUID === rid);
+                        // No await here to not block the UI update
+                        ensureRecipeDetailSaved({ id: rid, name: m?.recipeName, imageUrl: m?.imageUrl });
+                    }
                 }
                 
                 // Update state
@@ -932,6 +1018,7 @@ export function WeeklyPlanner() {
             container.scrollTo({ left: scrollPos, behavior });
         }
         setCurrentVisibleDate(date);
+        setFocusedDate(date);
     };
 
     const handleScroll = () => {
@@ -944,6 +1031,10 @@ export function WeeklyPlanner() {
             const centerX = scrollLeft + scrollContainerRef.current.offsetWidth / 2;
             const idx = Math.max(0, Math.min(calendarDays.length - 1, Math.floor(centerX / (childWidth + gap))));
             const newDate = calendarDays[idx];
+
+            if (newDate && newDate.toDateString() !== focusedDate.toDateString()) {
+                setFocusedDate(newDate);
+            }
             
             // Expand calendar if approaching the end (e.g. 5 days away)
             if (idx > calendarDays.length - 5) {
@@ -1327,6 +1418,26 @@ export function WeeklyPlanner() {
                 <div className="absolute top-0 left-1/4 w-[600px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
                 <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-secondary/5 rounded-full blur-[100px]" />
             </div>
+
+            {isOffline && (
+                <div className="mb-10 p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-[32px] flex flex-col sm:flex-row items-center gap-6 animate-in slide-in-from-top-4 duration-700 relative overflow-hidden group">
+                     <div className="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-[60px] animate-pulse" />
+                     <div className="w-16 h-16 rounded-3xl bg-indigo-500 shadow-2xl shadow-indigo-500/40 flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform duration-500 shrink-0">
+                        <WifiOff className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="flex-1 text-center md:text-left">
+                        <h3 className="text-lg font-black text-indigo-700 dark:text-indigo-400 mb-1">
+                            {language === 'es' ? 'Modo de Resiliencia Inteligente' : 'Smart Resilience Mode'}
+                        </h3>
+                        <p className="text-sm text-indigo-600/80 dark:text-indigo-300/80 font-medium leading-relaxed">
+                            {t.planner.offlineNotice}
+                        </p>
+                    </div>
+                    <div className="px-5 py-2.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                        {language === 'es' ? 'Local' : 'Local'}
+                    </div>
+                </div>
+            )}
 
             {/* ── CONCIERGE LOADING SCREEN ── */}
             {isGenerating && (
@@ -1834,12 +1945,20 @@ export function WeeklyPlanner() {
 
                                 {/* Nutrition and Cost Summary */}
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <NutritionalSummary 
-                                        isHorizontal 
-                                        targetCalories={planData?.targetCalories}
-                                        targetProtein={planData?.targetProtein}
-                                        meals={planData?.meals || []}
-                                    />
+                                    {(() => {
+                                        const activeDate = viewMode === 'DAY' ? calendarDays[selectedDateIndex] : focusedDate;
+                                        const dateStr = formatDateToString(activeDate);
+                                        const dayMeals = (planData?.meals || []).filter(m => m.mealDate === dateStr && m.isDeleted === 0);
+                                        
+                                        return (
+                                            <NutritionalSummary 
+                                                isHorizontal 
+                                                targetCalories={planData?.targetCalories}
+                                                targetProtein={planData?.targetProtein}
+                                                meals={dayMeals}
+                                            />
+                                        );
+                                    })()}
                                     {totalSpent > 0 && (
                                         <div className="flex items-center gap-2.5 px-3.5 py-2 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-100 dark:border-emerald-500/20 rounded-xl shadow-sm transition-colors">
                                             <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -1937,6 +2056,11 @@ export function WeeklyPlanner() {
                         >
                             {t.planner?.today || 'Hoy'}
                         </button>
+                    </div>
+                    
+                    {/* Main Planner Ad Banner */}
+                    <div className="py-2 opacity-80 hover:opacity-100 transition-all duration-500">
+                        <NativeAdCard adSlotId="planner-main-banner" variant="banner" />
                     </div>
 
 

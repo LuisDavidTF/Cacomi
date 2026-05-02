@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { RecipeFeed } from '@components/recipes/RecipeFeed';
+
+// Force dynamic SSR
+export const prerender = false;
+---
+
+<Layout title="Recetas Guardadas | Cacomi" description="Accede a tus recetas descargadas para verlas sin conexión en cualquier momento.">
+  <div id="saved-recipes-container" class="mt-8">
+    <RecipeFeed forceSavedMode={true} client:load />
+  </div>
+</Layout>

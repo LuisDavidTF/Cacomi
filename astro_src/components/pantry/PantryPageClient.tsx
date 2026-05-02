@@ -25,6 +25,18 @@ export default function PantryPageClient() {
         resumeSync
     } = usePantry();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+
+    React.useEffect(() => {
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     if (isAuthLoading) {
         return (
@@ -49,6 +61,17 @@ export default function PantryPageClient() {
                     {t.pantry.addProduct}
                 </Button>
             </div>
+
+            {isOffline && (
+                <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+                    <div className="p-2 bg-amber-500 rounded-lg text-white shadow-lg shadow-amber-500/20">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                    </div>
+                    <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed font-medium">
+                        {t.pantry.offlineNotice}
+                    </p>
+                </div>
+            )}
 
             {isPantryLoading ? (
                 <div className="flex justify-center p-12">

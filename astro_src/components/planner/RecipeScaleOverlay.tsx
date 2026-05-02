@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2, Info, Sparkles } from 'lucide-react';
+import { db } from '@/lib/db';
 import { useSettings } from '../../context/SettingsContext';
 
 interface RecipeScaleOverlayProps {
@@ -18,10 +19,31 @@ export function RecipeScaleOverlay({ recipeUUID, multiplier, onClose }: RecipeSc
     useEffect(() => {
         const fetchRecipe = async () => {
             try {
+                // 1. Try Local Dexie Storage first (Offline-First)
+                const offlineRecipe = await db.savedRecipes.get(String(recipeUUID));
+                if (offlineRecipe && offlineRecipe.ingredients && offlineRecipe.ingredients.length > 0) {
+                    setRecipe(offlineRecipe);
+                    setLoading(false);
+                    return;
+                }
+
+                // 2. Fallback to API if online
+                if (!navigator.onLine) {
+                    throw new Error('Sin conexión: La receta no está disponible offline.');
+                }
+
                 const res = await fetch(`/api/recipes/${recipeUUID}`);
                 if (!res.ok) throw new Error('Error al cargar la receta');
                 const data = await res.json();
                 setRecipe(data);
+                
+                // 3. Cache it for next time
+                await db.savedRecipes.put({
+                    ...data,
+                    id: String(recipeUUID),
+                    savedAt: new Date().toISOString()
+                });
+
             } catch (err: any) {
                 setError(err.message || 'Error desconocido');
             } finally {

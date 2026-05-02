@@ -27,6 +27,15 @@ export const POST: APIRoute = async ({ cookies }) => {
         const data = await response.json();
         const { accessToken } = data;
 
+        // Update Auth Token Cookie for Middleware
+        cookies.set('auth_token', accessToken, {
+            httpOnly: true,
+            secure: import.meta.env.PROD,
+            maxAge: 60 * 60 * 24 * 7,
+            path: '/',
+            sameSite: 'lax',
+        });
+
         // If the backend returned a new refresh token (optional but good practice)
         const backendCookies = response.headers.get('set-cookie');
         if (backendCookies && backendCookies.includes('refreshToken=')) {
