@@ -34,8 +34,8 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const authorName = recipe.authorName || recipe.user?.name;
   const typeValue = recipe.type || recipe.mealType;
   const translatedType = typeValue ? (t.recipeTypes?.[typeValue.toUpperCase()] || typeValue) : null;
-  const calories = recipe.calories;
-  const protein = recipe.protein;
+  const calories = recipe.calories || recipe.nutrition?.totalCalories || recipe.nutrition?.calories;
+  const protein = recipe.protein || recipe.nutrition?.totalProtein || recipe.nutrition?.protein;
 
   const [imgSrc, setImgSrc] = useState(imageUrl);
   const [showShare, setShowShare] = useState(false);
@@ -123,13 +123,13 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
                 {calories > 0 && (
                   <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm" title="Calorías">
                     <FlameIcon className="w-3.5 h-3.5 mr-1.5 text-orange-400" />
-                    {calories} kcal
+                    {Math.round(calories)} kcal
                   </span>
                 )}
                 {protein > 0 && (
                   <span className="flex items-center bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm" title="Proteína">
                     <ActivityIcon className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
-                    {protein}g
+                    {Number(protein).toFixed(1)}g
                   </span>
                 )}
                 </>
@@ -157,7 +157,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
         )}
 
         {/* Footer Actions */}
-        <div className="pt-4 mt-auto border-t border-border">
+        <div className="pt-4 border-t border-border mt-auto">
           <div
             className="w-full inline-flex items-center justify-center bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group/btn relative z-20"
           >

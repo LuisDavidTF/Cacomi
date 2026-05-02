@@ -36,7 +36,17 @@ export const translations = {
             blogDesc: 'Creemos en la transparencia y aportación. Pronto lanzaremos un espacio donde nuestro equipo compartirá actualizaciones, recetas curadas, decisiones sobre la Inteligencia Artificial y trucos financieros para el hogar.',
             ctaTitle: '¿Listo para cambiar tu rutina?',
             ctaDesc: 'Únete a la comunidad de hogares inteligentes hoy mismo.',
-            ctaBtn: 'Crear mi perfil gratis'
+            ctaBtn: 'Crear mi perfil gratis',
+            howItWorksTitle: 'Tu Cocina, Reinventada',
+            howItWorksSubtitle: 'Descubre cómo Cacomi utiliza tecnología avanzada para simplificar tu alimentación diaria.',
+            step1Title: 'Explora y Descubre',
+            step1Desc: 'Navega por un catálogo infinito de recetas reales. Nuestra interfaz intuitiva te permite filtrar por categorías y acceder a tus recetas guardadas incluso sin conexión a internet.',
+            step2Title: 'Planificación Inteligente',
+            step2Desc: 'Organiza tu semana con nuestro planificador interactivo. Arrastra y suelta recetas, ajusta tus objetivos nutricionales y deja que nuestra tecnología te guíe hacia una alimentación balanceada.',
+            step3Title: 'Control Total de tu Despensa',
+            step3Desc: 'Gestiona tus ingredientes y evita el desperdicio. Recibe alertas de caducidad en tiempo real y mantén un inventario digital sincronizado con tus planes de comida.',
+            step4Title: 'Ajuste de Porciones y Nutrición',
+            step4Desc: 'Personaliza cada comida según tus necesidades. Ajusta las porciones dinámicamente y observa cómo se recalcula la información nutricional de forma instantánea.'
         },
         nav: {
             home: 'Inicio',
@@ -356,6 +366,7 @@ export const translations = {
             deleteConfirm: '¿Estás seguro de que deseas eliminar',
             cancel: 'Cancelar',
             confirmDelete: 'Sí, eliminar',
+            pendingNutrition: 'Esta comida aún no ha sido calculada por Cacomi, espera al día de mañana para saber su información nutricional.',
             deleted: 'Receta eliminada correctamente',
             retry: 'Intentar de nuevo',
             error: 'Error al cargar más recetas.',
@@ -544,7 +555,17 @@ export const translations = {
             blogDesc: 'We believe in transparency and contribution. Soon we will launch a space where our team will share updates, curated recipes, AI decisions, and financial household tips.',
             ctaTitle: 'Ready to change your routine?',
             ctaDesc: 'Join the smart household community today.',
-            ctaBtn: 'Create my free profile'
+            ctaBtn: 'Create my free profile',
+            howItWorksTitle: 'Your Kitchen, Reinvented',
+            howItWorksSubtitle: 'Discover how Cacomi uses advanced technology to simplify your daily nutrition.',
+            step1Title: 'Explore & Discover',
+            step1Desc: 'Browse through an infinite catalog of real recipes. Our intuitive interface lets you filter by categories and access your saved recipes even without an internet connection.',
+            step2Title: 'Smart Planning',
+            step2Desc: 'Organize your week with our interactive planner. Drag and drop recipes, adjust your nutritional goals, and let our technology guide you toward balanced eating.',
+            step3Title: 'Full Pantry Control',
+            step3Desc: 'Manage your ingredients and avoid waste. Get real-time expiration alerts and keep a digital inventory synced with your meal plans.',
+            step4Title: 'Portion & Nutrition Adjustment',
+            step4Desc: 'Customize each meal according to your needs. Dynamically adjust portions and watch nutritional information recalculate instantly.'
         },
         nav: {
             home: 'Home',
@@ -835,6 +856,7 @@ export const translations = {
             deleteConfirm: 'Are you sure you want to delete',
             cancel: 'Cancel',
             confirmDelete: 'Yes, delete',
+            pendingNutrition: 'This meal has not yet been calculated by Cacomi, please check back tomorrow for its nutritional information.',
             deleted: 'Recipe deleted successfully',
             retry: 'Try again',
             error: 'Error loading more recipes.',
@@ -1023,7 +1045,17 @@ export const translations = {
             blogDesc: 'Nous croyons en la transparence. Bientôt, nous lancerons un espace où notre équipe partagera des mises à jour, des recettes, et des conseils.',
             ctaTitle: 'Prêt à changer de routine ?',
             ctaDesc: 'Rejoignez la communauté des foyers intelligents dès aujourd\'hui.',
-            ctaBtn: 'Créer mon profil gratuit'
+            ctaBtn: 'Créer mon profil gratuit',
+            howItWorksTitle: 'Votre Cuisine, Réinventée',
+            howItWorksSubtitle: 'Découvrez comment Cacomi utilise une technologie de pointe pour simplifier votre alimentation quotidienne.',
+            step1Title: 'Explorez et Découvrez',
+            step1Desc: 'Naviguez dans un catalogue infini de recettes réelles. Filtrez par catégories ou recherchez des ingrédients spécifiques que vous avez déjà à la maison.',
+            step2Title: 'Planification par IA',
+            step2Desc: 'Générez des plans hebdomadaires intelligents. Notre IA équilibre vos macros et votre budget pour que vous n\'ayez plus à vous demander "que manger demain ?".',
+            step3Title: 'Garde-manger Intelligent',
+            step3Desc: 'Gérez votre stock et recevez des alertes d\'expiration. Votre garde-manger se synchronise avec vos plans pour éviter les achats inutiles.',
+            step4Title: 'Évolution Continue',
+            step4Desc: 'Utilisez le "Meal Check" pour noter vos repas. Cacomi apprend de vos commentaires pour que chaque plan soit meilleur que le précédent.'
         },
         nav: {
             home: 'Accueil',

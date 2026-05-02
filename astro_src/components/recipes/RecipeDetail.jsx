@@ -381,7 +381,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                     </div>
                                 ) : (
                                     <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-sm italic text-center animate-pulse">
-                                        Esta comida aún no ha sido calculada por Cacomi, espera al día de mañana para conocer su información nutricional.
+                                        {t.feed.pendingNutrition}
                                     </div>
                                 )}
                             </div>

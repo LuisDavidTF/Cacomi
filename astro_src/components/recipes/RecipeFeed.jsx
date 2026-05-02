@@ -257,7 +257,24 @@ export function RecipeFeed({ initialData = null, forceSavedMode = false }) {
     <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       {/* Header Section - Always visible */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
+        <div className="flex flex-col gap-2">
+          {(forceSavedMode || activeCategory) && (
+            <button 
+              onClick={() => {
+                if (forceSavedMode) window.location.href = '/';
+                else setActiveCategory(null);
+              }}
+              className="inline-flex items-center text-sm font-bold text-primary hover:text-primary/80 transition-colors mb-2 group self-start"
+            >
+              <svg className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              {forceSavedMode 
+                ? (language === 'es' ? 'Volver al Inicio' : 'Back to Home')
+                : (language === 'es' ? 'Ver todas las recetas' : 'See all recipes')
+              }
+            </button>
+          )}
           <h1 className="text-3xl font-bold text-foreground leading-tight">{feedTitle}</h1>
           <p className="text-lg text-muted-foreground mt-1">
             {feedSubtitle}

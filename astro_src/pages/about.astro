@@ -31,8 +31,8 @@ const values = [
   title={t.about.title} 
   description={t.about.desc}
 >
-  <div class="bg-background min-h-screen">
-    {/* Hero Section */}
+  <main class="bg-background min-h-screen">
+    <!-- Hero Section -->
     <section class="relative pt-24 pb-32 overflow-hidden flex flex-col items-center justify-center text-center px-6">
       <div class="absolute inset-0 z-0">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
@@ -57,87 +57,251 @@ const values = [
       </div>
     </section>
 
-    {/* Values / Pilares */}
-    <section class="py-24 bg-muted/30 border-y border-border/50">
-      <div class="max-w-6xl mx-auto px-6">
+    <!-- How It Works Section -->
+    <section class="py-24 bg-muted/30 relative overflow-hidden border-y border-border/50">
+      <div class="container px-4 mx-auto relative z-10">
+        <div class="text-center mb-24">
+          <h2 class="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
+            {t.about.howItWorksTitle}
+          </h2>
+          <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+            {t.about.howItWorksSubtitle}
+          </p>
+        </div>
+
+        <div class="space-y-32 md:space-y-48">
+          <!-- Step 1: Discover -->
+          <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-24">
+            <div class="flex-1 space-y-6">
+              <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 text-primary font-bold text-xl mb-2">1</div>
+              <h3 class="text-2xl md:text-4xl font-bold tracking-tight">{t.about.step1Title}</h3>
+              <p class="text-lg text-muted-foreground leading-relaxed">
+                {t.about.step1Desc}
+              </p>
+            </div>
+            <div class="flex-1 relative group w-full">
+              <div class="absolute -inset-4 bg-gradient-to-tr from-primary/20 to-orange-500/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <img 
+                src="/images/about/iPad-PRO-11-cacomi.app (2).png" 
+                alt="Explora Recetas en Cacomi" 
+                class="rounded-3xl shadow-2xl border border-border/50 relative z-10 transform group-hover:scale-[1.02] transition-transform duration-500 w-full"
+              />
+            </div>
+          </div>
+
+          <!-- Step 2: Plan -->
+          <div class="flex flex-col md:flex-row-reverse items-center gap-12 lg:gap-24">
+            <div class="flex-1 space-y-6 text-left md:text-right">
+              <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 font-bold text-xl mb-2">2</div>
+              <h3 class="text-2xl md:text-4xl font-bold tracking-tight">{t.about.step2Title}</h3>
+              <p class="text-lg text-muted-foreground leading-relaxed">
+                {t.about.step2Desc}
+              </p>
+            </div>
+            <div class="flex-1 relative group w-full">
+              <div class="absolute -inset-4 bg-gradient-to-tr from-orange-500/20 to-primary/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <img 
+                src="/images/about/Macbook-Air-cacomi.app.png" 
+                alt="Planificador Semanal Inteligente" 
+                class="rounded-3xl shadow-2xl border border-border/50 relative z-10 transform group-hover:scale-[1.02] transition-transform duration-500 w-full"
+              />
+            </div>
+          </div>
+
+          <!-- Step 3: Pantry -->
+          <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-24">
+            <div class="flex-1 space-y-6">
+              <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 font-bold text-xl mb-2">3</div>
+              <h3 class="text-2xl md:text-4xl font-bold tracking-tight">{t.about.step3Title}</h3>
+              <p class="text-lg text-muted-foreground leading-relaxed">
+                {t.about.step3Desc}
+              </p>
+            </div>
+            <div class="flex-1 relative group w-full">
+              <div class="absolute -inset-4 bg-gradient-to-tr from-blue-500/20 to-cyan-500/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <img 
+                src="/images/about/iPad-PRO-11-cacomi.app (4).png" 
+                alt="Gestión de Despensa e Inventario" 
+                class="rounded-3xl shadow-2xl border border-border/50 relative z-10 transform group-hover:scale-[1.02] transition-transform duration-500 w-full"
+              />
+            </div>
+          </div>
+
+          <!-- Step 4: Portions -->
+          <div class="flex flex-col md:flex-row-reverse items-center gap-12 lg:gap-24">
+            <div class="flex-1 space-y-6 text-left md:text-right">
+              <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 font-bold text-xl mb-2">4</div>
+              <h3 class="text-2xl md:text-4xl font-bold tracking-tight">{t.about.step4Title}</h3>
+              <p class="text-lg text-muted-foreground leading-relaxed">
+                {t.about.step4Desc}
+              </p>
+            </div>
+            <div class="flex-1 relative group w-full">
+              <div class="absolute -inset-4 bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <img 
+                src="/images/about/Macbook-Air-cacomi.app (1).png" 
+                alt="Ajuste Dinámico de Porciones" 
+                class="rounded-3xl shadow-2xl border border-border/50 relative z-10 transform group-hover:scale-[1.02] transition-transform duration-500 w-full"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Additional Features Showcase -->
+    <section class="py-24 bg-background">
+      <div class="container px-4 mx-auto">
         <div class="text-center mb-16">
-          <h2 class="text-3xl font-bold mb-4">{t.about.pillarsTitle}</h2>
-          <p class="text-muted-foreground text-lg max-w-xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Experiencia Sin Fronteras</h2>
+            <p class="text-muted-foreground text-lg max-w-xl mx-auto">Detalles pensados para elevar tu experiencia de usuario al siguiente nivel.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Dark Mode -->
+          <div class="group space-y-4">
+            <div class="aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-lg relative bg-muted">
+              <img 
+                src="/images/about/Macbook-Air-cacomi.app (2).png" 
+                alt="Modo Oscuro en Cacomi" 
+                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span class="text-white font-medium px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/30">Modo Oscuro</span>
+              </div>
+            </div>
+            <h4 class="text-xl font-bold">Experiencia Premium</h4>
+            <p class="text-muted-foreground">Disfruta de una interfaz elegante diseñada para descansar tu vista, con un modo oscuro nativo impecable.</p>
+          </div>
+
+          <!-- Offline Mode -->
+          <div class="group space-y-4">
+            <div class="aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-lg relative bg-muted">
+              <img 
+                src="/images/about/iPad-PRO-11-cacomi.app (3).png" 
+                alt="Recetas Offline" 
+                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span class="text-white font-medium px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/30">Acceso Sin Conexión</span>
+              </div>
+            </div>
+            <h4 class="text-xl font-bold">Lleva tu Cocina a Todas Partes</h4>
+            <p class="text-muted-foreground">Accede a tus recetas favoritas y planes guardados incluso si pierdes la conexión a internet.</p>
+          </div>
+
+          <!-- Sharing -->
+          <div class="group space-y-4">
+            <div class="aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-lg relative bg-muted">
+              <img 
+                src="/images/about/iPad-PRO-11-cacomi.app (1).png" 
+                alt="Comparte con la Comunidad" 
+                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span class="text-white font-medium px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/30">Comparte el Sabor</span>
+              </div>
+            </div>
+            <h4 class="text-xl font-bold">Inspiración que se Comparte</h4>
+            <p class="text-muted-foreground">Envía tus recetas favoritas a amigos y familiares con un solo clic a través de redes sociales.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pillars Section -->
+    <section class="py-24 bg-muted/30 border-y border-border/50">
+      <div class="container px-4 mx-auto">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
+            {t.about.pillarsTitle}
+          </h2>
+          <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
             {t.about.pillarsSubtitle}
           </p>
         </div>
-        <div class="grid md:grid-cols-3 gap-8">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           {values.map(val => (
-            <div class="bg-background border border-border/50 rounded-3xl p-8 lg:p-10 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform origin-top-right">
-                <val.icon className="w-32 h-32" />
+            <div class="bg-background p-8 rounded-3xl shadow-sm border border-border/50 hover:shadow-xl transition-all duration-500 group relative overflow-hidden">
+               <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform origin-top-right">
+                <val.icon className="w-24 h-24" />
               </div>
-              <div class="relative z-10">
-                <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6">
-                  <val.icon className="w-7 h-7" />
-                </div>
-                <h3 class="text-xl font-bold mb-3">{val.title}</h3>
-                <p class="text-muted-foreground leading-relaxed">{val.description}</p>
+              <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 text-primary group-hover:scale-110 transition-transform">
+                <val.icon className="w-7 h-7" />
               </div>
+              <h3 class="text-xl font-bold mb-3">{val.title}</h3>
+              <p class="text-muted-foreground leading-relaxed">
+                {val.description}
+              </p>
             </div>
           ))}
         </div>
       </div>
     </section>
 
-    {/* Future / Blog Mention */}
-    <section class="py-24 px-6 overflow-hidden">
-      <div class="max-w-6xl mx-auto relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-card to-card border border-border shadow-xl">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 blur-[100px] rounded-full"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 blur-[100px] rounded-full"></div>
-        
-        <div class="relative z-10 p-10 md:p-16 lg:p-20 flex flex-col md:flex-row items-center justify-between gap-12">
-          <div class="flex-1 max-w-2xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 mb-5 rounded-full bg-primary/10 text-primary text-sm font-medium">
-               <Rss className="w-4 h-4" /> {t.about.blogTag}
-            </div>
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 tracking-tight">{t.about.blogTitle}</h2>
-            <p class="text-muted-foreground text-lg sm:text-xl leading-relaxed mb-6">
-              {t.about.blogDesc}
-            </p>
-          </div>
-          <div class="flex-1 w-full max-w-sm lg:max-w-md hidden md:block">
-            <div class="backdrop-blur-xl bg-background/60 border border-border/50 rounded-3xl p-8 shadow-2xl relative rotate-3 translate-x-4">
-              <div class="flex items-center gap-4 mb-6 opacity-40">
-                <div class="w-12 h-12 rounded-full bg-muted animate-pulse"></div>
-                <div class="space-y-3 flex-1">
-                  <div class="h-4 bg-muted animate-pulse rounded w-3/4"></div>
-                  <div class="h-3 bg-muted animate-pulse rounded w-1/2"></div>
+    <!-- Upcoming Section -->
+    <section class="py-24 bg-background overflow-hidden">
+      <div class="container px-4 mx-auto">
+        <div class="bg-muted/50 rounded-[3rem] p-10 md:p-20 border border-border/50 relative">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full"></div>
+            <div class="flex flex-col md:flex-row items-center gap-16 relative z-10">
+              <div class="flex-1 space-y-6">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold tracking-wide uppercase">
+                  {t.about.blogTag}
+                </span>
+                <h2 class="text-3xl md:text-5xl font-bold tracking-tight">
+                  {t.about.blogTitle}
+                </h2>
+                <p class="text-lg text-muted-foreground leading-relaxed">
+                  {t.about.blogDesc}
+                </p>
+              </div>
+              <div class="flex-1 w-full max-w-sm hidden md:block">
+                <div class="backdrop-blur-xl bg-background/60 border border-border/50 rounded-3xl p-8 shadow-2xl relative rotate-3">
+                  <div class="flex items-center gap-4 mb-6 opacity-40">
+                    <div class="w-12 h-12 rounded-full bg-muted animate-pulse"></div>
+                    <div class="space-y-3 flex-1">
+                      <div class="h-4 bg-muted animate-pulse rounded w-3/4"></div>
+                      <div class="h-3 bg-muted animate-pulse rounded w-1/2"></div>
+                    </div>
+                  </div>
+                  <div class="space-y-4 opacity-40">
+                    <div class="h-3 bg-muted animate-pulse rounded w-full"></div>
+                    <div class="h-3 bg-muted animate-pulse rounded w-full"></div>
+                    <div class="h-3 bg-muted animate-pulse rounded w-4/5"></div>
+                  </div>
                 </div>
               </div>
-              <div class="space-y-4 opacity-40">
-                <div class="h-3 bg-muted animate-pulse rounded w-full"></div>
-                <div class="h-3 bg-muted animate-pulse rounded w-full"></div>
-                <div class="h-3 bg-muted animate-pulse rounded w-4/5"></div>
-                <div class="h-3 bg-muted animate-pulse rounded w-5/6"></div>
-              </div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 px-6">
+      <div class="container px-4 mx-auto">
+        <div class="bg-gradient-to-br from-primary to-orange-600 rounded-[3rem] p-12 md:p-24 text-center text-white relative overflow-hidden shadow-2xl shadow-primary/20">
+          <div class="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+          <div class="absolute bottom-0 left-0 -ml-24 -mb-24 w-96 h-96 bg-black/10 rounded-full blur-3xl"></div>
+          
+          <div class="relative z-10 max-w-3xl mx-auto space-y-8">
+            <h2 class="text-4xl md:text-6xl font-bold tracking-tight">
+              {t.about.ctaTitle}
+            </h2>
+            <p class="text-xl text-white/90">
+              {t.about.ctaDesc}
+            </p>
+            <div class="pt-8">
+              <a 
+                href="/register" 
+                class="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-white text-primary font-bold text-lg hover:bg-white/90 hover:scale-105 transition-all duration-300 shadow-xl shadow-black/10"
+              >
+                {t.about.ctaBtn}
+              </a>
             </div>
           </div>
         </div>
       </div>
     </section>
-
-    {/* Final CTA */}
-    <section class="py-32 px-6 text-center">
-      <div class="max-w-3xl mx-auto">
-        <h2 class="text-4xl md:text-5xl font-bold mb-6 tracking-tight">{t.about.ctaTitle}</h2>
-        <p class="text-xl text-muted-foreground mb-10 max-w-xl mx-auto">
-          {t.about.ctaDesc}
-        </p>
-        <a 
-          href="/login" 
-          class="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-10 py-4 rounded-full text-lg font-bold hover:scale-[1.03] transition-transform shadow-xl shadow-primary/25"
-        >
-          {t.about.ctaBtn}
-          <ArrowRight className="w-5 h-5" />
-        </a>
-      </div>
-    </section>
-  </div>
+  </main>
 </Layout>
-

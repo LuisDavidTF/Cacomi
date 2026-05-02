@@ -23,16 +23,18 @@ export function PantryList({ items, onUpdate, onRemove, onAdd, pauseSync, resume
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
 
     const groupedItems = (() => {
-        const groups = new Map<number, LocalPantryItem[]>();
+        const groups = new Map<string, LocalPantryItem[]>();
 
         items.forEach(item => {
-            const current = groups.get(item.ingredientId || 0) || [];
+            const key = item.ingredientId ? `id-${item.ingredientId}` : `name-${item.ingredientName}`;
+            const current = groups.get(key) || [];
             current.push(item);
-            groups.set(item.ingredientId || 0, current);
+            groups.set(key, current);
         });
 
-        return Array.from(groups.entries()).map(([ingredientId, batchItems]) => ({
-            ingredientId,
+        return Array.from(groups.entries()).map(([key, batchItems]) => ({
+            key,
+            ingredientId: batchItems[0]?.ingredientId || 0,
             name: batchItems[0]?.ingredientName || t.pantry.unknownIngredient,
             items: batchItems
         })).sort((a, b) => a.name.localeCompare(b.name));
@@ -90,7 +92,7 @@ export function PantryList({ items, onUpdate, onRemove, onAdd, pauseSync, resume
                     <>
                         {groupedItems.map(group => (
                             <PantryItemGroup
-                                key={group.ingredientId || group.name}
+                                key={group.key}
                                 ingredientId={group.ingredientId}
                                 name={group.name}
                                 items={group.items}
