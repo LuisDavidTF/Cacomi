@@ -110,6 +110,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     // 6. Proceed and append security headers
     const response = await next();
+    const hostname = context.url.hostname;
+
+    // Prevent indexing of .pages.dev staging URLs
+    if (hostname.endsWith('.pages.dev')) {
+        response.headers.set('X-Robots-Tag', 'noindex');
+    }
 
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Frame-Options', 'DENY');

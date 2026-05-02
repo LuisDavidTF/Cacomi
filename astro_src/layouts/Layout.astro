@@ -23,6 +23,8 @@ const {
 	type = 'website',
 } = Astro.props;
 
+const isStaging = Astro.url.hostname.endsWith('.pages.dev');
+
 const enableAds = import.meta.env.PUBLIC_ENABLE_ADS === 'true';
 // Secret admin path prefix — server-side only, never exposed to JS bundle via PUBLIC_
 const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
@@ -40,6 +42,8 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		<meta name="description" content={description} />
 		<link rel="manifest" href="/manifest.json" />
 		<link rel="canonical" href={canonicalURL} />
+		
+		{isStaging && <meta name="robots" content="noindex, nofollow" />}
 		
 		<!-- PWA / Mobile Tags -->
 		<meta name="apple-mobile-web-app-capable" content="yes" />

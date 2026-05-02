@@ -22,7 +22,7 @@ const adapter = isVercel
 export default defineConfig({
     srcDir: './astro_src',
     output: 'server',
-    site: process.env.PUBLIC_SITE_URL || 'https://smart-recipe-planner.com',
+    site: process.env.PUBLIC_SITE_URL || 'https://cacomi.app',
     adapter,
     env: {
         schema: {
