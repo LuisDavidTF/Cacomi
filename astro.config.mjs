@@ -74,6 +74,7 @@ export default defineConfig({
                 skipWaiting: true,
                 clientsClaim: true,
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+                globIgnores: ['**/_worker.js/**'],
                 maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
                 navigateFallback: '/~offline',
                 // We exclude API routes and admin paths from the fallback
