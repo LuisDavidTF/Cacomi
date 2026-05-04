@@ -5,6 +5,7 @@ import { Footer } from '@components/ui/Footer';
 import { LegalsConsent } from '@components/ui/LegalsConsent';
 import { ViewTransitions } from 'astro:transitions';
 import { ADMIN_PATH_PREFIX } from 'astro:env/server';
+import { pwaInfo } from 'virtual:pwa-info';
 import '../layouts/globals.css';
 
 interface Props {
@@ -40,7 +41,6 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<meta name="description" content={description} />
-		<link rel="manifest" href="/manifest.json" />
 		<link rel="canonical" href={canonicalURL} />
 		
 		{isStaging && <meta name="robots" content="noindex, nofollow" />}
@@ -50,6 +50,8 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="apple-mobile-web-app-title" content="Cacomi" />
 		<link rel="apple-touch-icon" href="/icon.png" />
+		
+		{ pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} /> }
 		
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content={type} />

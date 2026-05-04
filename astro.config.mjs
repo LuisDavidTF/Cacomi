@@ -67,13 +67,28 @@ export default defineConfig({
                 ]
             },
             workbox: {
-                globDirectory: isDev ? '.astro' : 'dist',
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
                 maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
                 navigateFallback: '/~offline',
                 // We exclude API routes and admin paths from the fallback
                 navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
                 runtimeCaching: [
+                    {
+                        // Cache the main pages (SSR) so they work offline if visited before
+                        urlPattern: ({ request }) => request.mode === 'navigate',
+                        handler: 'NetworkFirst',
+                        options: {
+                            cacheName: 'pages',
+                            networkTimeoutSeconds: 3,
+                            expiration: {
+                                maxEntries: 50,
+                                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200],
+                            },
+                        },
+                    },
                     {
                         urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
                         handler: 'CacheFirst',
