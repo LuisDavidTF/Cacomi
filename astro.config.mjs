@@ -83,19 +83,18 @@ export default defineConfig({
                     {
                         // Cache all internal page navigations (SSR)
                         urlPattern: ({ url, request }) => {
-                            // Only match requests for our own origin
                             if (url.origin !== self.location.origin) return false;
                             
-                            // Match direct navigations or HTML fetches (like Astro ViewTransitions)
-                            const isPage = request.mode === 'navigate' || 
-                                          (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'));
-                                          
-                            // Exclude API and Admin paths
+                            // Match direct navigations or internal Astro fetches
+                            const isNav = request.mode === 'navigate';
+                            const isHtml = request.headers.get('accept')?.includes('text/html');
+                            
+                            // Exclude API, Admin and files with extensions
                             const isExcluded = url.pathname.startsWith('/api') || 
-                                              url.pathname.startsWith('/admin') ||
-                                              url.pathname.includes('.'); // Exclude files with extensions (handled by other rules)
-                                              
-                            return isPage && !isExcluded;
+                                               url.pathname.startsWith('/admin') ||
+                                               url.pathname.includes('.'); 
+                                               
+                            return (isNav || isHtml) && !isExcluded;
                         },
                         handler: 'NetworkFirst',
                         options: {
@@ -103,7 +102,30 @@ export default defineConfig({
                             networkTimeoutSeconds: 5,
                             expiration: {
                                 maxEntries: 60,
-                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200],
+                            },
+                        },
+                    },
+                    {
+                        // Cache Google Fonts (CSS)
+                        urlPattern: /^https:\/\/fonts\.googleapis\.com/i,
+                        handler: 'StaleWhileRevalidate',
+                        options: {
+                            cacheName: 'google-fonts-stylesheets',
+                        },
+                    },
+                    {
+                        // Cache Google Fonts (Files)
+                        urlPattern: /^https:\/\/fonts\.gstatic\.com/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'google-fonts-webfonts',
+                            expiration: {
+                                maxEntries: 30,
+                                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
                             },
                             cacheableResponse: {
                                 statuses: [0, 200],
