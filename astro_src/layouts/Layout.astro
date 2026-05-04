@@ -106,6 +106,48 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 			}
 		})} />
 		
+		<script is:inline>
+			// Force cleanup of legacy Service Workers and caches from the old Next.js / Culina Smart version
+			(function() {
+				const CURRENT_VERSION = 'cacomi-pwa-v2';
+				const storedVersion = localStorage.getItem('pwa_version');
+				
+				if (storedVersion !== CURRENT_VERSION) {
+					console.log('Detected legacy PWA or new version. Clearing caches and workers...');
+					
+					// 1. Unregister all service workers
+					if ('serviceWorker' in navigator) {
+						navigator.serviceWorker.getRegistrations().then(registrations => {
+							for (const registration of registrations) {
+								registration.unregister().then(() => {
+									console.log('Legacy Service Worker unregistered');
+								});
+							}
+						});
+					}
+					
+					// 2. Clear all cache storage
+					if ('caches' in window) {
+						caches.keys().then(names => {
+							for (const name of names) {
+								caches.delete(name).then(() => {
+									console.log('Cache cleared:', name);
+								});
+							}
+						});
+					}
+					
+					localStorage.setItem('pwa_version', CURRENT_VERSION);
+					
+					// 3. Force reload after a short delay to allow cleanup to start
+					// This ensures the new AstroPWA Service Worker can register cleanly
+					setTimeout(() => {
+						window.location.reload();
+					}, 500);
+				}
+			})();
+		</script>
+		
 		<ViewTransitions />
 	</head>
 	<body class="min-h-screen font-sans antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300" data-admin-path={`/${adminPathPrefix}`}>
