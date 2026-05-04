@@ -115,7 +115,6 @@ export default defineConfig({
                         handler: 'StaleWhileRevalidate',
                         options: {
                             cacheName: 'pages-cache',
-                            networkTimeoutSeconds: 5,
                             expiration: {
                                 maxEntries: 60,
                                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
