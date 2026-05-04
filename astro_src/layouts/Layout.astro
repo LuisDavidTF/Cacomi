@@ -52,6 +52,17 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		<link rel="apple-touch-icon" href="/icon.png" />
 		
 		{ pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} /> }
+
+		<script is:inline>
+			// Manual Service Worker Registration fallback
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					navigator.serviceWorker.register('/sw.js', { scope: '/' })
+						.then(reg => console.log('Service Worker registered successfully:', reg.scope))
+						.catch(err => console.error('Service Worker registration failed:', err));
+				});
+			}
+		</script>
 		
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content={type} />

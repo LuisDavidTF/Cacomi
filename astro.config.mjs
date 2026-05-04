@@ -67,6 +67,8 @@ export default defineConfig({
                 ]
             },
             workbox: {
+                skipWaiting: true,
+                clientsClaim: true,
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
                 maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
                 navigateFallback: '/~offline',
@@ -74,19 +76,41 @@ export default defineConfig({
                 navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
                 runtimeCaching: [
                     {
-                        // Cache the main pages (SSR) so they work offline if visited before
-                        urlPattern: ({ request }) => request.mode === 'navigate',
-                        handler: 'NetworkFirst',
+                        // Cache all internal page navigations (SSR)
+                        urlPattern: ({ url, request }) => {
+                            // Only match requests for our own origin
+                            if (url.origin !== self.location.origin) return false;
+                            
+                            // Match direct navigations or HTML fetches (like Astro ViewTransitions)
+                            const isPage = request.mode === 'navigate' || 
+                                          (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'));
+                                          
+                            // Exclude API and Admin paths
+                            const isExcluded = url.pathname.startsWith('/api') || 
+                                              url.pathname.startsWith('/admin') ||
+                                              url.pathname.includes('.'); // Exclude files with extensions (handled by other rules)
+                                              
+                            return isPage && !isExcluded;
+                        },
+                        handler: 'StaleWhileRevalidate',
                         options: {
-                            cacheName: 'pages',
-                            networkTimeoutSeconds: 3,
+                            cacheName: 'pages-cache',
+                            networkTimeoutSeconds: 5,
                             expiration: {
-                                maxEntries: 50,
-                                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+                                maxEntries: 60,
+                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
                             },
                             cacheableResponse: {
                                 statuses: [0, 200],
                             },
+                        },
+                    },
+                    {
+                        // Cache static assets that might not be in the precache
+                        urlPattern: /\.(?:js|css|json|webmanifest)$/i,
+                        handler: 'StaleWhileRevalidate',
+                        options: {
+                            cacheName: 'static-resources',
                         },
                     },
                     {
