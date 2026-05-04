@@ -54,12 +54,21 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		{ pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} /> }
 
 		<script is:inline>
-			// Manual Service Worker Registration fallback
+			// Manual Service Worker Registration with versioning to force update
 			if ('serviceWorker' in navigator) {
-				window.addEventListener('load', () => {
-					navigator.serviceWorker.register('/sw.js', { scope: '/' })
-						.then(reg => console.log('Service Worker registered successfully:', reg.scope))
-						.catch(err => console.error('Service Worker registration failed:', err));
+				const swPath = '/sw.js?v=' + Date.now();
+				navigator.serviceWorker.register(swPath, { scope: '/' })
+					.then(reg => {
+						console.log('Service Worker registered successfully:', reg.scope);
+						if (reg.waiting) {
+							reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+						}
+					})
+					.catch(err => console.error('Service Worker registration failed:', err));
+					
+				navigator.serviceWorker.addEventListener('controllerchange', () => {
+					console.log('New Service Worker is now in control');
+					// Optional: window.location.reload(); // Only if you want to force immediate update
 				});
 			}
 		</script>

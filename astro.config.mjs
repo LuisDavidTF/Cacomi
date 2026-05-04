@@ -64,6 +64,10 @@ export default defineConfig({
         sitemap(),
         AstroPWA({
             registerType: 'autoUpdate',
+            devOptions: {
+                enabled: true,
+                type: 'classic',
+            },
             manifest: {
                 name: 'Cacomi: Planificador de comidas',
                 short_name: 'Cacomi',
