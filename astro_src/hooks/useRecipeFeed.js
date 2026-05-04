@@ -212,7 +212,9 @@ export function useRecipeFeed({ initialData, forceSavedMode = false } = {}) {
 
     // Infinite Scroll Fetch
     const fetchMoreRecipes = useCallback(async () => {
-        if (stateRef.current.isLoadingMore || !stateRef.current.hasMore || stateRef.current.isErrorLoadingMore) return;
+        // Prevent API calls if loading, no more items, in error state, OFFLINE, or in saved mode
+        const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+        if (stateRef.current.isLoadingMore || !stateRef.current.hasMore || stateRef.current.isErrorLoadingMore || isOffline || forceSavedMode) return;
 
         setIsLoadingMore(true);
         try {
