@@ -57,15 +57,57 @@ export default defineConfig({
                 short_name: 'Cacomi',
                 description: 'Planifica tus comidas de manera inteligente con el instinto de comer sano.',
                 theme_color: '#ffffff',
+                background_color: '#ffffff',
+                display: 'standalone',
+                orientation: 'portrait',
                 icons: [
                     { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-                    { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+                    { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+                    { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
                 ]
             },
             workbox: {
                 globDirectory: isDev ? '.astro' : 'dist',
-                globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
                 maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+                navigateFallback: '/~offline',
+                // We exclude API routes and admin paths from the fallback
+                navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
+                runtimeCaching: [
+                    {
+                        urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'google-fonts-stylesheets',
+                            expiration: {
+                                maxEntries: 10,
+                                maxAgeSeconds: 60 * 60 * 24 * 365,
+                            },
+                        },
+                    },
+                    {
+                        urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'google-fonts-webfonts',
+                            expiration: {
+                                maxEntries: 20,
+                                maxAgeSeconds: 60 * 60 * 24 * 365,
+                            },
+                        },
+                    },
+                    {
+                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'images',
+                            expiration: {
+                                maxEntries: 100,
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
+                            },
+                        },
+                    },
+                ],
             },
         })
     ]

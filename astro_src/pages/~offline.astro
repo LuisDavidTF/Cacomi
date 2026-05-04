@@ -7,27 +7,56 @@ export const prerender = true;
 ---
 
 <Layout title="Sin Conexión" description="No tienes conexión a internet.">
-  <div class="min-h-[70vh] flex flex-col items-center justify-center p-4 text-center">
-    <div class="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6">
-      <WifiOff className="w-10 h-10 text-muted-foreground" />
+  <div class="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
+    <div class="relative mb-10 group">
+      {/* Decorative glow */}
+      <div class="absolute inset-0 bg-primary/10 rounded-full blur-[40px] group-hover:bg-primary/20 transition-all duration-500" />
+      
+      <div class="w-24 h-24 bg-card border border-border shadow-2xl rounded-[32px] flex items-center justify-center relative z-10 transform group-hover:scale-105 transition-transform duration-500">
+        <WifiOff className="w-10 h-10 text-primary animate-pulse" />
+      </div>
+      
+      {/* Small floating dots for "searching" feel */}
+      <div class="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-bounce delay-100 shadow-sm" />
+      <div class="absolute -bottom-1 -left-3 w-3 h-3 bg-primary rounded-full animate-bounce delay-300 shadow-sm" />
     </div>
     
-    <h1 class="text-3xl font-bold text-foreground mb-4">Estás sin conexión</h1>
-    <p class="text-muted-foreground max-w-md mb-8 leading-relaxed">
-      Parece que no tienes una conexión activa a internet. Algunas funciones de Cacomi, como la generación de recetas con IA o la sincronización, no están disponibles actualmente.
+    <h1 class="text-4xl font-black text-foreground mb-4 tracking-tight">
+      Sin conexión
+    </h1>
+    
+    <p class="text-muted-foreground max-w-md mb-10 leading-relaxed font-medium">
+      Parece que tu dispositivo ha perdido la señal. No te preocupes, <span class="text-foreground font-bold">Cacomi sigue contigo</span>. Puedes seguir consultando tus recetas guardadas y tu plan semanal sin interrupciones.
     </p>
     
-    <div class="flex flex-col sm:flex-row gap-4">
-      <Button onClick={() => window.location.reload()}>
+    <div class="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
+      <Button 
+        onClick={() => window.location.reload()} 
+        className="flex-1 py-6 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+      >
         Reintentar Conexión
       </Button>
-      <a href="/" class="inline-flex items-center justify-center px-6 py-2 rounded-lg border border-border bg-card text-foreground hover:bg-muted transition-colors">
+      <a 
+        href="/" 
+        class="flex-1 inline-flex items-center justify-center px-6 py-3 rounded-2xl border border-border bg-card text-foreground font-bold hover:bg-muted transition-all active:scale-95"
+      >
         Ir al Inicio
       </a>
     </div>
 
-    <p class="mt-12 text-sm text-muted-foreground">
-      Puedes seguir viendo las recetas que ya has cargado previamente.
-    </p>
+    <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
+      <div class="p-6 bg-muted/40 rounded-3xl border border-border/50 text-left">
+        <div class="text-primary font-black uppercase tracking-widest text-[10px] mb-2">Tip Offline</div>
+        <p class="text-sm text-muted-foreground leading-relaxed">
+          Las recetas que has "guardado" (icono de descarga) están disponibles 100% offline, incluyendo sus imágenes.
+        </p>
+      </div>
+      <div class="p-6 bg-muted/40 rounded-3xl border border-border/50 text-left">
+        <div class="text-primary font-black uppercase tracking-widest text-[10px] mb-2">Plan Semanal</div>
+        <p class="text-sm text-muted-foreground leading-relaxed">
+          Tu plan de comidas y lista de compras también se guardan en tu dispositivo para que no dejes de cocinar.
+        </p>
+      </div>
+    </div>
   </div>
 </Layout>
