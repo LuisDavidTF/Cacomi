@@ -25,7 +25,11 @@ const adapter = isVercel
                     '/registerSW.js',
                     '/workbox-*.js',
                     '/sitemap-*.xml',
-                    '/sitemap-index.xml'
+                    '/sitemap-index.xml',
+                    '/~offline',
+                    '/~offline/*',
+                    '/*.css',
+                    '/*.js'
                 ]
             }
         }

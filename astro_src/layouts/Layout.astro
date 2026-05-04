@@ -45,6 +45,47 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		
 		{isStaging && <meta name="robots" content="noindex, nofollow" />}
 		
+		<script is:inline>
+			// Force cleanup of legacy Service Workers and caches from the old Next.js / Culina Smart version
+			(function() {
+				const CURRENT_VERSION = 'cacomi-pwa-v2';
+				const storedVersion = localStorage.getItem('pwa_version');
+				
+				if (storedVersion !== CURRENT_VERSION) {
+					console.log('Detected legacy PWA or new version. Clearing caches and workers...');
+					
+					// 1. Unregister all service workers
+					if ('serviceWorker' in navigator) {
+						navigator.serviceWorker.getRegistrations().then(registrations => {
+							for (const registration of registrations) {
+								registration.unregister().then(() => {
+									console.log('Legacy Service Worker unregistered');
+								});
+							}
+						});
+					}
+					
+					// 2. Clear all cache storage
+					if ('caches' in window) {
+						caches.keys().then(names => {
+							for (const name of names) {
+								caches.delete(name).then(() => {
+									console.log('Cache cleared:', name);
+								});
+							}
+						});
+					}
+					
+					localStorage.setItem('pwa_version', CURRENT_VERSION);
+					
+					// 3. Force reload after a short delay to allow cleanup to start
+					setTimeout(() => {
+						window.location.reload();
+					}, 500);
+				}
+			})();
+		</script>
+		
 		<!-- PWA / Mobile Tags -->
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -53,30 +94,7 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		
 		{ pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} /> }
 
-		<script is:inline>
-			// Manual Service Worker Registration with versioning and enhanced logging
-			if ('serviceWorker' in navigator) {
-				const swPath = '/sw.js?v=' + Date.now();
-				console.log('Attempting to register Service Worker at:', swPath);
-				
-				navigator.serviceWorker.register(swPath, { scope: '/' })
-					.then(reg => {
-						console.log('✅ Service Worker registered successfully. Scope:', reg.scope);
-						if (reg.waiting) {
-							console.log('⏳ Service Worker waiting to activate...');
-							reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-						}
-					})
-					.catch(err => {
-						console.error('❌ Service Worker registration FAILED:', err);
-						console.log('TIP: Make sure you are ONLINE for the first registration!');
-					});
-					
-				navigator.serviceWorker.addEventListener('controllerchange', () => {
-					console.log('🚀 New Service Worker is now in control!');
-				});
-			}
-		</script>
+
 		
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content={type} />
@@ -132,45 +150,19 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		})} />
 		
 		<script is:inline>
-			// Force cleanup of legacy Service Workers and caches from the old Next.js / Culina Smart version
-			(function() {
-				const CURRENT_VERSION = 'cacomi-pwa-v2';
-				const storedVersion = localStorage.getItem('pwa_version');
-				
-				if (storedVersion !== CURRENT_VERSION) {
-					console.log('Detected legacy PWA or new version. Clearing caches and workers...');
-					
-					// 1. Unregister all service workers
-					if ('serviceWorker' in navigator) {
-						navigator.serviceWorker.getRegistrations().then(registrations => {
-							for (const registration of registrations) {
-								registration.unregister().then(() => {
-									console.log('Legacy Service Worker unregistered');
-								});
-							}
+			// Ultra-simplified SW registration (deferred to end of head)
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					console.log('PWA: Initiating Service Worker registration...');
+					navigator.serviceWorker.register('/sw.js')
+						.then(reg => {
+							console.log('✅ PWA: Registered successfully');
+						})
+						.catch(err => {
+							console.error('❌ PWA: Registration failed:', err);
 						});
-					}
-					
-					// 2. Clear all cache storage
-					if ('caches' in window) {
-						caches.keys().then(names => {
-							for (const name of names) {
-								caches.delete(name).then(() => {
-									console.log('Cache cleared:', name);
-								});
-							}
-						});
-					}
-					
-					localStorage.setItem('pwa_version', CURRENT_VERSION);
-					
-					// 3. Force reload after a short delay to allow cleanup to start
-					// This ensures the new AstroPWA Service Worker can register cleanly
-					setTimeout(() => {
-						window.location.reload();
-					}, 500);
-				}
-			})();
+				});
+			}
 		</script>
 		
 		<ViewTransitions />
