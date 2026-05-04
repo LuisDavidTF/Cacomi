@@ -48,7 +48,7 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		<script is:inline>
 			// Force cleanup of legacy Service Workers and caches from the old Next.js / Culina Smart version
 			(function() {
-				const CURRENT_VERSION = 'cacomi-pwa-v2';
+				const CURRENT_VERSION = 'cacomi-pwa-v3';
 				const storedVersion = localStorage.getItem('pwa_version');
 				
 				if (storedVersion !== CURRENT_VERSION) {
