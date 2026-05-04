@@ -77,7 +77,7 @@ export default defineConfig({
                 globIgnores: ['**/_worker.js/**'],
                 maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
                 navigateFallback: '/~offline',
-                navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
+                navigateFallbackDenylist: [/^\/$/, /^\/api\//, /^\/admin\//],
                 // We handle fallbacks manually via runtimeCaching for better SSR compatibility
                 runtimeCaching: [
                     {
@@ -85,7 +85,8 @@ export default defineConfig({
                         urlPattern: ({ url, request }) => {
                             if (url.origin !== self.location.origin) return false;
                             
-                            // Any GET request without an extension is likely a page
+                            // Match root explicitly or any GET request without an extension
+                            const isRoot = url.pathname === '/';
                             const isGet = request.method === 'GET';
                             const hasNoExtension = !url.pathname.includes('.');
                             
@@ -93,12 +94,12 @@ export default defineConfig({
                             const isExcluded = url.pathname.startsWith('/api') || 
                                                url.pathname.startsWith('/admin');
                                                
-                            return isGet && hasNoExtension && !isExcluded;
+                            return (isRoot || (isGet && hasNoExtension)) && !isExcluded;
                         },
                         handler: 'NetworkFirst',
                         options: {
                             cacheName: 'pages-cache',
-                            networkTimeoutSeconds: 10,
+                            networkTimeoutSeconds: 20,
                             expiration: {
                                 maxEntries: 60,
                                 maxAgeSeconds: 60 * 60 * 24 * 30,
