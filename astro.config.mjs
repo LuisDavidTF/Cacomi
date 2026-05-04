@@ -16,16 +16,6 @@ const adapter = isVercel
         imageService: 'cloudflare',
         platformProxy: {
             enabled: true
-        },
-        routes: {
-            extend: {
-                exclude: [
-                    '/sw.js',
-                    '/manifest.webmanifest',
-                    '/workbox-*.js',
-                    '/~offline'
-                ]
-            }
         }
     });
 
