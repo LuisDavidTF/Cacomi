@@ -22,14 +22,8 @@ const adapter = isVercel
                 exclude: [
                     '/sw.js',
                     '/manifest.webmanifest',
-                    '/registerSW.js',
                     '/workbox-*.js',
-                    '/sitemap-*.xml',
-                    '/sitemap-index.xml',
-                    '/~offline',
-                    '/~offline/*',
-                    '/*.css',
-                    '/*.js'
+                    '/~offline'
                 ]
             }
         }
