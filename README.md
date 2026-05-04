@@ -13,6 +13,7 @@ Cacomi es una aplicación web moderna e inteligente para planificar comidas, ges
 - **🔐 Autenticación** — Registro e inicio de sesión seguros con sesiones basadas en cookies JWT (httpOnly) y autorización basada en roles (`ROLE_ADMIN`).
 - **🛡️ Panel de Admin (Stealth Mode + Manual Training)** — Gestión administrativa oculta tras una ruta secreta. Incluye sistema auditado para entrenar la IA, revisar logs y moderar usuarios.
 - **📅 Planificador Universal Interactivo** — Organiza tus menús semanales con drag-and-drop optimizado para móviles/tablets (Pointer Events) y persistencia offline completa vía IndexedDB.
+- **🛒 Lista de Compras Inteligente** — Generación automática de listas de compras consolidadas semánticamente (ej. unifica variantes de aceites o especias) con flujo de compra integrado hacia la alacena.
 - **📱 PWA** — Instalable en móvil y escritorio. Soporte offline con Service Worker y sincronización local.
 - **🌙 Modo Oscuro** — Tema claro/oscuro con persistencia de preferencia.
 - **⚡ SSR + Edge Ready** — Renderizado en servidor con Astro 6.

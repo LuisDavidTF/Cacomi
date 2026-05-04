@@ -42,7 +42,7 @@ export const translations = {
             step1Title: 'Explora y Descubre',
             step1Desc: 'Navega por un catálogo infinito de recetas reales. Nuestra interfaz intuitiva te permite filtrar por categorías y acceder a tus recetas guardadas incluso sin conexión a internet.',
             step2Title: 'Planificación Inteligente',
-            step2Desc: 'Organiza tu semana con nuestro planificador interactivo. Arrastra y suelta recetas, ajusta tus objetivos nutricionales y deja que nuestra tecnología te guíe hacia una alimentación balanceada.',
+            step2Desc: 'Organiza tu semana con nuestro planificador interactivo. Arrastra y suelta recetas, genera listas de compras inteligentes consolidadas automáticamente y deja que nuestra tecnología te guíe hacia una alimentación balanceada.',
             step3Title: 'Control Total de tu Despensa',
             step3Desc: 'Gestiona tus ingredientes y evita el desperdicio. Recibe alertas de caducidad en tiempo real y mantén un inventario digital sincronizado con tus planes de comida.',
             step4Title: 'Ajuste de Porciones y Nutrición',
@@ -241,7 +241,7 @@ export const translations = {
             appName: 'Cacomi',
             rights: 'Todos los derechos reservados.',
             aboutLink: 'Acerca de',
-            instagramUrl: 'https://www.instagram.com/cacomi.app',
+            instagramUrl: 'https://www.instagram.com/cacomi_oficial',
             facebookUrl: 'https://www.facebook.com/people/Cacomi-Planificador-de-Comidas-con-IA/61589350700287',
             followUs: 'Síguenos en redes sociales',
             edit: 'Editar',
@@ -521,6 +521,25 @@ export const translations = {
         legal: {
             googleAiDisclaimer: 'Google LLC (Gemini API): Procesamiento temporal de preferencias dietéticas e ingredientes para generar recetas mediante IA. El procesamiento se rige por los términos de servicio de Google AI Studio, los cuales pueden incluir el uso de datos anonimizados para la mejora del modelo en su versión gratuita.',
             internalTrainingClause: 'Cacomi podrá utilizar datos de interacción anonimizados para el entrenamiento y optimización de sus algoritmos internos de recomendación y mejora del servicio.'
+        },
+        shoppingList: {
+            title: 'Lista de Compras',
+            fullList: 'Lista Completa',
+            toBuy: 'Por Comprar',
+            inPantry: 'En alacena',
+            partial: 'Incompleto',
+            needToBuy: 'Falta comprar',
+            quantity: 'Cantidad',
+            unit: 'Unidad',
+            empty: 'No hay ingredientes en tu plan para esta semana.',
+            pantryNote: 'Basado en tu alacena local.',
+            copySuccess: 'Lista copiada al portapapeles',
+            buyAction: 'Compré esto',
+            addToPantry: 'Añadir a alacena',
+            boughtQuantity: 'Cantidad comprada',
+            expirationDate: 'Fecha de caducidad',
+            saveToPantry: 'Guardar en Alacena',
+            buySuccess: '¡Añadido a tu alacena!'
         }
     },
     en: {
@@ -561,7 +580,7 @@ export const translations = {
             step1Title: 'Explore & Discover',
             step1Desc: 'Browse through an infinite catalog of real recipes. Our intuitive interface lets you filter by categories and access your saved recipes even without an internet connection.',
             step2Title: 'Smart Planning',
-            step2Desc: 'Organize your week with our interactive planner. Drag and drop recipes, adjust your nutritional goals, and let our technology guide you toward balanced eating.',
+            step2Desc: 'Organize your week with our interactive planner. Drag and drop recipes, generate automatically consolidated smart shopping lists, and let our technology guide you toward balanced eating.',
             step3Title: 'Full Pantry Control',
             step3Desc: 'Manage your ingredients and avoid waste. Get real-time expiration alerts and keep a digital inventory synced with your meal plans.',
             step4Title: 'Portion & Nutrition Adjustment',
@@ -652,7 +671,7 @@ export const translations = {
             appName: 'Cacomi',
             rights: 'All rights reserved.',
             aboutLink: 'About Us',
-            instagramUrl: 'https://www.instagram.com/cacomi.app',
+            instagramUrl: 'https://www.instagram.com/cacomi_oficial',
             facebookUrl: 'https://www.facebook.com/people/Cacomi-Planificador-de-Comidas-con-IA/61589350700287',
             followUs: 'Follow us',
             edit: 'Edit',
@@ -1011,6 +1030,25 @@ export const translations = {
         legal: {
             googleAiDisclaimer: 'Google LLC (Gemini API): Temporary processing of dietary preferences and ingredients to generate recipes via AI. Processing is governed by the Google AI Studio terms of service, which may include the use of anonymized data for model improvement in its free version.',
             internalTrainingClause: 'Cacomi may use anonymized interaction data for the training and optimization of its internal recommendation algorithms and service improvement.'
+        },
+        shoppingList: {
+            title: 'Shopping List',
+            fullList: 'Full List',
+            toBuy: 'To Buy',
+            inPantry: 'In pantry',
+            partial: 'Partial',
+            needToBuy: 'Need to buy',
+            quantity: 'Quantity',
+            unit: 'Unit',
+            empty: 'No ingredients in your plan for this week.',
+            pantryNote: 'Based on your local pantry.',
+            copySuccess: 'List copied to clipboard',
+            buyAction: 'I bought this',
+            addToPantry: 'Add to pantry',
+            boughtQuantity: 'Quantity bought',
+            expirationDate: 'Expiration date',
+            saveToPantry: 'Save to Pantry',
+            buySuccess: 'Added to your pantry!'
         }
     },
     fr: {
@@ -1051,7 +1089,7 @@ export const translations = {
             step1Title: 'Explorez et Découvrez',
             step1Desc: 'Naviguez dans un catalogue infini de recettes réelles. Filtrez par catégories ou recherchez des ingrédients spécifiques que vous avez déjà à la maison.',
             step2Title: 'Planification par IA',
-            step2Desc: 'Générez des plans hebdomadaires intelligents. Notre IA équilibre vos macros et votre budget pour que vous n\'ayez plus à vous demander "que manger demain ?".',
+            step2Desc: 'Générez des plans hebdomadaires intelligents. Notre IA équilibre vos macros, génère des listes de courses intelligentes consolidées et s\'assure que vous mangez sainement chaque jour.',
             step3Title: 'Garde-manger Intelligent',
             step3Desc: 'Gérez votre stock et recevez des alertes d\'expiration. Votre garde-manger se synchronise avec vos plans pour éviter les achats inutiles.',
             step4Title: 'Évolution Continue',
@@ -1213,7 +1251,7 @@ export const translations = {
             appName: 'Cacomi',
             rights: 'Tous droits réservés.',
             aboutLink: 'À propos',
-            instagramUrl: 'https://www.instagram.com/cacomi.app',
+            instagramUrl: 'https://www.instagram.com/cacomi_oficial',
             facebookUrl: 'https://www.facebook.com/people/Cacomi-Planificador-de-Comidas-con-IA/61589350700287',
             followUs: 'Suivez-nous',
             edit: 'Modifier',
@@ -1460,7 +1498,25 @@ export const translations = {
             googleAiDisclaimer: 'Google LLC (Gemini API) : Traitement temporaire des préférences diététiques et des ingrédients pour générer des recettes via l\'IA. Le traitement est régi par les conditions d\'utilisation de Google AI Studio, qui peuvent inclure l\'utilisation de données anonymisées pour l\'amélioration du modèle dans sa version gratuite.',
             internalTrainingClause: 'Cacomi peut utilizar des données d\'interaction anonymisées pour l\'entraînement et l\'optimisation de ses propres algorithmes de recommandation internes et l\'amélioration du service.'
         },
-
+        shoppingList: {
+            title: 'Liste de Courses',
+            fullList: 'Liste Complète',
+            toBuy: 'À Acheter',
+            inPantry: 'En réserve',
+            partial: 'Incomplet',
+            needToBuy: 'À acheter',
+            quantity: 'Quantité',
+            unit: 'Unité',
+            empty: 'Aucun ingrédient dans votre plan pour cette semaine.',
+            pantryNote: 'Basé sur votre garde-manger local.',
+            copySuccess: 'Liste copiée dans le presse-papiers',
+            buyAction: 'J\'ai acheté ça',
+            addToPantry: 'Ajouter au garde-manger',
+            boughtQuantity: 'Quantité achetée',
+            expirationDate: 'Date d\'expiration',
+            saveToPantry: 'Enregistrer au Garde-manger',
+            buySuccess: 'Ajouté à votre réserve !'
+        }
     }
 };
 

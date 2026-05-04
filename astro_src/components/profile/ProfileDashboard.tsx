@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useApiClient } from "@/hooks/useApiClient";
 import { EditProfileModal } from "./EditProfileModal";
-import { ViewAsToggle, VIEW_AS_OPTIONS, type ViewAsType } from "./ViewAsToggle";
 import { Button } from "@/components/shadcn/button";
 import { Camera, MapPin, CalendarDays, Link as LinkIcon, Activity } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
@@ -20,7 +19,6 @@ export function ProfileDashboard() {
     const [profileData, setProfileData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [viewAs, setViewAs] = useState<ViewAsType>(VIEW_AS_OPTIONS.ME);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isBiometricModalOpen, setIsBiometricModalOpen] = useState(false);
     const [isSetPasswordModalOpen, setIsSetPasswordModalOpen] = useState(false);
@@ -68,7 +66,6 @@ export function ProfileDashboard() {
         );
     }
 
-    const isMeView = viewAs === VIEW_AS_OPTIONS.ME;
 
     return (
         <div className="mx-auto max-w-4xl overflow-hidden rounded-xl border bg-background shadow-sm">
@@ -97,35 +94,31 @@ export function ProfileDashboard() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center gap-3 py-4 sm:py-0">
-                        <ViewAsToggle viewAs={viewAs} onChange={setViewAs} />
-                        {isMeView && (
-                            <div className="flex gap-2">
-                                <div className="relative">
-                                    <Button
-                                        variant="outline"
-                                        className="rounded-full border-primary/20 text-primary opacity-60 pointer-events-none cursor-not-allowed"
-                                        disabled
-                                    >
-                                        <Activity className="w-4 h-4 mr-2" />
-                                        {t?.nav?.progress || "Mi Progreso"}
-                                    </Button>
-                                    <span className="absolute -top-2 -right-1 bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm z-10 tracking-widest">
-                                        {t?.nav?.comingSoon || 'Soon'}
-                                    </span>
-                                </div>
-                                <Button onClick={() => setIsBiometricModalOpen(true)} variant="outline" className="rounded-full border-primary/30 text-primary">
-                                    <Ruler className="w-4 h-4 mr-2" />
-                                    {t?.profile?.biometric || "Metas Nutricionales"}
-                                </Button>
-                                <Button onClick={() => setIsEditModalOpen(true)} className="rounded-full">
-                                    {t?.profile?.editProfile || "Editar Perfil"}
-                                </Button>
-                                <Button onClick={() => setIsSetPasswordModalOpen(true)} variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary/70 hover:text-primary transition-colors" title={t?.auth?.setPassword}>
-                                    <KeyRound className="w-5 h-5" />
-                                </Button>
-                            </div>
-                        )}
+                    <div className="flex flex-wrap items-center gap-2 py-4 sm:py-0">
+                        <div className="relative hidden sm:block">
+                            <Button
+                                variant="outline"
+                                className="rounded-full border-primary/20 text-primary opacity-60 pointer-events-none cursor-not-allowed"
+                                disabled
+                            >
+                                <Activity className="w-4 h-4 mr-2" />
+                                {t?.nav?.progress || "Mi Progreso"}
+                            </Button>
+                            <span className="absolute -top-2 -right-1 bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm z-10 tracking-widest">
+                                {t?.nav?.comingSoon || 'Soon'}
+                            </span>
+                        </div>
+                        <Button onClick={() => setIsBiometricModalOpen(true)} variant="outline" className="rounded-full border-primary/30 text-primary text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4">
+                            <Ruler className="w-4 h-4 mr-2" />
+                            <span className="hidden xs:inline">{t?.profile?.biometric || "Metas Nutricionales"}</span>
+                            <span className="xs:hidden">{t?.nav?.goals || "Metas"}</span>
+                        </Button>
+                        <Button onClick={() => setIsEditModalOpen(true)} className="rounded-full text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4">
+                            {t?.profile?.editProfile || "Editar Perfil"}
+                        </Button>
+                        <Button onClick={() => setIsSetPasswordModalOpen(true)} variant="ghost" size="icon" className="h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:bg-primary/10 text-primary/70 hover:text-primary transition-colors" title={t?.auth?.setPassword}>
+                            <KeyRound className="w-5 h-5" />
+                        </Button>
                     </div>
                 </div>
 
@@ -149,17 +142,7 @@ export function ProfileDashboard() {
                 </div>
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="mt-2 border-t px-4 sm:px-6">
-                <nav className="flex space-x-6 overflow-x-auto">
-                    <button className="border-b-2 border-primary py-4 font-medium text-primary">
-                        {t?.profile?.myRecipes || "Mis Recetas"}
-                    </button>
-                    <button className="py-4 font-medium text-muted-foreground hover:text-foreground">
-                        {t?.profile?.savedRecipes || "Guardados"}
-                    </button>
-                </nav>
-            </div>
+            <div className="mt-6 border-t" />
 
             <EditProfileModal
                 isOpen={isEditModalOpen}

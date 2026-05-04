@@ -16,7 +16,8 @@ import {
     RotateCcw,
     Trash2,
     Utensils,
-    WifiOff
+    WifiOff,
+    ShoppingCart
 } from 'lucide-react';
 import { useSettings } from '@context/SettingsContext';
 import { useAuth } from '@context/AuthContext';
@@ -27,6 +28,7 @@ import { WeeklyCheckinModal } from './WeeklyCheckinModal';
 import { BiometricModal } from './BiometricModal';
 import { PlannerDay } from './PlannerDay';
 import { NutritionalSummary } from './NutritionalSummary';
+import { ShoppingListModal } from './ShoppingListModal';
 import { NativeAdCard } from '../ads/NativeAdCard';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -233,6 +235,8 @@ export function WeeklyPlanner() {
         btnText?: string;
     } | null>(null);
 
+    const [isShoppingListOpen, setIsShoppingListOpen] = useState(false);
+
     const mealsForNextWeek = React.useMemo(() => {
         if (!planData?.meals) return [];
         const tomorrowDate = new Date(today);
@@ -284,8 +288,11 @@ export function WeeklyPlanner() {
             }
 
             // If online, fetch full details to ensure offline parity
-            if (navigator.onLine && isAuthenticated) {
-                const response = await fetchAuth(`/api/recipes/${id}`);
+            if (navigator.onLine) {
+                const response = isAuthenticated 
+                    ? await fetchAuth(`/api/recipes/${id}`)
+                    : await fetch(`/api/recipes/${id}`);
+
                 if (response.ok) {
                     const fullRecipe = await response.json();
                     await db.savedRecipes.put({
@@ -1420,20 +1427,20 @@ export function WeeklyPlanner() {
             </div>
 
             {isOffline && (
-                <div className="mb-10 p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-[32px] flex flex-col sm:flex-row items-center gap-6 animate-in slide-in-from-top-4 duration-700 relative overflow-hidden group">
+                <div className="mb-6 md:mb-10 p-4 md:p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl md:rounded-[32px] flex flex-col sm:flex-row items-center gap-4 md:gap-6 animate-in slide-in-from-top-4 duration-700 relative overflow-hidden group">
                      <div className="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-[60px] animate-pulse" />
-                     <div className="w-16 h-16 rounded-3xl bg-indigo-500 shadow-2xl shadow-indigo-500/40 flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform duration-500 shrink-0">
-                        <WifiOff className="w-8 h-8 text-white" />
+                     <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-indigo-500 shadow-2xl shadow-indigo-500/40 flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform duration-500 shrink-0">
+                        <WifiOff className="w-6 h-6 md:w-8 md:h-8 text-white" />
                     </div>
-                    <div className="flex-1 text-center md:text-left">
-                        <h3 className="text-lg font-black text-indigo-700 dark:text-indigo-400 mb-1">
+                    <div className="flex-1 text-center sm:text-left">
+                        <h3 className="text-sm md:text-lg font-black text-indigo-700 dark:text-indigo-400 mb-0.5 md:mb-1">
                             {language === 'es' ? 'Modo de Resiliencia Inteligente' : 'Smart Resilience Mode'}
                         </h3>
-                        <p className="text-sm text-indigo-600/80 dark:text-indigo-300/80 font-medium leading-relaxed">
+                        <p className="text-[10px] md:text-sm text-indigo-600/80 dark:text-indigo-300/80 font-medium leading-relaxed">
                             {t.planner.offlineNotice}
                         </p>
                     </div>
-                    <div className="px-5 py-2.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                    <div className="px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-widest shrink-0">
                         {language === 'es' ? 'Local' : 'Local'}
                     </div>
                 </div>
@@ -1863,6 +1870,21 @@ export function WeeklyPlanner() {
                                         </button>
                                     )}
                                 </div>
+
+                                {/* Shopping List Button */}
+                                <button
+                                    onClick={() => setIsShoppingListOpen(true)}
+                                    className="relative inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl font-bold text-sm border border-gray-200 dark:border-gray-700 shadow-sm hover:border-primary/50 hover:text-primary transition-all group active:scale-95"
+                                    title={t.shoppingList.title}
+                                >
+                                    <ShoppingCart className="w-4 h-4 group-hover:scale-110 transition-transform text-primary" />
+                                    <span className="hidden sm:inline">{t.shoppingList.title}</span>
+                                    
+                                    {/* Beta Badge */}
+                                    <div className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 bg-orange-500 text-[8px] font-black text-white rounded-md uppercase tracking-tighter shadow-sm z-10">
+                                        BETA
+                                    </div>
+                                </button>
 
                                 {/* AI Info & Disclaimers */}
                                 <div className="group relative">
@@ -2316,6 +2338,12 @@ export function WeeklyPlanner() {
                     </div>
                 </div>
             )}
+            
+            <ShoppingListModal
+                isOpen={isShoppingListOpen}
+                onClose={() => setIsShoppingListOpen(false)}
+                meals={planData?.meals || []}
+            />
         </div>
     );
 }
