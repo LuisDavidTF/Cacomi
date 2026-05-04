@@ -76,25 +76,22 @@ export default defineConfig({
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
                 globIgnores: ['**/_worker.js/**'],
                 maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
-                navigateFallback: '/~offline',
-                // We exclude API routes and admin paths from the fallback
-                navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
+                // We handle fallbacks manually via runtimeCaching for better SSR compatibility
                 runtimeCaching: [
                     {
                         // Cache all internal page navigations (SSR)
                         urlPattern: ({ url, request }) => {
                             if (url.origin !== self.location.origin) return false;
                             
-                            // Match direct navigations or internal Astro fetches
-                            const isNav = request.mode === 'navigate';
-                            const isHtml = request.headers.get('accept')?.includes('text/html');
+                            // Any GET request without an extension is likely a page
+                            const isGet = request.method === 'GET';
+                            const hasNoExtension = !url.pathname.includes('.');
                             
-                            // Exclude API, Admin and files with extensions
+                            // Exclude API and Admin
                             const isExcluded = url.pathname.startsWith('/api') || 
-                                               url.pathname.startsWith('/admin') ||
-                                               url.pathname.includes('.'); 
+                                               url.pathname.startsWith('/admin');
                                                
-                            return (isNav || isHtml) && !isExcluded;
+                            return isGet && hasNoExtension && !isExcluded;
                         },
                         handler: 'NetworkFirst',
                         options: {
