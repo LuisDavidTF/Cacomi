@@ -51,7 +51,7 @@ async function getAllRecipes() {
 }
 
 export const GET: APIRoute = async () => {
-    const baseUrl = import.meta.env.PUBLIC_BASE_URL || 'https://Cacomismart.com';
+    const baseUrl = 'https://cacomi.app';
     const recipes = await getAllRecipes();
 
     let urls = `

@@ -1,15 +1,16 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = ({ request }) => {
-    const baseUrl = import.meta.env.PUBLIC_BASE_URL || 'https://Cacomismart.com';
+    const baseUrl = 'https://cacomi.app';
 
     const robotsText = `
 User-agent: *
 Allow: /
 Disallow: /edit-recipe/
 Disallow: /create-recipe/
+Disallow: /api/
 
-Sitemap: ${baseUrl}/sitemap.xml
+Sitemap: ${baseUrl}/sitemap-index.xml
 `.trim();
 
     return new Response(robotsText, {
