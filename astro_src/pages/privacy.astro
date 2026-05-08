@@ -16,7 +16,7 @@ const t = translations[lang] || translations.es;
         <div class="bg-card shadow-sm rounded-xl p-8 border border-border">
             <h1 class="text-3xl font-bold text-foreground mb-2">Política de Privacidad</h1>
             <p class="text-muted-foreground text-sm mb-8">
-                Última actualización: 1 de mayo de 2026 (Revisión de Proveedores e IA)
+                Última actualización: 8 de mayo de 2026 (Revisión de Privacidad de Google API)
             </p>
 
             <div class="space-y-8 text-foreground leading-relaxed">
@@ -60,7 +60,39 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">5. Publicidad y Google AdSense</h2>
+                    <h2 class="text-xl font-semibold mb-3">5. Uso de Datos de Google (Google API Services)</h2>
+                    <p class="mb-3">
+                        Nuestra aplicación utiliza los servicios de autenticación de Google (Google Sign-In). Para cumplir con la <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Política de Datos de Usuario de los Servicios API de Google</a>, detallamos cómo interactuamos con sus datos:
+                    </p>
+                    <div class="bg-muted/30 border border-border/50 p-5 rounded-lg space-y-4 text-sm text-foreground/90">
+                        <div>
+                            <strong class="block text-foreground mb-1">Datos Accedidos:</strong>
+                            <p>Cuando usted inicia sesión con Google, nuestra aplicación accede únicamente a su información de perfil básica (nombre y apellido), su dirección de correo electrónico principal y su foto de perfil.</p>
+                        </div>
+                        <div>
+                            <strong class="block text-foreground mb-1">Uso de Datos:</strong>
+                            <p>Estos datos se utilizan estrictamente para: autenticar su identidad, crear y gestionar su cuenta de usuario dentro de la aplicación, y personalizar la interfaz (mostrando su nombre y foto de perfil).</p>
+                        </div>
+                        <div>
+                            <strong class="block text-foreground mb-1">Almacenamiento y Protección de Datos:</strong>
+                            <p>Sus datos de Google (correo electrónico y nombre) se almacenan de manera segura en nuestra base de datos con encriptación en reposo y en tránsito. No almacenamos su contraseña de Google, ya que el proceso utiliza tokens OAuth seguros.</p>
+                        </div>
+                        <div>
+                            <strong class="block text-foreground mb-1">Compartición de Datos:</strong>
+                            <p><strong>No compartimos, vendemos, ni transferimos</strong> sus datos obtenidos a través de las APIs de Google a terceros, redes publicitarias, ni brokers de datos. El uso de esta información se limita exclusivamente a las funcionalidades de la aplicación.</p>
+                        </div>
+                        <div>
+                            <strong class="block text-foreground mb-1">Retención y Eliminación:</strong>
+                            <p>Los datos se conservan únicamente mientras su cuenta permanezca activa. Puede solicitar la eliminación definitiva de su cuenta y todos sus datos asociados en cualquier momento contactándonos al correo indicado en la sección de Contacto, o desde la sección de ajustes de su perfil.</p>
+                        </div>
+                        <div class="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded text-xs">
+                            <p>El uso y la transferencia que hace Cacomi a cualquier otra aplicación de la información recibida de las API de Google se ajustan a la <a href="https://developers.google.com/terms/api-services-user-data-policy#limited-use" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Política de Uso Limitado de Google</a>, incluidos los requisitos de uso limitado.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">6. Publicidad y Google AdSense</h2>
                     <p class="mb-2">
                         Utilizamos Google AdSense para mostrar anuncios. Google utiliza cookies para mostrar anuncios basados en sus visitas anteriores a nuestro sitio web u otros sitios web.
                     </p>
@@ -75,21 +107,21 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">6. Protección de la Información</h2>
+                    <h2 class="text-xl font-semibold mb-3">7. Protección de la Información</h2>
                     <p>
                         Se aplican medidas técnicas y organizativas razonables para proteger la información personal frente a accesos no autorizados, pérdida o alteración.
                     </p>
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">7. Compartición de Datos</h2>
+                    <h2 class="text-xl font-semibold mb-3">8. Compartición de Datos</h2>
                     <p>
                         Cacomi no vende ni cede datos personales a terceros, salvo obligación legal o requerimiento de autoridad competente.
                     </p>
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">8. Transferencia Internacional de Datos</h2>
+                    <h2 class="text-xl font-semibold mb-3">9. Transferencia Internacional de Datos</h2>
                     <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-lg">
                         <p class="mb-2">
                             Para la prestación del servicio, Cacomi utiliza infraestructura técnica de proveedores internacionales, lo que implica que sus datos pueden ser transferidos y procesados fuera de su país de residencia.
@@ -107,7 +139,7 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">9. Derechos del Usuario (ARCO)</h2>
+                    <h2 class="text-xl font-semibold mb-3">10. Derechos del Usuario (ARCO)</h2>
                     <p class="mb-2">El usuario puede solicitar:</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li>Acceso</li>
@@ -127,7 +159,7 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">10. Conservación de Datos</h2>
+                    <h2 class="text-xl font-semibold mb-3">11. Conservación de Datos</h2>
                     <p class="mb-4">
                         Los datos se conservan mientras la cuenta esté activa o sea necesario para cumplir con las finalidades descritas.
                     </p>
@@ -144,7 +176,7 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">11. Cambios a esta Política</h2>
+                    <h2 class="text-xl font-semibold mb-3">12. Cambios a esta Política</h2>
                     <p>
                         Esta política puede modificarse en cualquier momento.
                         Los cambios se reflejarán en la fecha de actualización.
@@ -152,7 +184,7 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section id="contacto" class="pt-6 border-t border-border/40">
-                    <h2 class="text-xl font-semibold mb-3">12. Contacto</h2>
+                    <h2 class="text-xl font-semibold mb-3">13. Contacto</h2>
                     <p class="mb-4">
                         Si tienes preguntas sobre esta Política de Privacidad, puedes contactarnos a través de los siguientes canales oficiales:
                     </p>
