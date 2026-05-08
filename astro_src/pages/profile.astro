@@ -5,7 +5,7 @@ import { ProfileDashboard } from '@components/profile/ProfileDashboard';
 export const prerender = false;
 ---
 
-<Layout title="Mi Perfil" description="Gestiona tu perfil en Cacomi.">
+<Layout title="Mi Perfil" description="Gestiona tu perfil en Cacomi." noindex={true}>
   <div class="container mx-auto py-6 sm:py-10">
     <ProfileDashboard client:load />
   </div>

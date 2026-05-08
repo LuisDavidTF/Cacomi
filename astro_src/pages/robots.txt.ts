@@ -9,6 +9,7 @@ Allow: /
 Disallow: /edit-recipe/
 Disallow: /create-recipe/
 Disallow: /api/
+Disallow: /register
 
 Sitemap: ${baseUrl}/sitemap-index.xml
 `.trim();

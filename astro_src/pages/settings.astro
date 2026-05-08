@@ -5,7 +5,7 @@ import SettingsClient from '@components/settings/SettingsClient';
 export const prerender = false;
 ---
 
-<Layout title="Configuración" description="Ajusta las preferencias de Cacomi.">
+<Layout title="Configuración" description="Ajusta las preferencias de Cacomi." noindex={true}>
   <SettingsClient client:load />
 </Layout>
 

@@ -5,6 +5,6 @@ import PantryPageClient from '@components/pantry/PantryPageClient';
 export const prerender = false;
 ---
 
-<Layout title="Mi Despensa" description="Gestiona tus ingredientes para cocinar siempre fresco.">
+<Layout title="Mi Despensa" description="Gestiona tus ingredientes para cocinar siempre fresco." noindex={true}>
   <PantryPageClient client:load />
 </Layout>

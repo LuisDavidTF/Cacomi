@@ -10,7 +10,7 @@ const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
 const t = translations[lang] || translations.es;
 ---
 
-<Layout title={`${t.nav.planner} - Cacomi`}>
+<Layout title={`${t.nav.planner} - Cacomi`} noindex={true}>
   <WeeklyPlanner client:load />
 </Layout>
 

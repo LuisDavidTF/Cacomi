@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://cacomi.app/$1",
+      "permanent": true
+    }
+  ]
+}

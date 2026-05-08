@@ -14,6 +14,7 @@ interface Props {
 	image?: string;
 	canonicalURL?: string | URL;
 	type?: 'website' | 'article' | 'profile';
+	noindex?: boolean;
 }
 
 const { 
@@ -22,9 +23,11 @@ const {
 	image = '/og-image.jpg', // Placeholder image URL for Open Graph
 	canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url),
 	type = 'website',
+	noindex = false,
 } = Astro.props;
 
 const isStaging = Astro.url.hostname.endsWith('.pages.dev');
+const shouldNoIndex = isStaging || noindex;
 
 const enableAds = import.meta.env.PUBLIC_ENABLE_ADS === 'true';
 // Secret admin path prefix — server-side only, never exposed to JS bundle via PUBLIC_
@@ -43,7 +46,7 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonicalURL} />
 		
-		{isStaging && <meta name="robots" content="noindex, nofollow" />}
+		{shouldNoIndex && <meta name="robots" content="noindex, nofollow" />}
 		
 		<script is:inline>
 			// Force cleanup of legacy Service Workers and caches from the old Next.js / Culina Smart version
