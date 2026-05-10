@@ -12,7 +12,6 @@ type JobDefinition = {
     endpointParams: string;
 };
 
-// Mapeo acorde a los endpoints del controlador de backend
 const ACTUAL_JOBS: JobDefinition[] = [
     { id: '1', alias: 'NutritionSyncJob', name: 'Nutrition Sync', description: 'Llena calorías/macros de ingredientes pendientes', endpointParams: '/sync-nutrition' },
     { id: '2', alias: 'PriceSyncJob', name: 'Price Sync', description: 'Actualiza precios de ingredientes en BD', endpointParams: '/sync-prices' },
@@ -20,7 +19,8 @@ const ACTUAL_JOBS: JobDefinition[] = [
     { id: '4', alias: 'RecipeImageJob', name: 'Image Generation', description: 'Genera imágenes diarias mediante Pollinations AI', endpointParams: '/trigger-image-generation' },
     { id: '5', alias: 'RecipeVectorSync', name: 'Vectorize Recipes', description: 'Genera vectores Embedding (Gemini) para búsqueda', endpointParams: '/vectorize-recipes' },
     { id: '6', alias: 'DailyRecipeGenerator', name: 'Daily Recipe Generator', description: 'Genera nuevas recetas (Gemini Normal)', endpointParams: '/generate-daily-recipes' },
-    { id: '7', alias: 'ScavengerGenerator', name: 'Quota Recipe Generator', description: 'Genera recetas (Gemini 3 Scavenger)', endpointParams: '/generate-quota-recipes' }
+    { id: '7', alias: 'ScavengerGenerator', name: 'Quota Recipe Generator', description: 'Genera recetas (Gemini 3 Scavenger)', endpointParams: '/generate-quota-recipes' },
+    { id: '8', alias: 'TrainingJob', name: 'Training Bots', description: 'Genera datos de entrenamiento nocturno (PlannerTraining)', endpointParams: '/training-bots' }
 ];
 
 export const JobsDataManager = () => {
