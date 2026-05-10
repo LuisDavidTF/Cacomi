@@ -37,6 +37,9 @@ export function Footer() {
                 <a href="/about" className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors">
                     {t.common?.aboutLink || 'Acerca de'}
                 </a>
+                <a href="/blog" className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors">
+                    {t.common?.blogLink || 'Blog & Guías'}
+                </a>
                 <a href="/terms" className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors">
                     {t.auth.termsLink}
                 </a>

@@ -1,0 +1,62 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { Calendar, ChevronRight } from 'lucide-react';
+
+const allRevistas = await getCollection('revista');
+
+const sortedRevistas = allRevistas.sort((a, b) => {
+	return new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf();
+});
+---
+
+<Layout 
+	title="Revista Semanal | Cacomi"
+	description="Ediciones semanales con colecciones de nuestros mejores artículos sobre nutrición, ahorro y recetas."
+>
+	<div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-20">
+		<header class="text-center mb-16">
+			<h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+				Hemeroteca Cacomi
+			</h1>
+			<p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+				Explora nuestras ediciones semanales, donde agrupamos artículos y guías como una revista tradicional de lectura continua.
+			</p>
+		</header>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+			{sortedRevistas.map((revista) => (
+				<a href={`/revista/${revista.slug}`} class="group block h-full">
+                    <article class="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 p-8 h-full flex flex-col hover:shadow-xl transition-all duration-300 hover:-translate-y-2 relative overflow-hidden">
+                        
+                        <!-- Elemento decorativo de portada -->
+                        <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+                        
+                        <div class="flex items-center gap-2 text-sm text-primary font-bold mb-4 tracking-wide uppercase relative z-10">
+                            <span>Edición #{revista.data.number}</span>
+                            <span class="text-gray-300 dark:text-gray-700">•</span>
+                            <time datetime={revista.data.date}>{revista.data.date}</time>
+                        </div>
+                        
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 leading-tight relative z-10 group-hover:text-primary transition-colors">
+                            {revista.data.title}
+                        </h2>
+                        
+                        <p class="text-gray-600 dark:text-gray-400 mb-8 flex-grow relative z-10">
+                            {revista.data.description}
+                        </p>
+                        
+                        <div class="pt-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between relative z-10 mt-auto">
+                            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                {revista.data.articles.length} artículos incluidos
+                            </span>
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                <ChevronRight class="w-5 h-5" />
+                            </div>
+                        </div>
+                    </article>
+                </a>
+			))}
+		</div>
+	</div>
+</Layout>

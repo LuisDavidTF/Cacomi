@@ -81,10 +81,12 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 					
 					localStorage.setItem('pwa_version', CURRENT_VERSION);
 					
-					// 3. Force reload after a short delay to allow cleanup to start
+					// 3. Skip force reload to prevent loops in some environments
+					/*
 					setTimeout(() => {
 						window.location.reload();
 					}, 500);
+					*/
 				}
 			})();
 		</script>

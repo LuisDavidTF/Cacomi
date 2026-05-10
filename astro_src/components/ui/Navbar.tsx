@@ -19,7 +19,9 @@ import {
     ShoppingBasket,
     CalendarDays,
     Activity,
-    Download
+    Download,
+    BookOpen,
+    Gamepad2
 } from 'lucide-react';
 
 export function Navbar() {
@@ -108,44 +110,59 @@ export function Navbar() {
                 <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Main Navigation">
                     <div className="flex justify-between items-center h-18 w-full transition-all duration-300">
                         {/* Left: Logo */}
-                        <div className="flex-1 flex items-center justify-start">
+                        <div className="flex-none flex items-center justify-start mr-4 lg:mr-8">
                             <a href="/" onClick={handleLogoClick} className="shrink-0 flex items-center gap-2 group">
                                 {/* Light Mode Logo */}
                                 <img 
                                     src="/images/brand/logo_navbar_light.png" 
                                     alt="Cacomi" 
-                                    className="h-12 w-auto object-contain hidden md:block dark:md:hidden group-hover:scale-105 transition-transform"
+                                    className="h-10 w-auto object-contain hidden md:block dark:md:hidden group-hover:scale-105 transition-transform"
                                 />
                                 {/* Dark Mode Logo */}
                                 <img 
                                     src="/images/brand/logo_navbar_dark.png" 
                                     alt="Cacomi" 
-                                    className="h-12 w-auto object-contain hidden dark:md:block group-hover:scale-105 transition-transform [mask-image:radial-gradient(ellipse_at_center,black_75%,transparent_100%)]"
+                                    className="h-10 w-auto object-contain hidden dark:md:block group-hover:scale-105 transition-transform [mask-image:radial-gradient(ellipse_at_center,black_75%,transparent_100%)]"
                                 />
                             </a>
                         </div>
 
                         {/* Center: Main Navigation (Desktop) */}
                         <div className="hidden md:flex flex-1 items-center justify-center space-x-1 lg:space-x-2">
-                            <a href="/" onClick={handleLogoClick} className={`flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <Home className="w-5 lg:w-6 h-5 lg:h-6" />
-                                <span className="hidden md:inline">{t?.nav?.home || 'Inicio'}</span>
+                            <a href="/" onClick={handleLogoClick} className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <Home className="w-6 h-6" />
+                                <span className="hidden xl:inline">{t?.nav?.home || 'Inicio'}</span>
                             </a>
-                            <a href="/pantry" className={`flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/pantry') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <ShoppingBasket className="w-5 lg:w-6 h-5 lg:h-6" />
-                                <span className="hidden md:inline">{t?.nav?.pantry || 'Despensa'}</span>
+                            <a href="/pantry" className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/pantry') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <ShoppingBasket className="w-6 h-6" />
+                                <span className="hidden xl:inline">{t?.nav?.pantry || 'Despensa'}</span>
                             </a>
-                            <a href="/planner" className={`flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/planner') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <CalendarDays className="w-5 lg:w-6 h-5 lg:h-6" />
-                                <span className="hidden md:inline">{t?.nav?.planner || 'Planificador'}</span>
-                                <span className="absolute -top-1.5 -right-2 flex h-5 px-2 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white uppercase tracking-tighter shadow-md border border-background scale-90 group-hover:scale-100 transition-transform">
+                            <a href="/blog" className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/blog') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <BookOpen className="w-6 h-6" />
+                                <span className="hidden xl:inline">Blog</span>
+                            </a>
+                            <a 
+                                href="/juego" 
+                                data-astro-reload
+                                className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/juego') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                            >
+                                <Gamepad2 className="w-6 h-6" />
+                                <span className="hidden xl:inline">Juego</span>
+                                <span className="absolute -top-1 -right-0.5 flex h-4 px-1.5 items-center justify-center rounded-full bg-green-500 text-[8px] font-black text-white uppercase tracking-tighter shadow-md border border-background scale-90 group-hover:scale-100 transition-transform">
+                                    NEW
+                                </span>
+                            </a>
+                            <a href="/planner" className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/planner') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <CalendarDays className="w-6 h-6" />
+                                <span className="hidden xl:inline">{t?.nav?.planner || 'Planificador'}</span>
+                                <span className="absolute -top-1 -right-0.5 flex h-4 px-1.5 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white uppercase tracking-tighter shadow-md border border-background scale-90 group-hover:scale-100 transition-transform">
                                     BETA
                                 </span>
                             </a>
                         </div>
                         
                         {/* Center: Search Bar */}
-                        <div className="hidden md:flex flex-none items-center justify-center">
+                        <div className="hidden xl:flex flex-1 items-center justify-center px-2">
                             <NavbarSearch />
                         </div>
 
@@ -435,6 +452,17 @@ export function Navbar() {
                                 </div>
                                 <span className="bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm tracking-widest z-[60]">
                                     {t?.nav?.comingSoon || 'Soon'}
+                                </span>
+                            </a>
+                            <a href="/blog" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/blog') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                <BookOpen className="w-6 h-6 mr-3 opacity-70" />
+                                Blog
+                            </a>
+                             <a href="/juego" data-astro-reload className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base relative ${getIsActive('/juego') ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                <Gamepad2 className="w-6 h-6 mr-3 opacity-70" />
+                                El Reto Diario
+                                <span className="absolute top-3 right-4 bg-green-500 text-[10px] font-black text-white uppercase px-2 py-0.5 rounded-full">
+                                    NUEVO
                                 </span>
                             </a>
                             <a href="/settings" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/settings') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>

@@ -1,0 +1,39 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { BlogSearch } from '../../components/blog/BlogSearch';
+
+// Fetch all blog posts using the new Content Collections API
+const allPosts = await getCollection('blog');
+
+// Sort by date (descending)
+const sortedPosts = allPosts.sort((a, b) => {
+	return new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf();
+});
+---
+
+<Layout 
+	title="Blog de Cacomi | Guías y Consejos de Cocina"
+	description="Aprende a planificar tus comidas, ahorrar dinero y comer mejor con nuestros artículos y guías."
+>
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20">
+		<header class="text-center mb-16">
+			<h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+				Blog de Cacomi
+			</h1>
+			<p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
+				Consejos prácticos para organizar tu cocina, planificar tus comidas y disfrutar más comiendo en casa.
+			</p>
+			<a href="/revista" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-colors gap-2">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+				</svg>
+				Leer Ediciones Completas (Revista Semanal)
+			</a>
+		</header>
+
+		<!-- React Client Component for Searching -->
+		<BlogSearch posts={sortedPosts} client:load />
+
+	</div>
+</Layout>

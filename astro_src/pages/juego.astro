@@ -1,0 +1,15 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SecretIngredientGame } from '../components/game/SecretIngredientGame';
+
+export const prerender = false;
+---
+
+<Layout 
+	title="El Reto Diario | Cacomi"
+	description="Adivina el ingrediente secreto del día en 6 intentos. Un nuevo reto culinario cada 24 horas."
+>
+    {/* client:only="react" es crucial aquí porque el juego depende fuertemente 
+        del LocalStorage (window) y la hora local del navegador para el estado inicial */}
+	<SecretIngredientGame client:only="react" />
+</Layout>
