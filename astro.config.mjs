@@ -77,7 +77,10 @@ export default defineConfig({
                 globIgnores: ['**/_worker.js/**'],
                 maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
                 navigateFallback: '/~offline',
-                navigateFallbackDenylist: [/^\/$/, /^\/api\//, /^\/admin\//],
+                navigateFallbackDenylist: [
+                    /^\/api\//, 
+                    /^\/admin\//
+                ],
                 // We handle fallbacks manually via runtimeCaching for better SSR compatibility
                 runtimeCaching: [
                     {
@@ -90,7 +93,8 @@ export default defineConfig({
                             const isGet = request.method === 'GET';
                             const hasNoExtension = !url.pathname.includes('.');
                             
-                            // Exclude API and Admin
+                            // Exclude explicit API paths. Unknown secret paths will naturally 
+                            // fallback to offline only if they truly timeout.
                             const isExcluded = url.pathname.startsWith('/api') || 
                                                url.pathname.startsWith('/admin');
                                                
@@ -99,7 +103,7 @@ export default defineConfig({
                         handler: 'NetworkFirst',
                         options: {
                             cacheName: 'pages-cache',
-                            networkTimeoutSeconds: 3,
+                            networkTimeoutSeconds: 15, // 15s covers Koyeb cold-starts safely
                             expiration: {
                                 maxEntries: 60,
                                 maxAgeSeconds: 60 * 60 * 24 * 30,
