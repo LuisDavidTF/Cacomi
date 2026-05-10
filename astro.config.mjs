@@ -76,11 +76,6 @@ export default defineConfig({
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
                 globIgnores: ['**/_worker.js/**'],
                 maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
-                navigateFallback: '/~offline',
-                navigateFallbackDenylist: [
-                    /^\/api\//, 
-                    /^\/admin\//
-                ],
                 // We handle fallbacks manually via runtimeCaching for better SSR compatibility
                 runtimeCaching: [
                     {
