@@ -374,8 +374,8 @@ export function RecipeFeed({ initialData = null, forceSavedMode = false }) {
                   </button>
                   
                   {/* Dropdown for remaining categories */}
-                  <div className={`absolute top-full mt-2 left-0 sm:left-auto sm:right-0 bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-xl ring-1 ring-black/5 p-3 z-40 w-64 transition-all origin-top-left sm:origin-top-right ${showAllCategories ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
-                      <div className="flex flex-wrap gap-2">
+                  <div className={`absolute top-full mt-2 right-0 md:left-0 md:right-auto lg:right-0 lg:left-auto bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-2xl ring-1 ring-black/5 p-4 z-50 w-72 max-h-[70vh] overflow-y-auto transition-all origin-top-right md:origin-top-left lg:origin-top-right ${showAllCategories ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+                      <div className="flex flex-wrap gap-2.5">
                           {categories.filter(cat => activeCategory !== cat.id && categories.indexOf(cat) >= 3).map(cat => (
                               <button
                                   key={cat.id}
@@ -383,13 +383,14 @@ export function RecipeFeed({ initialData = null, forceSavedMode = false }) {
                                       handleCategoryToggle(cat.id);
                                       setShowAllCategories(false);
                                   }}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-background border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-background border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-all active:scale-95 whitespace-nowrap"
                               >
                                   {cat.label}
                               </button>
                           ))}
                       </div>
                   </div>
+
               </div>
           </div>
         </div>
