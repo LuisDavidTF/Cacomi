@@ -4,6 +4,7 @@ import { LegalsConsent } from '@components/ui/LegalsConsent';
 import { ViewTransitions } from 'astro:transitions';
 import { translations } from '@context/SettingsContext';
 import { ADMIN_PATH_PREFIX } from 'astro:env/server';
+import GoogleAnalytics from '@components/analytics/GoogleAnalytics.astro';
 import '../layouts/globals.css';
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
 const { 
 	title = 'Admin Panel - Cacomi',
 } = Astro.props;
+
+const gaId = 'G-X50BSFS1NL';
 
 const langCookie = Astro.cookies.get('cacomi_language')?.value || 'es';
 const t = translations[langCookie as keyof typeof translations] || translations.es;
@@ -54,6 +57,8 @@ const getLinkStyle = (path: string) => {
 				font-family: 'Inter', sans-serif;
 			}
 		</style>
+		
+		<GoogleAnalytics id={gaId} />
 		
 		<ViewTransitions />
 	</head>

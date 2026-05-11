@@ -7,6 +7,7 @@ import { ViewTransitions } from 'astro:transitions';
 import { ADMIN_PATH_PREFIX } from 'astro:env/server';
 import { pwaInfo } from 'virtual:pwa-info';
 import '../layouts/globals.css';
+import GoogleAnalytics from '@components/analytics/GoogleAnalytics.astro';
 
 interface Props {
 	title?: string;
@@ -31,6 +32,8 @@ const shouldNoIndex = noindex;
 const enableAds = import.meta.env.PUBLIC_ENABLE_ADS === 'true';
 // Secret admin path prefix — server-side only, never exposed to JS bundle via PUBLIC_
 const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
+
+const gaId = 'G-X50BSFS1NL';
 
 ---
 
@@ -133,13 +136,8 @@ const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX 
 			<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2928206942835905" crossorigin="anonymous"></script>
 		)}
 		
-		<script async src="https://www.googletagmanager.com/gtag/js?id=G-X50BSFS1NL"></script>
-		<script is:inline>
-			window.dataLayer = window.dataLayer || [];
-			function gtag(){dataLayer.push(arguments);}
-			gtag('js', new Date());
-			gtag('config', 'G-X50BSFS1NL');
-		</script>
+		<GoogleAnalytics id={gaId} />
+
 		
 		<script type="application/ld+json" set:html={JSON.stringify({
 			"@context": "https://schema.org",
