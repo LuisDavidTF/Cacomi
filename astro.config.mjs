@@ -1,6 +1,5 @@
 import { defineConfig, envField } from 'astro/config';
 import react from '@astrojs/react';
-import sitemap from '@astrojs/sitemap';
 import AstroPWA from '@vite-pwa/astro';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -49,7 +48,6 @@ export default defineConfig({
     },
     integrations: [
         react(),
-        sitemap(),
         AstroPWA({
             registerType: 'autoUpdate',
             devOptions: {

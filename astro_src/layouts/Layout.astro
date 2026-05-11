@@ -26,8 +26,7 @@ const {
 	noindex = false,
 } = Astro.props;
 
-const isStaging = Astro.url.hostname.endsWith('.pages.dev');
-const shouldNoIndex = isStaging || noindex;
+const shouldNoIndex = noindex;
 
 const enableAds = import.meta.env.PUBLIC_ENABLE_ADS === 'true';
 // Secret admin path prefix — server-side only, never exposed to JS bundle via PUBLIC_

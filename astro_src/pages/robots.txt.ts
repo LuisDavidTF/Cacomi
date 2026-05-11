@@ -11,7 +11,7 @@ Disallow: /create-recipe/
 Disallow: /api/
 Disallow: /register
 
-Sitemap: ${baseUrl}/sitemap-index.xml
+Sitemap: ${baseUrl}/sitemap.xml
 `.trim();
 
     return new Response(robotsText, {

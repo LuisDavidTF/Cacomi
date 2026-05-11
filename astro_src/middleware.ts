@@ -108,14 +108,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
         return context.rewrite(internalPath);
     }
 
-    // 6. Proceed and append security headers
-    const response = await next();
+    // 6. Canonical Domain Enforcer (301 Redirect)
     const hostname = context.url.hostname;
-
-    // Prevent indexing of .pages.dev staging URLs
-    if (hostname.endsWith('.pages.dev')) {
-        response.headers.set('X-Robots-Tag', 'noindex');
+    const isLocal = hostname === 'localhost' || hostname.includes('127.0.0.1');
+    const isVercelStaging = hostname.endsWith('.vercel.app') && !hostname.includes('cacomi'); // Vercel previews
+    
+    // If not local and not the production domain, redirect to production
+    if (!isLocal && !isVercelStaging && hostname !== 'cacomi.app' && hostname !== 'www.cacomi.app') {
+        const canonicalUrl = new URL(context.url.pathname + context.url.search, 'https://cacomi.app');
+        return redirect(canonicalUrl.toString(), 301);
     }
+
+    // 7. Proceed and append security headers
+    const response = await next();
 
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Frame-Options', 'DENY');

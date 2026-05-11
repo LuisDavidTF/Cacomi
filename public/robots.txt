@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /register
 
-Sitemap: https://cacomi.app/sitemap-index.xml
+Sitemap: https://cacomi.app/sitemap.xml
