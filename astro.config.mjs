@@ -9,7 +9,10 @@ export default defineConfig({
     output: 'server',
     site: 'https://cacomi.app',
     adapter: cloudflare({
-        mode: 'advanced'
+        mode: 'advanced',
+        platformProxy:{
+            enabled: false
+        }
     }),
     integrations: [
         react(),
