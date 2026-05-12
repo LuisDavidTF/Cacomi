@@ -23,12 +23,12 @@ export default defineConfig({
                 theme_color: '#ffffff',
                 icons: [
                     {
-                        src: 'pwa-192x192.png',
+                        src: 'icon-192x192.png',
                         sizes: '192x192',
                         type: 'image/png'
                     },
                     {
-                        src: 'pwa-512x512.png',
+                        src: 'icon-512x512.png',
                         sizes: '512x512',
                         type: 'image/png'
                     }
@@ -37,9 +37,20 @@ export default defineConfig({
             workbox: {
                 maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-                navigateFallback: '/offline.html',
-                navigateFallbackDenylist: [/^\/api\//, /^\/admin\//, /^\/login/, /^\/register/, /^\/~offline/],
+                navigateFallback: '/',
+                navigateFallbackDenylist: [/^\/api\//, /^\/admin\//, /^\/login/, /^\/register/],
                 runtimeCaching: [
+                    {
+                        urlPattern: ({ request }) => request.mode === 'navigate',
+                        handler: 'NetworkFirst',
+                        options: {
+                            cacheName: 'pages-cache',
+                            networkTimeoutSeconds: 5,
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
                     {
                         urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
                         handler: 'CacheFirst',
