@@ -30,51 +30,34 @@ export default defineConfig({
             workbox: {
                 skipWaiting: true,
                 clientsClaim: true,
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+                globIgnores: ['**/_worker.js/**'],
                 maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
-                globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
-                navigateFallback: '/',
-                navigateFallbackDenylist: [/^\/api\//, /^\/admin\//, /^\/login/, /^\/register/],
+                navigateFallback: '/~offline',
+                navigateFallbackDenylist: [
+                    /^\/$/, 
+                    /^\/api\//, 
+                    /^\/admin\//
+                ],
+                // We handle fallbacks manually via runtimeCaching for better SSR compatibility
                 runtimeCaching: [
                     {
                         // Cache all internal page navigations (SSR)
                         urlPattern: ({ url, request }) => {
                             if (url.origin !== self.location.origin) return false;
+                            const isRoot = url.pathname === '/';
                             const isGet = request.method === 'GET';
                             const hasNoExtension = !url.pathname.includes('.');
                             const isExcluded = url.pathname.startsWith('/api') || 
-                                               url.pathname.startsWith('/admin') ||
-                                               url.pathname.startsWith('/login');
-                            return isGet && hasNoExtension && !isExcluded;
+                                               url.pathname.startsWith('/admin');
+                            return (isRoot || (isGet && hasNoExtension)) && !isExcluded;
                         },
                         handler: 'NetworkFirst',
                         options: {
                             cacheName: 'pages-cache',
-                            networkTimeoutSeconds: 3,
+                            networkTimeoutSeconds: 15, // covers Koyeb cold-starts
                             expiration: {
                                 maxEntries: 60,
-                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-                            },
-                            cacheableResponse: {
-                                statuses: [0, 200],
-                            },
-                        },
-                    },
-                    {
-                        // Cache static assets that might not be in the precache
-                        urlPattern: /\.(?:js|css|json|webmanifest)$/i,
-                        handler: 'StaleWhileRevalidate',
-                        options: {
-                            cacheName: 'static-resources',
-                        },
-                    },
-                    {
-                        // Cache images aggressively
-                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/i,
-                        handler: 'CacheFirst',
-                        options: {
-                            cacheName: 'images',
-                            expiration: {
-                                maxEntries: 100,
                                 maxAgeSeconds: 60 * 60 * 24 * 30,
                             },
                             cacheableResponse: {
@@ -83,21 +66,39 @@ export default defineConfig({
                         },
                     },
                     {
-                        // Cache Google Fonts
-                        urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+                        urlPattern: /^https:\/\/fonts\.googleapis\.com/i,
+                        handler: 'StaleWhileRevalidate',
+                        options: { cacheName: 'google-fonts-stylesheets' },
+                    },
+                    {
+                        urlPattern: /^https:\/\/fonts\.gstatic\.com/i,
                         handler: 'CacheFirst',
                         options: {
-                            cacheName: 'google-fonts',
+                            cacheName: 'google-fonts-webfonts',
                             expiration: {
-                                maxEntries: 20,
+                                maxEntries: 30,
                                 maxAgeSeconds: 60 * 60 * 24 * 365,
                             },
-                            cacheableResponse: {
-                                statuses: [0, 200],
+                            cacheableResponse: { statuses: [0, 200] },
+                        },
+                    },
+                    {
+                        urlPattern: /\.(?:js|css|json|webmanifest)$/i,
+                        handler: 'StaleWhileRevalidate',
+                        options: { cacheName: 'static-resources' },
+                    },
+                    {
+                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'images',
+                            expiration: {
+                                maxEntries: 100,
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
                             },
-                        }
-                    }
-                ]
+                        },
+                    },
+                ],
             }
         })
     ]
