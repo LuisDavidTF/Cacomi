@@ -34,7 +34,7 @@ export default defineConfig({
                 globIgnores: ['**/_worker.js/**'],
                 maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
                 // offline.html is a static file → always precached → always works offline
-                navigateFallback: '/offline.html',
+                navigateFallback: '/offline',
                 navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
                 // Force SW to fetch and cache all main sections during install
                 // so they work offline even if the user never visited them
@@ -83,7 +83,7 @@ export default defineConfig({
                                         if (url.pathname.startsWith('/recipes/')) {
                                             return caches.match('/recipes/offline-shell');
                                         }
-                                        return caches.match('/offline.html');
+                                        return caches.match('/offline');
                                     }
                                 }
                             ]
