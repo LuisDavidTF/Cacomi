@@ -60,6 +60,12 @@ export default defineConfig({
                                 maxAgeSeconds: 60 * 60 * 24 * 30,
                             },
                             cacheableResponse: { statuses: [0, 200] },
+                            plugins: [
+                                {
+                                    // Serve offline.html when a page is not cached and network fails
+                                    handlerDidError: async () => caches.match('/offline.html')
+                                }
+                            ]
                         },
                     },
                     {
