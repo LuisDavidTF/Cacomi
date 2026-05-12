@@ -77,7 +77,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     //    Exception: internal rewrites from the secret path (flagged via context.locals).
     if (pathname.startsWith(internalAdminPrefix)) {
         // Allow the rewrite chain: /<secret>/* → /admin/* sets this flag
-        if ((context.locals as Record<string, unknown>).isInternalAdminRewrite) {
+        if ((context.locals as unknown as Record<string, unknown>).isInternalAdminRewrite) {
             return next();
         }
         return notFound(context);
