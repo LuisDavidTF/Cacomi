@@ -10,7 +10,6 @@
     "dev": "astro dev -p 5173",
     "dev:astro": "astro dev -p 5173",
     "build": "astro build",
-    "postbuild": "node -e \"const fs = require('fs'); const path = require('path'); const possiblePaths = ['dist/functions', 'dist/server/functions', '.astro/functions']; for (const p of possiblePaths) { if (fs.existsSync(p)) { if (fs.existsSync('functions')) { fs.rmSync('functions', { recursive: true, force: true }); } fs.renameSync(p, 'functions'); console.log('Found and moved functions from ' + p + ' to root'); break; } }\"",
     "build:astro": "astro build",
     "preview": "wrangler pages dev dist",
     "start": "astro dev",
