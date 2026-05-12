@@ -1,0 +1,24 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { RecipeDetail } from '@components/recipes/RecipeDetail';
+
+export const prerender = true;
+
+// This is a static shell used by the Service Worker as a fallback for ANY recipe page.
+// It doesn't receive any props from Astro because it's static.
+// The RecipeDetail component will extract the recipe ID from the URL client-side.
+---
+
+<Layout title="Cargando Receta | Cacomi" description="Cargando tu receta guardada para uso offline.">
+  <main>
+    <div id="offline-recipe-shell">
+        <RecipeDetail client:load recipe={null} />
+    </div>
+  </main>
+</Layout>
+
+<script>
+    // In the client, we need to make sure RecipeDetail gets the ID.
+    // Since we're passing recipe={null}, the component will try to find the ID.
+    // Let's see how RecipeDetail gets its ID if not passed as prop.
+</script>
