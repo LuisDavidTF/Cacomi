@@ -36,9 +36,26 @@ export default defineConfig({
                 // offline.html is a static file → always precached → always works offline
                 navigateFallback: '/offline.html',
                 navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
-                // Force SW to fetch and cache '/' during install
+                // Force SW to fetch and cache all main sections during install
+                // so they work offline even if the user never visited them
                 additionalManifestEntries: [
+                    // Core navigation
                     { url: '/', revision: null },
+                    { url: '/pantry', revision: null },
+                    { url: '/planner', revision: null },
+                    { url: '/saved-recipes', revision: null },
+                    { url: '/juego', revision: null },
+                    { url: '/profile', revision: null },
+                    { url: '/settings', revision: null },
+                    // Content pages
+                    { url: '/blog', revision: null },
+                    { url: '/about', revision: null },
+                    { url: '/terms', revision: null },
+                    { url: '/privacy', revision: null },
+                    // Auth (login page, but not register which redirects)
+                    { url: '/login', revision: null },
+                    // Note: /recipes/[slug] are dynamic SSR — they get cached
+                    // automatically via runtimeCaching NetworkFirst when visited
                 ],
                 runtimeCaching: [
                     {
@@ -60,6 +77,12 @@ export default defineConfig({
                                 maxAgeSeconds: 60 * 60 * 24 * 30,
                             },
                             cacheableResponse: { statuses: [0, 200] },
+                            plugins: [
+                                {
+                                    // Serve offline.html when a page is not cached and network fails
+                                    handlerDidError: async () => caches.match('/offline.html')
+                                }
+                            ]
                         },
                     },
                     {

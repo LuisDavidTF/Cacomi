@@ -181,6 +181,8 @@ const gaId = 'G-X50BSFS1NL';
 				</main>
 
 				<Footer client:load />
+				{/* Static link for Google OAuth crawler - Footer is client:load so bots may miss it */}
+				<a href="/privacy" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;" aria-hidden="true">Privacy Policy</a>
 			</div>
 
 			<LegalsConsent client:load />
