@@ -2,7 +2,7 @@
 import { getCollection, getEntry, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 
-export const prerender = true;
+export const prerender = false;
 export async function getStaticPaths() {
   const revistaEntries = await getCollection('revista');
   return revistaEntries.map(entry => ({

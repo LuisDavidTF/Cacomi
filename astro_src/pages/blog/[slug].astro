@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import BlogLayout from '../../layouts/BlogLayout.astro';
 
 // 1. Generate a new path for every collection entry
-export const prerender = true;
+export const prerender = false;
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
   return blogEntries.map(entry => ({

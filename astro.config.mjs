@@ -12,7 +12,7 @@ const isVercel = process.env.VERCEL === '1';
 const adapter = isVercel
     ? vercel()
     : cloudflare({
-        imageService: 'cloudflare',
+        mode: 'directory',
         platformProxy: {
             enabled: true
         }
