@@ -64,9 +64,14 @@ if (fs.existsSync(clientDir)) {
 }
 
 // --- 5. Remove conflicting generated config files ---
-['dist/server/wrangler.json', '.wrangler/deploy/config.json'].forEach(f => {
-    try { fs.rmSync(f, { recursive: true }); console.log('🗑  Deleted:', f); }
-    catch(e) { /* file doesn't exist */ }
+['dist/server/wrangler.json', 'dist/server/.prerender', '.wrangler/deploy/config.json'].forEach(f => {
+    try { 
+        if (fs.existsSync(f)) {
+            fs.rmSync(f, { recursive: true, force: true }); 
+            console.log('🗑  Deleted:', f); 
+        }
+    }
+    catch(e) { console.warn('⚠️  Failed to delete:', f, e.message); }
 });
 
 console.log('🚀 Postbuild complete. dist/_worker.js + static assets ready for Cloudflare Pages.');

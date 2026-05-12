@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { RecipeDetail } from '@components/recipes/RecipeDetail';
 
-export const prerender = true;
+export const prerender = false;
 
 // This is a static shell used by the Service Worker as a fallback for ANY recipe page.
 // It doesn't receive any props from Astro because it's static.
@@ -18,7 +18,6 @@ export const prerender = true;
 </Layout>
 
 <script>
-    // In the client, we need to make sure RecipeDetail gets the ID.
-    // Since we're passing recipe={null}, the component will try to find the ID.
-    // Let's see how RecipeDetail gets its ID if not passed as prop.
+    // This shell will extract the ID from the URL in the client
+    // thanks to the auto-detection logic in RecipeDetail.jsx
 </script>
