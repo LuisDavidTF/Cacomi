@@ -82,10 +82,10 @@ export default defineConfig({
                                     // Smart offline fallback
                                     handlerDidError: async ({ request }) => {
                                         const url = new URL(request.url);
-                                        // If it's a recipe page, serve the smart shell
+                                        // If it's a recipe page, serve the smart shell from the pages cache
                                         if (url.pathname.startsWith('/recipes/')) {
-                                            return (await caches.match('/recipes/offline-shell/index.html')) || 
-                                                   (await caches.match('/recipes/offline-shell'));
+                                            const cache = await caches.open('pages-cache');
+                                            return await cache.match('/recipes/offline-shell');
                                         }
                                         return caches.match('/offline.html');
                                     }

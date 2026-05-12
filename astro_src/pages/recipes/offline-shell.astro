@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { RecipeDetail } from '@components/recipes/RecipeDetail';
 
-export const prerender = true;
+export const prerender = false;
 
 // This is a static shell used by the Service Worker as a fallback for ANY recipe page.
 // It doesn't receive any props from Astro because it's static.

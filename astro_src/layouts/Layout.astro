@@ -47,6 +47,19 @@ const adminPathPrefix = getEnv('ADMIN_PATH_PREFIX') || 'admin-dashboard';
 		</script>
 		
 		<ClientRouter />
+
+		<!-- Warm Cache for Offline Shell -->
+		<script is:inline>
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					// Warm the cache with the recipe shell after load
+					// This ensures it's available offline without build-time precaching
+					setTimeout(() => {
+						fetch('/recipes/offline-shell').catch(() => {});
+					}, 2000);
+				});
+			}
+		</script>
 	</head>
 	<body class="min-h-screen font-sans antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300" data-admin-path={`/${adminPathPrefix}`}>
 		<AppProviders client:load>
