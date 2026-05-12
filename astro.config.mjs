@@ -36,9 +36,18 @@ export default defineConfig({
                 // offline.html is a static file → always precached → always works offline
                 navigateFallback: '/offline.html',
                 navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
-                // Force SW to fetch and cache '/' during install
+                // Force SW to fetch and cache all main sections during install
+                // so they work offline even if the user never visited them
                 additionalManifestEntries: [
                     { url: '/', revision: null },
+                    { url: '/pantry', revision: null },
+                    { url: '/planner', revision: null },
+                    { url: '/saved-recipes', revision: null },
+                    { url: '/blog', revision: null },
+                    { url: '/juego', revision: null },
+                    { url: '/about', revision: null },
+                    { url: '/profile', revision: null },
+                    { url: '/settings', revision: null },
                 ],
                 runtimeCaching: [
                     {
