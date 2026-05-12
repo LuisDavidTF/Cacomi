@@ -3,7 +3,7 @@ import { AppProviders } from '@components/providers/AppProviders';
 import { LegalsConsent } from '@components/ui/LegalsConsent';
 import { ClientRouter } from 'astro:transitions';
 import { translations } from '@context/SettingsContext';
-import { ADMIN_PATH_PREFIX } from 'astro:env/server';
+// import { ADMIN_PATH_PREFIX } from 'astro:env/server';
 import GoogleAnalytics from '@components/analytics/GoogleAnalytics.astro';
 import '../layouts/globals.css';
 
@@ -22,7 +22,7 @@ const t = translations[langCookie as keyof typeof translations] || translations.
 // After context.rewrite(), Astro.url.pathname reflects the internal /admin/* path
 const currentPath = Astro.url.pathname.replace(/\/$/, "");
 // Secret prefix for public-facing nav links
-const adminPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
+const adminPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
 const ap = `/${adminPrefix}`; // e.g. /ctrl-x7q2
 
 const getLinkStyle = (path: string) => {

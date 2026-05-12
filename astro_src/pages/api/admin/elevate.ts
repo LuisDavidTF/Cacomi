@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { ADMIN_PIN as ENV_ADMIN_PIN } from 'astro:env/server';
+// import { ADMIN_PIN as ENV_ADMIN_PIN } from 'astro:env/server';
+const ENV_ADMIN_PIN = import.meta.env.ADMIN_PIN;
 
 const ADMIN_PIN = ENV_ADMIN_PIN || import.meta.env.ADMIN_PIN;
 const ELEVATION_COOKIE = 'Cacomi_admin_elevated';
