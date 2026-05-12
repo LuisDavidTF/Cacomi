@@ -55,6 +55,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const internalAdminPrefix = '/admin';
 
     // 1. Session Check
+    console.log(`[MIDDLEWARE DEBUG] Path: ${pathname} | Host: ${context.url.hostname}`);
     const tokenCookie = cookies.get(AUTH_COOKIE_NAME);
     const hasSession = !!tokenCookie;
 
