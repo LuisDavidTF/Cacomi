@@ -1,65 +1,175 @@
 ---
-import { ClientRouter } from 'astro:transitions';
+import { AppProviders } from '@components/providers/AppProviders';
 import { Navbar } from '@components/ui/Navbar';
 import { Footer } from '@components/ui/Footer';
-import { AppProviders } from '@components/providers/AppProviders';
 import { LegalsConsent } from '@components/ui/LegalsConsent';
-import { getEnv } from '@utils/env';
+import { ClientRouter } from 'astro:transitions';
+// import { ADMIN_PATH_PREFIX } from 'astro:env/server';
+import { pwaInfo } from 'virtual:pwa-info';
 import '../layouts/globals.css';
 import GoogleAnalytics from '@components/analytics/GoogleAnalytics.astro';
 
 interface Props {
 	title?: string;
 	description?: string;
+	image?: string;
+	canonicalURL?: string | URL;
+	type?: 'website' | 'article' | 'profile';
+	noindex?: boolean;
 }
 
 const { 
-	title = 'Cacomi - Smart Recipe Planner', 
-	description = 'Planifica tus comidas de forma inteligente con nuestra inteligencia artificial.' 
+	title = 'Cacomi - Cocina Inteligente y Planificación de Comidas',
+	description = 'Cacomi: El asistente de cocina con IA que gestiona tu despensa y planifica tus comidas de forma inteligente para ahorrar tiempo y dinero.',
+	image = '/og-image.jpg', // Placeholder image URL for Open Graph
+	canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url),
+	type = 'website',
+	noindex = false,
 } = Astro.props;
 
-const adminPathPrefix = getEnv('ADMIN_PATH_PREFIX') || 'admin-dashboard';
+const shouldNoIndex = noindex;
+
+const enableAds = import.meta.env.PUBLIC_ENABLE_ADS === 'true';
+// Secret admin path prefix — server-side only, never exposed to JS bundle via PUBLIC_
+const adminPathPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
+
+const gaId = 'G-X50BSFS1NL';
+
 ---
 
 <!doctype html>
-<html lang="es" class="scroll-smooth">
+<html lang="es">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+		<link rel="icon" type="image/png" href="/icon.png?v=2" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
 		
-		<!-- PWA tags -->
-		<link rel="manifest" href="/manifest.webmanifest" />
-		<meta name="theme-color" content="#ffffff" />
-		<link rel="apple-touch-icon" href="/icon-192x192.png" />
+		{shouldNoIndex && <meta name="robots" content="noindex, nofollow" />}
 		
-		<GoogleAnalytics />
-
-		<!-- Prevent FOUC -->
 		<script is:inline>
+			// Force cleanup of legacy Service Workers and caches from the old Next.js / Culina Smart version
 			(function() {
-				const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-				document.documentElement.classList.toggle('dark', theme === 'dark');
+				const CURRENT_VERSION = 'cacomi-pwa-v4';
+				const storedVersion = localStorage.getItem('pwa_version');
+				
+				if (storedVersion !== CURRENT_VERSION) {
+					console.log('Detected legacy PWA or new version. Clearing caches and workers...');
+					
+					// 1. Unregister all service workers
+					if ('serviceWorker' in navigator) {
+						navigator.serviceWorker.getRegistrations().then(registrations => {
+							for (const registration of registrations) {
+								registration.unregister().then(() => {
+									console.log('Legacy Service Worker unregistered');
+								});
+							}
+						});
+					}
+					
+					// 2. Clear all cache storage
+					if ('caches' in window) {
+						caches.keys().then(names => {
+							for (const name of names) {
+								caches.delete(name).then(() => {
+									console.log('Cache cleared:', name);
+								});
+							}
+						});
+					}
+					
+					localStorage.setItem('pwa_version', CURRENT_VERSION);
+					
+					// 3. Skip force reload to prevent loops in some environments
+					/*
+					setTimeout(() => {
+						window.location.reload();
+					}, 500);
+					*/
+				}
 			})();
 		</script>
 		
-		<ClientRouter />
+		<!-- PWA / Mobile Tags -->
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Cacomi" />
+		<link rel="apple-touch-icon" href="/icon.png" />
+		
+		{ pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} /> }
 
-		<!-- Warm Cache for Offline Shell -->
+
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content={type} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={new URL(image, Astro.url)} />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={canonicalURL} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content={new URL(image, Astro.url)} />
+
+		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f2ea" />
+		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#010006" />
+		
+		<!-- Google Fonts: Inter -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+		
+		<style>
+			html {
+				font-family: 'Inter', sans-serif;
+			}
+		</style>
+		
+		{enableAds && (
+			<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2928206942835905" crossorigin="anonymous"></script>
+		)}
+		
+		<GoogleAnalytics id={gaId} />
+
+		
+		<script type="application/ld+json" set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "WebApplication",
+			"name": "Cacomi",
+			"applicationCategory": "LifestyleApplication",
+			"operatingSystem": "All",
+			"offers": {
+				"@type": "Offer",
+				"price": "0",
+				"priceCurrency": "USD"
+			}
+		})} />
+		
 		<script is:inline>
-			if ('serviceWorker' in navigator) {
+			// Ultra-simplified SW registration (deferred to end of head)
+			// Avoid registration on localhost or development to prevent 404 errors
+			if ('serviceWorker' in navigator && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')) {
 				window.addEventListener('load', () => {
-					// Warm the cache with the recipe shell after load
-					// This ensures it's available offline without build-time precaching
-					setTimeout(() => {
-						fetch('/recipes/offline-shell').catch(() => {});
-					}, 2000);
+					console.log('PWA: Initiating Service Worker registration...');
+					navigator.serviceWorker.register('/sw.js')
+						.then((registration) => {
+							console.log('✅ PWA: Registered successfully');
+						})
+						.catch((error) => {
+							console.error('❌ PWA: Registration failed:', error);
+						});
 				});
 			}
 		</script>
+		
+		<ClientRouter />
 	</head>
 	<body class="min-h-screen font-sans antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300" data-admin-path={`/${adminPathPrefix}`}>
 		<AppProviders client:load>
@@ -71,12 +181,11 @@ const adminPathPrefix = getEnv('ADMIN_PATH_PREFIX') || 'admin-dashboard';
 				</main>
 
 				<Footer client:load />
+				{/* Static link for Google OAuth crawler - Footer is client:load so bots may miss it */}
+				<a href="/privacy" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;" aria-hidden="true">Privacy Policy</a>
 			</div>
 
 			<LegalsConsent client:load />
 		</AppProviders>
-
-		{/* Static link for Google OAuth crawler - Outside React providers to avoid hydration errors */}
-		<a href="/privacy" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;" aria-hidden="true">Privacy Policy</a>
 	</body>
 </html>

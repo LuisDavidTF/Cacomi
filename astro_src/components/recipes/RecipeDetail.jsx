@@ -22,25 +22,9 @@ import { CloudDownload, CheckCircle2, Loader2 } from 'lucide-react';
  * Optimized for mobile and desktop, restoring the stable design 
  * from the previous Next.js implementation.
  */
-export function RecipeDetail({ recipe: initialRecipe, recipeId: providedId }) {
+export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
     const { t, language } = useSettings();
     const { showToast } = useToast();
-
-    // Extract ID from URL if not provided (useful for static shells or direct navigations)
-    const [recipeId, setRecipeId] = useState(providedId);
-    
-    useEffect(() => {
-        if (!providedId && typeof window !== 'undefined') {
-            const parts = window.location.pathname.split('/').filter(Boolean);
-            // URL structure is /recipes/[slug]/[id] OR /recipes/[id]
-            // We want the last part
-            const idFromUrl = parts[parts.length - 1];
-            if (idFromUrl && idFromUrl !== 'recipes') {
-                setRecipeId(idFromUrl);
-            }
-        }
-    }, [providedId]);
-
     const [recipe, setRecipe] = useState(initialRecipe);
     const [isLoading, setIsLoading] = useState(!initialRecipe);
     const [showShare, setShowShare] = useState(false);

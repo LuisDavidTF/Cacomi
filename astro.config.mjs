@@ -54,8 +54,8 @@ export default defineConfig({
                     { url: '/privacy', revision: null },
                     // Auth (login page, but not register which redirects)
                     { url: '/login', revision: null },
-                    // Static shell for offline recipe viewing
-                    { url: '/recipes/offline-shell', revision: null },
+                    // Note: /recipes/[slug] are dynamic SSR — they get cached
+                    // automatically via runtimeCaching NetworkFirst when visited
                 ],
                 runtimeCaching: [
                     {
@@ -79,16 +79,8 @@ export default defineConfig({
                             cacheableResponse: { statuses: [0, 200] },
                             plugins: [
                                 {
-                                    // Smart offline fallback
-                                    handlerDidError: async ({ request }) => {
-                                        const url = new URL(request.url);
-                                        // If it's a recipe page, serve the smart shell from the pages cache
-                                        if (url.pathname.startsWith('/recipes/')) {
-                                            const cache = await caches.open('pages-cache');
-                                            return await cache.match('/recipes/offline-shell');
-                                        }
-                                        return caches.match('/offline.html');
-                                    }
+                                    // Serve offline.html when a page is not cached and network fails
+                                    handlerDidError: async () => caches.match('/offline.html')
                                 }
                             ]
                         },
