@@ -39,15 +39,23 @@ export default defineConfig({
                 // Force SW to fetch and cache all main sections during install
                 // so they work offline even if the user never visited them
                 additionalManifestEntries: [
+                    // Core navigation
                     { url: '/', revision: null },
                     { url: '/pantry', revision: null },
                     { url: '/planner', revision: null },
                     { url: '/saved-recipes', revision: null },
-                    { url: '/blog', revision: null },
                     { url: '/juego', revision: null },
-                    { url: '/about', revision: null },
                     { url: '/profile', revision: null },
                     { url: '/settings', revision: null },
+                    // Content pages
+                    { url: '/blog', revision: null },
+                    { url: '/about', revision: null },
+                    { url: '/terms', revision: null },
+                    { url: '/privacy', revision: null },
+                    // Auth (login page, but not register which redirects)
+                    { url: '/login', revision: null },
+                    // Note: /recipes/[slug] are dynamic SSR — they get cached
+                    // automatically via runtimeCaching NetworkFirst when visited
                 ],
                 runtimeCaching: [
                     {
