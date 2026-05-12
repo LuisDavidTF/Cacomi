@@ -35,6 +35,7 @@ export default defineConfig({
                 ]
             },
             workbox: {
+                maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
                 navigateFallback: '/~offline',
                 navigateFallbackDenylist: [/^\/api\//, /^\/admin\//, /^\/login/, /^\/register/],
