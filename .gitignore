@@ -66,3 +66,4 @@ public/fallback-*
 /test-results/
 
 astro_src/node_modules
+.wrangler/
