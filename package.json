@@ -10,7 +10,7 @@
     "dev": "astro dev -p 5173",
     "dev:astro": "astro dev -p 5173",
     "build": "astro build",
-    "postbuild": "node -e \"const fs=require('fs'); console.log('=== dist/ ==='); fs.readdirSync('dist').forEach(f=>console.log(f)); console.log('=== dist/server/ ==='); try{fs.readdirSync('dist/server').forEach(f=>console.log(f));}catch(e){console.log('no server dir')}; ['dist/server/wrangler.json','.wrangler/deploy/config.json'].forEach(f=>{try{fs.rmSync(f);console.log('Deleted: '+f);}catch(e){}});\"\",
+    "postbuild": "node scripts/postbuild.cjs",
     "build:astro": "astro build",
     "preview": "wrangler pages dev dist",
     "start": "astro dev",
