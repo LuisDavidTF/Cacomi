@@ -55,6 +55,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const internalAdminPrefix = '/admin';
 
     // 1. Session Check
+    console.log(`[MIDDLEWARE DEBUG] Path: ${pathname} | Host: ${context.url.hostname}`);
     const tokenCookie = cookies.get(AUTH_COOKIE_NAME);
     const hasSession = !!tokenCookie;
 
@@ -77,7 +78,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     //    Exception: internal rewrites from the secret path (flagged via context.locals).
     if (pathname.startsWith(internalAdminPrefix)) {
         // Allow the rewrite chain: /<secret>/* → /admin/* sets this flag
-        if ((context.locals as Record<string, unknown>).isInternalAdminRewrite) {
+        if ((context.locals as unknown as Record<string, unknown>).isInternalAdminRewrite) {
             return next();
         }
         return notFound(context);
@@ -100,7 +101,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
         // c) Mark as internal rewrite so the /admin/* block lets it through
         //    (middleware runs again after rewrite; locals persists across rewrites)
-        (context.locals as Record<string, unknown>).isInternalAdminRewrite = true;
+        (context.locals as unknown as Record<string, unknown>).isInternalAdminRewrite = true;
 
         // d) Rewrite the secret path to the real /admin/* page internally
         const rest = pathname.slice(secretAdminPrefix.length) || '/dashboard';
@@ -113,11 +114,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const isLocal = hostname === 'localhost' || hostname.includes('127.0.0.1');
     const isVercelStaging = hostname.endsWith('.vercel.app') && !hostname.includes('cacomi'); // Vercel previews
     
+    /*
     // If not local and not the production domain, redirect to production
     if (!isLocal && !isVercelStaging && hostname !== 'cacomi.app' && hostname !== 'www.cacomi.app') {
         const canonicalUrl = new URL(context.url.pathname + context.url.search, 'https://cacomi.app');
         return redirect(canonicalUrl.toString(), 301);
     }
+    */
 
     // 7. Proceed and append security headers
     const response = await next();
