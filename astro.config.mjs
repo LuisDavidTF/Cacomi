@@ -3,15 +3,15 @@ import react from '@astrojs/react';
 import AstroPWA from '@vite-pwa/astro';
 import tailwindcss from '@tailwindcss/vite';
 
+import cloudflare from '@astrojs/cloudflare';
+import vercel from '@astrojs/vercel';
+
 // Detectamos el entorno
 const isVercel = process.env.VERCEL === '1';
-const isDev = process.env.NODE_ENV === 'development';
 
-// Cargamos el adapter dinámicamente para evitar que workerd/lightningcss
-// intenten resolver sus binarios de plataforma en entornos donde no se usan.
 const adapter = isVercel
-    ? (await import('@astrojs/vercel')).default()
-    : (await import('@astrojs/cloudflare')).default({
+    ? vercel()
+    : cloudflare({
         imageService: 'cloudflare',
         platformProxy: {
             enabled: true
@@ -23,6 +23,7 @@ export default defineConfig({
     output: 'server',
     site: 'https://cacomi.app',
     adapter,
+    outDir: './dist',
     vite: {
         plugins: [tailwindcss()],
         resolve: {
