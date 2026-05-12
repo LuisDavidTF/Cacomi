@@ -58,20 +58,6 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                     savedAt: new Date().toISOString()
                 });
 
-                // Also try to cache the page HTML for full offline navigation support
-                if ('caches' in window) {
-                    try {
-                        const cache = await caches.open('pages');
-                        const req = new Request(window.location.pathname);
-                        const resp = await fetch(req);
-                        if (resp.ok) {
-                            await cache.put(req, resp.clone());
-                        }
-                    } catch (e) {
-                        console.warn('HTML cache failed, but data is in Dexie', e);
-                    }
-                }
-
                 showToast(language === 'es' ? 'Receta guardada para uso offline' : 'Recipe saved for offline use', 'success');
             } catch (err) {
                 console.error("Save error", err);
@@ -84,66 +70,79 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
 
     useEffect(() => {
         const loadRecipe = async () => {
+            // Extraer ID de la URL si no viene por props (para el modo offline shell)
+            let currentId = recipeId;
+            if (!currentId && typeof window !== 'undefined') {
+                const pathParts = window.location.pathname.split('/').filter(Boolean);
+                currentId = pathParts[pathParts.length - 1]; 
+            }
+
+            if (!currentId && !initialRecipe) {
+                setIsLoading(false);
+                return;
+            }
+
+            // 1. Si Astro la mandó lista desde el servidor (SSR perfecto)
             if (initialRecipe) {
                 setRecipe(initialRecipe);
                 setIsLoading(false);
                 return;
             }
 
-            if (!recipeId) {
-                setIsLoading(false);
-                return;
-            }
-
-            // 1. Try RAM Cache
-            const visited = CacheManager.getVisitedRecipe(recipeId);
+            // 2. Caché de RAM (solo para que la app se sienta instantánea al navegar)
+            const visited = CacheManager.getVisitedRecipe(currentId);
             if (visited) {
                 setRecipe(visited);
                 setIsLoading(false);
                 return;
             }
 
-            // 2. Try Offline Dexie Storage (Crucial for Planner offline access)
+            // --- EL CAMBIO CLAVE ESTÁ AQUÍ ---
+            // 3. NETWORK FIRST: Intentar pedirla al servidor si estamos online
             try {
-                const offlineRecipe = await db.savedRecipes.get(String(recipeId));
+                if (typeof navigator !== 'undefined' && navigator.onLine) {
+                    const res = await fetch(`/api/recipes/${currentId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        setRecipe(data);
+                        CacheManager.saveVisitedRecipe(data);
+                        
+                        // Truco Pro: Si la receta estaba guardada en offline, 
+                        // la actualizamos silenciosamente con los datos frescos
+                        const isSaved = await db.savedRecipes.get(String(currentId));
+                        if (isSaved) {
+                            await db.savedRecipes.put({ ...data, id: String(currentId), savedAt: new Date().toISOString() });
+                        }
+                        
+                        setIsLoading(false);
+                        return; // Terminamos, ya tenemos la receta fresca
+                    }
+                }
+            } catch (err) {
+                console.warn("Fallo de red al intentar obtener receta fresca. Pasando a modo offline...", err);
+            }
+
+            // 4. OFFLINE FALLBACK: Si falló la red (sin internet o el server se cayó), buscar en Dexie
+            try {
+                const offlineRecipe = await db.savedRecipes.get(String(currentId));
                 if (offlineRecipe) {
-                    console.log("[Offline] Loaded recipe from Dexie:", recipeId);
+                    console.log("[Offline] Receta cargada desde base de datos local (Dexie)");
                     setRecipe(offlineRecipe);
                     setIsLoading(false);
                     return;
                 }
             } catch (err) {
-                console.error("Dexie access error", err);
+                console.error("Error al acceder a Dexie", err);
             }
 
-            // 3. Try Feed Cache
+            // 5. Último recurso (Feed viejo)
             const feed = CacheManager.getFeed();
-            const feedRecipe = feed?.recipes?.find(r => String(r.id) === String(recipeId));
+            const feedRecipe = feed?.recipes?.find(r => String(r.id) === String(currentId));
             if (feedRecipe) {
                 setRecipe(feedRecipe);
-                setIsLoading(false);
-                return;
             }
 
-            // 4. Fetch from API if online
-            if (typeof navigator !== 'undefined' && navigator.onLine) {
-                setIsLoading(true);
-                try {
-                    const res = await fetch(`/api/recipes/${recipeId}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        setRecipe(data);
-                        // Auto-save to RAM cache
-                        CacheManager.saveVisitedRecipe(data);
-                    }
-                } catch (err) {
-                    console.error("Fetch error", err);
-                } finally {
-                    setIsLoading(false);
-                }
-            } else {
-                setIsLoading(false);
-            }
+            setIsLoading(false);
         };
 
         loadRecipe();
@@ -179,19 +178,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
         CacheManager.saveVisitedRecipe(recipe);
 
         if ('caches' in window) {
-            try {
-                // 1. Cache the recipe page HTML (aligned with SW's pages-cache)
-                const pageCache = await caches.open('pages-cache');
-                const req = new Request(window.location.pathname);
-                const resp = await fetch(req);
-                if (resp.ok) {
-                    await pageCache.put(req, resp.clone());
-                }
-            } catch (e) {
-                console.error('Failed to cache recipe page', e);
-            }
-
-            // 2. Cache the recipe image for offline use
+            // 1. Cache the recipe image for offline use
             const imgSrc = recipe.imageUrl;
             if (imgSrc && !imgSrc.includes('placehold.co')) {
                 try {
@@ -543,4 +530,3 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
         </article>
     );
 }
-
