@@ -68,6 +68,12 @@ Cacomi is a modern web application for managing recipes and meal planning.
 
 ---
 
+### Branch Protection Rule (CRITICAL)
+- **NEVER push directly to the `main` branch**. 
+- Always create a separate branch for any fix, feature, or modification (e.g., `fix/offline-issues`, `feat/new-ui`).
+- **Verify the changes** in the branch first.
+- Only merge to `main` after confirming that everything works correctly, to avoid disrupting the experience for existing users.
+
 ## Commit & Pull Request Guidelines
 
 Follow conventional-commit style: `<type>[scope]: <description>`
