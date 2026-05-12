@@ -1,9 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { RecipeFeed } from '@components/recipes/RecipeFeed';
-import { LandingHero } from '@components/landing/LandingHero';
-import { FeaturesSection } from '@components/landing/FeaturesSection';
 import { FeatureAnnouncement } from '@components/landing/FeatureAnnouncement';
+import { FloatingWelcome } from '@components/landing/FloatingWelcome';
 import { RecipeService } from '@/lib/services/recipes';
 
 // Force dynamic SSR (do not prerender)
@@ -45,11 +44,12 @@ try {
 ---
 
 <Layout>
+  <div id="latest-recipes" class="mt-0">
+    <RecipeFeed initialData={initialData} client:load />
+  </div>
+
   {isNewUser && (
-    <div id="new-user-landing">
-      <LandingHero client:load />
-      <FeaturesSection client:visible />
-    </div>
+    <FloatingWelcome client:load />
   )}
 
   {hasNewFeatures && (
@@ -57,8 +57,4 @@ try {
       <FeatureAnnouncement version={CURRENT_APP_VERSION} client:load />
     </div>
   )}
-
-  <div id="latest-recipes" class={isNewUser || hasNewFeatures ? "mt-4" : "mt-0"}>
-    <RecipeFeed initialData={initialData} client:load />
-  </div>
 </Layout>

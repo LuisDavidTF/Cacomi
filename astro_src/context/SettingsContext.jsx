@@ -201,6 +201,13 @@ export const translations = {
             ariaClose: 'Cerrar anuncio'
         },
 
+        floatingWelcome: {
+            title: '¡Bienvenido a Cacomi!',
+            subtitle: 'Tu asistente de cocina con IA. Planifica, cocina y ahorra.',
+            cta: 'Empezar ahora',
+            learnMore: '¿Cómo funciona?',
+        },
+
         features: {
             aiTitle: 'Recetas con IA',
             aiDesc: 'Nuestra inteligencia artificial analiza tus ingredientes disponibles para sugerirte recetas deliciosas y evitar el desperdicio de alimentos.',
@@ -629,6 +636,13 @@ export const translations = {
             desc: 'The ultimate planning experience is here. Manage your week with the new drag-and-drop (DND) system optimized for mobile and tablet. Replace recipes, add snacks, and save everything locally for offline use.',
             btn: 'Try Planner!',
             ariaClose: 'Close announcement'
+        },
+
+        floatingWelcome: {
+            title: 'Welcome to Cacomi!',
+            subtitle: 'Your AI kitchen assistant. Plan, cook, and save.',
+            cta: 'Get Started',
+            learnMore: 'How it works?',
         },
 
         features: {
