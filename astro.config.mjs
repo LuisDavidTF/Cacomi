@@ -71,21 +71,21 @@ export default defineConfig({
                         handler: 'NetworkFirst',
                         options: {
                             cacheName: 'pages-cache',
-                            networkTimeoutSeconds: 3,
+                            networkTimeoutSeconds: 10,
                             expiration: {
                                 maxEntries: 60,
                                 maxAgeSeconds: 60 * 60 * 24 * 30,
                             },
-                            cacheableResponse: { statuses: [0, 200] },
+                            cacheableResponse: { statuses: [0, 200, 301] },
                             plugins: [
                                 {
                                     // Smart offline fallback
                                     handlerDidError: async ({ request }) => {
                                         const url = new URL(request.url);
-                                        // If it's a recipe page, serve the smart shell from the pages cache
+                                        // If it's a recipe page, serve the smart shell from the precache
                                         if (url.pathname.startsWith('/recipes/')) {
-                                            const cache = await caches.open('pages-cache');
-                                            return await cache.match('/recipes/offline-shell');
+                                            return await caches.match('/recipes/offline-shell') || 
+                                                   await caches.match('/offline.html');
                                         }
                                         return caches.match('/offline.html');
                                     }
