@@ -33,17 +33,19 @@ export default defineConfig({
     vite: {
         plugins: [tailwindcss()],
         resolve: {
-            // Solo aplicamos el alias de Cloudflare si NO estamos en local (dev)
-            // y NO estamos en Vercel. Ver skill astro-6 para el motivo.
-            alias: (isDev || isVercel)
-                ? {}
-                : {
-                    'react-dom/server': 'react-dom/server.edge',
-                },
+            // Solo aplicamos el alias si es estrictamente necesario y no rompe el runner local.
+            // Para Astro 6 + React 19, el adapter de Cloudflare ya gestiona gran parte del SSR.
+            alias: {}
         },
         ssr: {
             // Evita que Vite bundle módulos nativos de Node en SSR (especialmente en Windows)
-            external: ['node:buffer', 'node:async_hooks', 'node:path', 'node:url']
+            external: ['node:buffer', 'node:async_hooks', 'node:path', 'node:url', 'node:fs', 'node:crypto', 'node:stream']
+        },
+        optimizeDeps: {
+            exclude: ['lightningcss']
+        },
+        css: {
+            transformer: 'postcss'
         }
     },
     integrations: [

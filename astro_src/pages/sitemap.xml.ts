@@ -99,7 +99,7 @@ export const GET: APIRoute = async () => {
     blogPosts.forEach((post) => {
         urls += `
   <url>
-    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <loc>${baseUrl}/blog/${post.id}</loc>
     <lastmod>${new Date(post.data.date || new Date()).toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -110,7 +110,7 @@ export const GET: APIRoute = async () => {
     revistaEditions.forEach((edition) => {
         urls += `
   <url>
-    <loc>${baseUrl}/revista/${edition.slug}</loc>
+    <loc>${baseUrl}/revista/${edition.id}</loc>
     <lastmod>${new Date(edition.data.date || new Date()).toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

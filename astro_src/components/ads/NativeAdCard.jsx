@@ -1,8 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { getEnv } from '@utils/env';
 
 export function NativeAdCard({ adSlotId, variant = 'card' }) {
+    const PUBLIC_ENABLE_ADS = getEnv('PUBLIC_ENABLE_ADS') || getEnv('NEXT_PUBLIC_ENABLE_ADS');
+    if (PUBLIC_ENABLE_ADS !== 'true') return null;
+
     const adRef = useRef(null);
 
     useEffect(() => {

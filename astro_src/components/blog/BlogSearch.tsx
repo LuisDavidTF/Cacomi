@@ -43,13 +43,13 @@ export function BlogSearch({ posts }: { posts: any[] }) {
       ) : (
         <div className="grid gap-8">
           {filteredPosts.map((post) => (
-            <article key={post.slug} className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8 hover:shadow-md transition-all hover:-translate-y-1">
+            <article key={post.id} className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8 hover:shadow-md transition-all hover:-translate-y-1">
               <div className="flex items-center gap-2 text-sm text-primary font-bold mb-4 tracking-wide uppercase">
                 <Calendar className="w-4 h-4" />
                 <time dateTime={post.data.date}>{post.data.date}</time>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
-                <a href={`/blog/${post.slug}`} className="hover:text-primary transition-colors">
+                <a href={`/blog/${post.id}`} className="hover:text-primary transition-colors">
                   {post.data.title}
                 </a>
               </h2>
@@ -57,7 +57,7 @@ export function BlogSearch({ posts }: { posts: any[] }) {
                 {post.data.description}
               </p>
               <a 
-                href={`/blog/${post.slug}`} 
+                href={`/blog/${post.id}`} 
                 className="inline-flex items-center text-primary font-bold hover:gap-2 transition-all gap-1"
               >
                 Leer artículo 

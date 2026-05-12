@@ -1,7 +1,7 @@
 ---
 import { AppProviders } from '@components/providers/AppProviders';
 import { LegalsConsent } from '@components/ui/LegalsConsent';
-import { ViewTransitions } from 'astro:transitions';
+import { ClientRouter } from 'astro:transitions';
 import { translations } from '@context/SettingsContext';
 import { ADMIN_PATH_PREFIX } from 'astro:env/server';
 import GoogleAnalytics from '@components/analytics/GoogleAnalytics.astro';
@@ -60,7 +60,7 @@ const getLinkStyle = (path: string) => {
 		
 		<GoogleAnalytics id={gaId} />
 		
-		<ViewTransitions />
+		<ClientRouter />
 	</head>
 	<body class="min-h-screen font-sans antialiased text-slate-800 dark:text-slate-200 transition-colors duration-300 bg-slate-50 dark:bg-[#0B1120]">
 		<AppProviders client:load>
