@@ -10,6 +10,7 @@
     "dev": "astro dev -p 5173",
     "dev:astro": "astro dev -p 5173",
     "build": "astro build",
+    "postbuild": "node -e \"const fs = require('fs'); try { fs.copyFileSync('dist/server/entry.mjs', 'dist/_worker.js'); console.log('Worker copied successfully'); } catch (e) { console.log('No worker to copy'); }\"",
     "build:astro": "astro build",
     "preview": "wrangler pages dev dist",
     "start": "astro dev",

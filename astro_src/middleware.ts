@@ -100,7 +100,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
         // c) Mark as internal rewrite so the /admin/* block lets it through
         //    (middleware runs again after rewrite; locals persists across rewrites)
-        (context.locals as Record<string, unknown>).isInternalAdminRewrite = true;
+        (context.locals as unknown as Record<string, unknown>).isInternalAdminRewrite = true;
 
         // d) Rewrite the secret path to the real /admin/* page internally
         const rest = pathname.slice(secretAdminPrefix.length) || '/dashboard';
