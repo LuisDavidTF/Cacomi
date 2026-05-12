@@ -1,4 +1,4 @@
-import { defineConfig, envField } from 'astro/config';
+import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import AstroPWA from '@vite-pwa/astro';
 import tailwindcss from '@tailwindcss/vite';
@@ -23,13 +23,6 @@ export default defineConfig({
     output: 'server',
     site: 'https://cacomi.app',
     adapter,
-    env: {
-        schema: {
-            BACKEND_URL: envField.string({ context: 'server', access: 'secret', optional: true }),
-            ADMIN_PATH_PREFIX: envField.string({ context: 'server', access: 'secret', optional: true }),
-            ADMIN_PIN: envField.string({ context: 'server', access: 'secret', optional: true }),
-        }
-    },
     vite: {
         plugins: [tailwindcss()],
         resolve: {

@@ -1,0 +1,7 @@
+name = "smart-recipe-planner-app"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat_v2"]
+
+[[kv_namespaces]]
+binding = "SESSION"
+id = "64e1fa1d17084a5ba4f9e336b1bd9026"

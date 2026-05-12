@@ -4,7 +4,7 @@ import { Navbar } from '@components/ui/Navbar';
 import { Footer } from '@components/ui/Footer';
 import { LegalsConsent } from '@components/ui/LegalsConsent';
 import { ClientRouter } from 'astro:transitions';
-import { ADMIN_PATH_PREFIX } from 'astro:env/server';
+// import { ADMIN_PATH_PREFIX } from 'astro:env/server';
 import { pwaInfo } from 'virtual:pwa-info';
 import '../layouts/globals.css';
 import GoogleAnalytics from '@components/analytics/GoogleAnalytics.astro';
@@ -31,7 +31,7 @@ const shouldNoIndex = noindex;
 
 const enableAds = import.meta.env.PUBLIC_ENABLE_ADS === 'true';
 // Secret admin path prefix — server-side only, never exposed to JS bundle via PUBLIC_
-const adminPathPrefix = (ADMIN_PATH_PREFIX ?? import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
+const adminPathPrefix = (import.meta.env.ADMIN_PATH_PREFIX ?? 'admin').replace(/^\/|\/$/g, '');
 
 const gaId = 'G-X50BSFS1NL';
 
