@@ -33,36 +33,33 @@ export default defineConfig({
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
                 globIgnores: ['**/_worker.js/**'],
                 maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
-                navigateFallback: '/~offline',
-                navigateFallbackDenylist: [
-                    /^\/$/, 
-                    /^\/api\//, 
-                    /^\/admin\//
+                // offline.html is a static file → always precached → always works offline
+                navigateFallback: '/offline.html',
+                navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
+                // Force SW to fetch and cache '/' during install
+                additionalManifestEntries: [
+                    { url: '/', revision: null },
                 ],
-                // We handle fallbacks manually via runtimeCaching for better SSR compatibility
                 runtimeCaching: [
                     {
-                        // Cache all internal page navigations (SSR)
+                        // NetworkFirst for all SSR page navigations
                         urlPattern: ({ url, request }) => {
                             if (url.origin !== self.location.origin) return false;
-                            const isRoot = url.pathname === '/';
                             const isGet = request.method === 'GET';
                             const hasNoExtension = !url.pathname.includes('.');
-                            const isExcluded = url.pathname.startsWith('/api') || 
+                            const isExcluded = url.pathname.startsWith('/api') ||
                                                url.pathname.startsWith('/admin');
-                            return (isRoot || (isGet && hasNoExtension)) && !isExcluded;
+                            return isGet && hasNoExtension && !isExcluded;
                         },
                         handler: 'NetworkFirst',
                         options: {
                             cacheName: 'pages-cache',
-                            networkTimeoutSeconds: 15, // covers Koyeb cold-starts
+                            networkTimeoutSeconds: 3,
                             expiration: {
                                 maxEntries: 60,
                                 maxAgeSeconds: 60 * 60 * 24 * 30,
                             },
-                            cacheableResponse: {
-                                statuses: [0, 200],
-                            },
+                            cacheableResponse: { statuses: [0, 200] },
                         },
                     },
                     {
@@ -75,10 +72,7 @@ export default defineConfig({
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'google-fonts-webfonts',
-                            expiration: {
-                                maxEntries: 30,
-                                maxAgeSeconds: 60 * 60 * 24 * 365,
-                            },
+                            expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
                             cacheableResponse: { statuses: [0, 200] },
                         },
                     },
@@ -92,10 +86,7 @@ export default defineConfig({
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'images',
-                            expiration: {
-                                maxEntries: 100,
-                                maxAgeSeconds: 60 * 60 * 24 * 30,
-                            },
+                            expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
                         },
                     },
                 ],
