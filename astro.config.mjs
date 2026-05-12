@@ -13,6 +13,7 @@ const adapter = isVercel
     ? vercel()
     : cloudflare({
         mode: 'directory',
+        imageService: 'passthrough',
         platformProxy: {
             enabled: true
         }
