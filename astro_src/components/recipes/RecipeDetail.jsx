@@ -22,25 +22,9 @@ import { CloudDownload, CheckCircle2, Loader2 } from 'lucide-react';
  * Optimized for mobile and desktop, restoring the stable design 
  * from the previous Next.js implementation.
  */
-export function RecipeDetail({ recipe: initialRecipe, recipeId: providedId }) {
+export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
     const { t, language } = useSettings();
     const { showToast } = useToast();
-
-    // Extract ID from URL if not provided (useful for static shells or direct navigations)
-    const [recipeId, setRecipeId] = useState(providedId);
-    
-    useEffect(() => {
-        if (!providedId && typeof window !== 'undefined') {
-            const parts = window.location.pathname.split('/').filter(Boolean);
-            // URL structure is /recipes/[slug]/[id] OR /recipes/[id]
-            // We want the last part
-            const idFromUrl = parts[parts.length - 1];
-            if (idFromUrl && idFromUrl !== 'recipes') {
-                setRecipeId(idFromUrl);
-            }
-        }
-    }, [providedId]);
-
     const [recipe, setRecipe] = useState(initialRecipe);
     const [isLoading, setIsLoading] = useState(!initialRecipe);
     const [showShare, setShowShare] = useState(false);
@@ -67,42 +51,24 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId: providedId }) {
         } else {
             setIsDownloading(true);
             try {
-                // 1. Ensure we save the FULL recipe data in Dexie
+                // Ensure we save the FULL recipe data
                 await db.savedRecipes.put({
                     ...recipe,
                     id,
                     savedAt: new Date().toISOString()
                 });
 
-                // 2. RAM Cache update
-                CacheManager.saveVisitedRecipe(recipe);
-
-                // 3. Cache the page HTML for full offline navigation support
+                // Also try to cache the page HTML for full offline navigation support
                 if ('caches' in window) {
                     try {
-                        // Aligned with SW's pages-cache
-                        const pageCache = await caches.open('pages-cache');
+                        const cache = await caches.open('pages');
                         const req = new Request(window.location.pathname);
                         const resp = await fetch(req);
                         if (resp.ok) {
-                            await pageCache.put(req, resp.clone());
+                            await cache.put(req, resp.clone());
                         }
                     } catch (e) {
                         console.warn('HTML cache failed, but data is in Dexie', e);
-                    }
-
-                    // 4. Cache the recipe image for offline use
-                    const imgSrc = recipe.imageUrl;
-                    if (imgSrc && !imgSrc.includes('placehold.co')) {
-                        try {
-                            const imgCache = await caches.open('images');
-                            // no-cors allows cross-origin Cloudflare Images CDN
-                            const imgResp = await fetch(imgSrc, { mode: 'no-cors' });
-                            await imgCache.put(imgSrc, imgResp);
-                        } catch (e) {
-                            // Non-critical — image caching is best-effort
-                            console.warn('Failed to cache recipe image', e);
-                        }
                     }
                 }
 
@@ -209,6 +175,40 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId: providedId }) {
         );
     }
 
+    const handleSaveOffline = async () => {
+        CacheManager.saveVisitedRecipe(recipe);
+
+        if ('caches' in window) {
+            try {
+                // 1. Cache the recipe page HTML (aligned with SW's pages-cache)
+                const pageCache = await caches.open('pages-cache');
+                const req = new Request(window.location.pathname);
+                const resp = await fetch(req);
+                if (resp.ok) {
+                    await pageCache.put(req, resp.clone());
+                }
+            } catch (e) {
+                console.error('Failed to cache recipe page', e);
+            }
+
+            // 2. Cache the recipe image for offline use
+            const imgSrc = recipe.imageUrl;
+            if (imgSrc && !imgSrc.includes('placehold.co')) {
+                try {
+                    const imgCache = await caches.open('images');
+                    // cache.add handles the fetch + store atomically
+                    // no-cors allows cross-origin Cloudflare Images CDN
+                    const imgResp = await fetch(imgSrc, { mode: 'no-cors' });
+                    await imgCache.put(imgSrc, imgResp);
+                } catch (e) {
+                    // Non-critical — image caching is best-effort
+                    console.warn('Failed to cache recipe image', e);
+                }
+            }
+        }
+
+        showToast(t.common?.offlineSaved || 'Receta guardada para uso sin conexión', 'success');
+    };
 
     const imageUrl = recipe.imageUrl || 'https://placehold.co/1200x800/f3f4f6/9ca3af?text=Cacomi+Smart';
     const authorName = recipe.authorName || recipe.user?.name || (t.recipe?.chef || 'Chef');

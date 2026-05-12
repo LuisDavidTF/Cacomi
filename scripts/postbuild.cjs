@@ -1,6 +1,12 @@
 /**
- * Postbuild script for Cloudflare Pages SSR deployment (Advanced Mode).
- * Optimized for Astro 6 to maintain relative path integrity.
+ * Postbuild script for Cloudflare Pages SSR deployment.
+ *
+ * Astro 6 generates:
+ *   dist/server/entry.mjs   → needs to be dist/_worker.js
+ *   dist/server/chunks/     → needs to be dist/chunks/
+ *   dist/client/            → contents need to be at dist/ root (Cloudflare ASSETS binding)
+ *
+ * This script flattens the output so Cloudflare Pages finds everything.
  */
 const fs = require('fs');
 const path = require('path');
@@ -18,69 +24,49 @@ function copyDirRecursive(src, dst) {
     }
 }
 
-console.log('🏗  Starting robust postbuild flattening...');
+// --- 1. Move dist/server/entry.mjs → dist/_worker.js ---
+const workerSrc = path.join('dist', 'server', 'entry.mjs');
+const workerDst = path.join('dist', '_worker.js');
+if (fs.existsSync(workerSrc)) {
+    fs.copyFileSync(workerSrc, workerDst);
+    console.log('✅ Copied: dist/server/entry.mjs → dist/_worker.js');
+} else {
+    console.error('❌ ERROR: dist/server/entry.mjs not found!');
+    process.exit(1);
+}
 
-const serverDir = path.join('dist', 'server');
+// --- 2. Move dist/server/chunks/ → dist/chunks/ ---
+const chunksSrc = path.join('dist', 'server', 'chunks');
+const chunksDst = path.join('dist', 'chunks');
+if (fs.existsSync(chunksSrc)) {
+    if (fs.existsSync(chunksDst)) fs.rmSync(chunksDst, { recursive: true, force: true });
+    copyDirRecursive(chunksSrc, chunksDst);
+    console.log('✅ Copied: dist/server/chunks/ → dist/chunks/');
+}
+
+// --- 3. Copy any other .mjs files from dist/server/ → dist/ ---
+try {
+    for (const file of fs.readdirSync(path.join('dist', 'server'))) {
+        if (file.endsWith('.mjs') && file !== 'entry.mjs') {
+            fs.copyFileSync(path.join('dist', 'server', file), path.join('dist', file));
+            console.log(`✅ Copied: dist/server/${file} → dist/${file}`);
+        }
+    }
+} catch(e) { /* ignore */ }
+
+// --- 4. Flatten dist/client/ → dist/ (so ASSETS binding finds static files) ---
 const clientDir = path.join('dist', 'client');
-
-// --- 1. Move everything from dist/server/ to dist/ ---
-// This preserves relative paths between entry point and chunks/middleware
-if (fs.existsSync(serverDir)) {
-    console.log('📦 Moving server files to root...');
-    const files = fs.readdirSync(serverDir);
-    files.forEach(file => {
-        const src = path.join(serverDir, file);
-        const dst = path.join('dist', file);
-        if (fs.lstatSync(src).isDirectory()) {
-            copyDirRecursive(src, dst);
-        } else {
-            fs.copyFileSync(src, dst);
-        }
-    });
-    
-    // Rename entry.mjs to _worker.js as required by Cloudflare Pages
-    const entryPath = path.join('dist', 'entry.mjs');
-    const workerPath = path.join('dist', '_worker.js');
-    if (fs.existsSync(entryPath)) {
-        if (fs.existsSync(workerPath)) fs.unlinkSync(workerPath);
-        fs.renameSync(entryPath, workerPath);
-        console.log('✅ Renamed entry.mjs to _worker.js');
-    }
-}
-
-// --- 2. Move everything from dist/client/ to dist/ ---
 if (fs.existsSync(clientDir)) {
-    console.log('📂 Flattening client assets...');
-    const files = fs.readdirSync(clientDir);
-    files.forEach(file => {
-        const src = path.join(clientDir, file);
-        const dst = path.join('dist', file);
-        if (fs.lstatSync(src).isDirectory()) {
-            copyDirRecursive(src, dst);
-        } else {
-            fs.copyFileSync(src, dst);
-        }
-    });
+    copyDirRecursive(clientDir, 'dist');
+    console.log('✅ Flattened: dist/client/ → dist/');
+} else {
+    console.warn('⚠️  dist/client/ not found, skipping flatten.');
 }
 
-// --- 3. Cleanup conflicting files ---
-const problematicFiles = [
-    'dist/server',
-    'dist/client',
-    'dist/wrangler.json', // Sometimes generated in root or server
-    'dist/server/wrangler.json',
-    '.wrangler/deploy/config.json'
-];
-
-problematicFiles.forEach(f => {
-    try {
-        if (fs.existsSync(f)) {
-            fs.rmSync(f, { recursive: true, force: true });
-            console.log(`🗑  Deleted: ${f}`);
-        }
-    } catch (e) {
-        // ignore
-    }
+// --- 5. Remove conflicting generated config files ---
+['dist/server/wrangler.json', '.wrangler/deploy/config.json'].forEach(f => {
+    try { fs.rmSync(f, { recursive: true }); console.log('🗑  Deleted:', f); }
+    catch(e) { /* file doesn't exist */ }
 });
 
-console.log('🚀 Postbuild complete. Application structure is now optimized for Cloudflare Pages.');
+console.log('🚀 Postbuild complete. dist/_worker.js + static assets ready for Cloudflare Pages.');
