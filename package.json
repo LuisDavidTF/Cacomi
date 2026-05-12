@@ -10,7 +10,6 @@
     "dev": "astro dev -p 5173",
     "dev:astro": "astro dev -p 5173",
     "build": "astro build",
-    "postbuild": "node scripts/postbuild.cjs",
     "build:astro": "astro build",
     "preview": "wrangler pages dev dist",
     "start": "astro dev",

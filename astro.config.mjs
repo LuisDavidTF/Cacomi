@@ -9,7 +9,7 @@ export default defineConfig({
     output: 'server',
     site: 'https://cacomi.app',
     adapter: cloudflare({
-        mode: 'advanced'
+        mode: 'directory'
     }),
     integrations: [
         react(),
