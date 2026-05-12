@@ -114,11 +114,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const isLocal = hostname === 'localhost' || hostname.includes('127.0.0.1');
     const isVercelStaging = hostname.endsWith('.vercel.app') && !hostname.includes('cacomi'); // Vercel previews
     
+    /*
     // If not local and not the production domain, redirect to production
     if (!isLocal && !isVercelStaging && hostname !== 'cacomi.app' && hostname !== 'www.cacomi.app') {
         const canonicalUrl = new URL(context.url.pathname + context.url.search, 'https://cacomi.app');
         return redirect(canonicalUrl.toString(), 301);
     }
+    */
 
     // 7. Proceed and append security headers
     const response = await next();
