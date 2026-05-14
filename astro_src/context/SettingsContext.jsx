@@ -179,18 +179,18 @@ export const translations = {
         },
 
         landing: {
-            heroTitle: 'Planificación de Comidas Inteligente',
-            heroSubtitle: 'Descubre una nueva forma de cocinar con recetas generadas por IA, gestiona tu despensa y organiza tus comidas semanales en un solo lugar. Únete a nuestra comunidad de amantes de la cocina y transforma tu alimentación hoy mismo.',
-            ctaStart: 'Comenzar Gratis',
-            ctaExplore: 'Explorar Recetas',
-            featureTitle: 'Todo lo que necesitas para cocinar mejor',
-            featureSubtitle: 'Cacomi no es solo un recetario, es tu asistente personal de cocina.',
-            evolution: 'La evolución de tu cocina',
-            aiChef: 'IA Chef Integrada',
-            noCommitment: 'Tú tienes el control siempre',
-            pantryAnalysis: 'Análisis de Despensa',
-            ingredientsRecipe: '3 Ingredientes = 12 Recetas*',
-            aiCreativity: '*Los resultados varían según la creatividad de IA.'
+            heroTitle: 'Domina tu Estilo de Vida',
+            heroSubtitle: 'No te conformes con lo ordinario. Toma el control total de tu tiempo y bienestar con la ingeniería gastronómica de Cacomi. Planes inteligentes, comunidad de élite y el futuro de la alimentación personalizada a tu alcance.',
+            ctaStart: 'Acceso Exclusivo',
+            ctaExplore: 'Explorar el Futuro',
+            featureTitle: 'La excelencia en cada detalle',
+            featureSubtitle: 'Cacomi no es una herramienta, es tu ventaja competitiva en la cocina.',
+            evolution: 'El estándar de la cocina moderna',
+            aiChef: 'Ingeniería con IA',
+            noCommitment: 'Tu libertad es nuestra prioridad',
+            pantryAnalysis: 'Optimización de Recursos',
+            ingredientsRecipe: 'Máxima Eficiencia Gastronómica',
+            aiCreativity: '*Sistemas inteligentes diseñando tu éxito diario.'
         },
 
         announcement: {
@@ -209,14 +209,16 @@ export const translations = {
         },
 
         features: {
-            aiTitle: 'Recetas con IA',
-            aiDesc: 'Nuestra inteligencia artificial analiza tus ingredientes disponibles para sugerirte recetas deliciosas y evitar el desperdicio de alimentos.',
-            pantryTitle: 'Gestión de Despensa',
-            pantryDesc: 'Mantén un inventario digital de tu cocina con persistencia local. Recibe alertas de caducidad y sabe siempre qué tienes a mano.',
-            communityTitle: 'Comunidad Activa',
-            communityDesc: 'Comparte tus propias creaciones culinarias y descubre recetas de chefs caseros de todo el mundo.',
-            planningTitle: 'Planificador Interactivo',
-            planningDesc: 'Organiza tus menús semanales con drag-and-drop universal. Sustituye comidas, añade snacks y gestiona todo offline.'
+            aiTitle: 'Ingeniería con IA',
+            aiDesc: 'Nuestra inteligencia artificial no sugiere comidas; diseña el combustible perfecto para tu día a día, adaptado milimétricamente a tus metas y gustos.',
+            pantryTitle: 'Optimización de Despensa',
+            pantryDesc: 'Control absoluto sobre tus recursos. Un inventario digital inteligente que elimina el desperdicio y garantiza que siempre tengas lo mejor a mano.',
+            communityTitle: 'Círculo de Creadores',
+            communityDesc: 'Únete a una comunidad exclusiva de chefs caseros que han dejado atrás lo común para compartir experiencias gastronómicas de autor.',
+            planningTitle: 'Estrategia Semanal',
+            planningDesc: 'La máxima expresión de organización. Gestiona tu semana con un sistema intuitivo que trabaja para ti, incluso sin conexión.',
+            marketplaceTitle: 'Cacomi Private Chef (Próximamente)',
+            marketplaceDesc: 'La libertad definitiva: tus planes personalizados, preparados por chefs certificados y entregados con precisión donde el éxito te encuentre.'
         },
 
         cookie: {
@@ -613,21 +615,31 @@ export const translations = {
             menu: 'Menu',
             accountMenu: 'Account Menu'
         },
-
-
         landing: {
-            heroTitle: 'Smart Meal Planning',
-            heroSubtitle: 'Transform your kitchen with AI-powered recipes, effortless pantry management, and personalized meal planning. Join our community and elevate your cooking experience today.',
-            ctaStart: 'Start for Free',
-            ctaExplore: 'Explore Recipes',
-            featureTitle: 'Everything you need to cook better',
-            featureSubtitle: 'Cacomi is not just a recipe book, it\'s your personal kitchen assistant.',
-            evolution: 'The evolution of your kitchen',
-            aiChef: 'Integrated AI Chef',
-            noCommitment: 'You are always in control',
-            pantryAnalysis: 'Pantry Analysis',
-            ingredientsRecipe: '3 Ingredients = 12 Recipes*',
-            aiCreativity: '*Results vary based on AI creativity.'
+            heroTitle: 'Master Your Lifestyle',
+            heroSubtitle: 'Don\'t settle for the ordinary. Take full control of your time and well-being with Cacomi\'s gastronomic engineering. Smart plans, elite community, and the future of personalized nutrition at your fingertips.',
+            ctaStart: 'Exclusive Access',
+            ctaExplore: 'Explore the Future',
+            featureTitle: 'Excellence in every detail',
+            featureSubtitle: 'Cacomi is not a tool; it\'s your competitive advantage in the kitchen.',
+            evolution: 'The modern kitchen standard',
+            aiChef: 'AI Engineering',
+            noCommitment: 'Your freedom is our priority',
+            pantryAnalysis: 'Resource Optimization',
+            ingredientsRecipe: 'Maximum Gastronomic Efficiency',
+            aiCreativity: '*Intelligent systems designing your daily success.'
+        },
+        features: {
+            aiTitle: 'Precision Engineering',
+            aiDesc: 'Our artificial intelligence doesn\'t just suggest meals; it designs the perfect fuel for your life, precision-tuned to your goals and lifestyle standards.',
+            pantryTitle: 'Asset Optimization',
+            pantryDesc: 'Absolute control over your resources. A high-end digital inventory that eliminates waste and ensures constant excellence.',
+            communityTitle: 'Creators Circle',
+            communityDesc: 'Join an exclusive ecosystem of home chefs who transcend the common to share signature gastronomic experiences.',
+            planningTitle: 'Weekly Strategy',
+            planningDesc: 'The ultimate expression of organization. Master your week with an intuitive system designed to perform at its peak, even offline.',
+            marketplaceTitle: 'Cacomi Private Chef (Coming Soon)',
+            marketplaceDesc: 'Absolute freedom: your personalized plans, designed by certified chefs and executed with the precision your success demands.'
         },
 
         announcement: {
@@ -643,17 +655,6 @@ export const translations = {
             subtitle: 'Your AI kitchen assistant. Plan, cook, and save.',
             cta: 'Get Started',
             learnMore: 'How it works?',
-        },
-
-        features: {
-            aiTitle: 'AI Recipes',
-            aiDesc: 'Our artificial intelligence analyzes your available ingredients to suggest delicious recipes and prevent food waste.',
-            pantryTitle: 'Pantry Management',
-            pantryDesc: 'Keep a digital inventory of your kitchen with local persistence. Get expiration alerts and always know what you have on hand.',
-            communityTitle: 'Active Community',
-            communityDesc: 'Share your own culinary creations and discover recipes from home chefs around the world.',
-            planningTitle: 'Interactive Planner',
-            planningDesc: 'Organize your weekly menus with universal drag-and-drop. Replace meals, add snacks, and manage everything offline.'
         },
 
         cookie: {
@@ -1203,18 +1204,18 @@ export const translations = {
         },
 
         landing: {
-            heroTitle: 'Planification de Repas Intelligente',
-            heroSubtitle: 'Transformez votre cuisine avec des recettes assistées par IA, une gestion simplifiée de votre garde-manger et une planification personnalisée. Rejoignez notre communauté et améliorez votre expérience culinaire dès aujourd\'hui.',
-            ctaStart: 'Commencer Gratuitement',
-            ctaExplore: 'Explorer Recettes',
-            featureTitle: 'Tout ce dont vous avez besoin pour mieux cuisiner',
-            featureSubtitle: 'Cacomi n\'est pas seulement un livre de recettes, c\'est votre assistant de cuisine personnel.',
-            evolution: 'L\'évolution de votre cuisine',
-            aiChef: 'Chef IA Intégré',
-            noCommitment: 'Vous avez toujours le contrôle',
-            pantryAnalysis: 'Analyse du Garde-manger',
-            ingredientsRecipe: '3 Ingrédients = 12 Recettes*',
-            aiCreativity: '*Les résultats varient selon la créativité de l\'IA.'
+            heroTitle: 'Maîtrisez votre Style de Vie',
+            heroSubtitle: 'Ne vous contentez pas de l\'ordinaire. Prenez le contrôle total de votre temps et de votre bien-être avec l\'ingénierie gastronomique de Cacomi. Des plans inteligentes, une communauté d\'élite et le futur de l\'alimentation personnalisée à votre portée.',
+            ctaStart: 'Accès Exclusif',
+            ctaExplore: 'Explorer le Futur',
+            featureTitle: 'L\'excellence dans chaque détail',
+            featureSubtitle: 'Cacomi n\'est pas un outil, c\'est votre avantage compétitif en cuisine.',
+            evolution: 'Le standard de la cuisine moderne',
+            aiChef: 'Ingénierie par IA',
+            noCommitment: 'Votre liberté est notre priorité',
+            pantryAnalysis: 'Optimisation des Ressources',
+            ingredientsRecipe: 'Efficacité Gastronomique Maximale',
+            aiCreativity: '*Des systèmes inteligentes conçoivent votre succès quotidien.'
         },
 
         announcement: {
@@ -1226,14 +1227,16 @@ export const translations = {
         },
 
         features: {
-            aiTitle: 'Recettes IA',
-            aiDesc: 'Notre intelligence artificielle analyse vos ingrédients disponibles pour vous suggérer de délicieuses recettes et éviter le gaspillage alimentaire.',
-            pantryTitle: 'Gestion du Garde-manger',
-            pantryDesc: 'Gardez un inventaire numérique de votre cuisine. Recevez des alertes d\'expiration et sachez toujours ce que vous avez sous la main.',
-            communityTitle: 'Communauté Active',
-            communityDesc: 'Partagez vos propres créations culinaires et découvrez des recettes de chefs amateurs du monde entier.',
-            planningTitle: 'Planification Hebdomadaire',
-            planningDesc: 'Organisez vos menus hebdomadaires facilement et générez des listes de courses automatiques.'
+            aiTitle: 'Ingénierie par IA',
+            aiDesc: 'Notre intelligence artificielle ne suggère pas de repas ; elle conçoit le carburant parfait pour votre quotidien, adapté millimétriquement à vos objectifs et à vos goûts.',
+            pantryTitle: 'Optimisation du Garde-manger',
+            pantryDesc: 'Contrôle absolu sur vos ressources. Un inventaire numérique intelligent qui élimine le gaspillage et garantit que vous avez toujours le meilleur sous la main.',
+            communityTitle: 'Cercle de Créateurs',
+            communityDesc: 'Rejoignez une communauté exclusive de chefs amateurs qui ont laissé derrière eux le commun pour partager des expériences gastronomiques d\'auteur.',
+            planningTitle: 'Stratégie Hebdomadaire',
+            planningDesc: 'L\'expression ultime de l\'organisation. Gérez votre semaine avec un système intuitif qui travaille pour vous, même hors ligne.',
+            marketplaceTitle: 'Cacomi Private Chef (Bientôt)',
+            marketplaceDesc: 'La liberté ultime : vos plans personnalisés, préparés par des chefs certifiés et livrés avec précision là où le succès vous trouve.'
         },
 
         cookie: {
