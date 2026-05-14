@@ -166,10 +166,31 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
 
     if (!recipe) {
         return (
-            <div className="p-10 text-center text-red-500">
-                <p>{t.recipe?.error || 'Receta no encontrada.'}</p>
-                <p className="text-sm mt-2 text-gray-500">{t.recipe?.checkNet || 'Verifica tu conexión a internet.'}</p>
-                <a href="/" className="inline-block mt-4 text-primary hover:underline">&larr; Volver al inicio</a>
+            <div className="p-10 text-center flex flex-col items-center justify-center min-h-[50vh]">
+                <div className="bg-red-50 dark:bg-red-900/20 p-8 rounded-[2rem] border border-red-100 dark:border-red-900/30 max-w-md w-full shadow-xl shadow-red-500/5 animate-in fade-in zoom-in duration-500">
+                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900/40 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <ActivityIcon className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">{t.recipe?.error || 'Receta no encontrada'}</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+                        {t.recipe?.checkNet || 'Verifica tu conexión a internet o intenta recargar la página.'}
+                    </p>
+                    
+                    <div className="flex flex-col gap-3">
+                        <Button 
+                            onClick={() => window.location.reload()}
+                            className="w-full py-6 rounded-2xl font-bold bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 active:scale-95 transition-all"
+                        >
+                            {t.recipe?.retry || 'Reintentar Cargar'}
+                        </Button>
+                        <a 
+                            href="/" 
+                            className="w-full py-3 rounded-2xl border border-gray-200 dark:border-gray-700 font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-center"
+                        >
+                            &larr; Volver al inicio
+                        </a>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -362,26 +383,34 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                     {t.recipe?.nutrition || 'Información Nutricional'}
                                 </h3>
                                 {(recipe.nutrition.totalCalories > 0 || recipe.nutrition.totalProtein > 0) ? (
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex flex-col items-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border border-orange-100 dark:border-orange-800/30">
-                                            <FlameIcon className="w-6 h-6 text-orange-500 mb-2" />
-                                            <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-tighter">{t.recipe?.calories || 'Calorías'}</span>
-                                            <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalCalories?.toFixed(0)}</span>
+                                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                                        <div className="flex flex-col items-center p-3 sm:p-4 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border border-orange-100 dark:border-orange-800/30 transition-transform hover:scale-[1.02]">
+                                            <FlameIcon className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mb-2" />
+                                            <span className="text-[9px] sm:text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-1">{t.recipe?.calories || 'Calorías'}</span>
+                                            <span className="text-base sm:text-lg font-black text-gray-900 dark:text-white tabular-nums">
+                                                {typeof recipe.nutrition.totalCalories === 'number' ? recipe.nutrition.totalCalories.toFixed(0) : '0'}
+                                            </span>
                                         </div>
-                                        <div className="flex flex-col items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800/30">
-                                            <ActivityIcon className="w-6 h-6 text-blue-500 mb-2" />
-                                            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tighter">{t.recipe?.protein || 'Proteína'}</span>
-                                            <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalProtein?.toFixed(1)}g</span>
+                                        <div className="flex flex-col items-center p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800/30 transition-transform hover:scale-[1.02]">
+                                            <ActivityIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500 mb-2" />
+                                            <span className="text-[9px] sm:text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">{t.recipe?.protein || 'Proteína'}</span>
+                                            <span className="text-base sm:text-lg font-black text-gray-900 dark:text-white tabular-nums">
+                                                {typeof recipe.nutrition.totalProtein === 'number' ? recipe.nutrition.totalProtein.toFixed(1) : '0'}g
+                                            </span>
                                         </div>
-                                        <div className="flex flex-col items-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-800/30">
-                                            <WheatIcon className="w-6 h-6 text-amber-500 mb-2" />
-                                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-tighter">{t.recipe?.carbs || 'Carbs'}</span>
-                                            <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalCarbs?.toFixed(1)}g</span>
+                                        <div className="flex flex-col items-center p-3 sm:p-4 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-800/30 transition-transform hover:scale-[1.02]">
+                                            <WheatIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 mb-2" />
+                                            <span className="text-[9px] sm:text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1">{t.recipe?.carbs || 'Carbs'}</span>
+                                            <span className="text-base sm:text-lg font-black text-gray-900 dark:text-white tabular-nums">
+                                                {typeof recipe.nutrition.totalCarbs === 'number' ? recipe.nutrition.totalCarbs.toFixed(1) : '0'}g
+                                            </span>
                                         </div>
-                                        <div className="flex flex-col items-center p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
-                                            <DropletIcon className="w-6 h-6 text-emerald-500 mb-2" />
-                                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">{t.recipe?.fat || 'Grasas'}</span>
-                                            <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">{recipe.nutrition.totalFat?.toFixed(1)}g</span>
+                                        <div className="flex flex-col items-center p-3 sm:p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/30 transition-transform hover:scale-[1.02]">
+                                            <DropletIcon className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 mb-2" />
+                                            <span className="text-[9px] sm:text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">{t.recipe?.fat || 'Grasas'}</span>
+                                            <span className="text-base sm:text-lg font-black text-gray-900 dark:text-white tabular-nums">
+                                                {typeof recipe.nutrition.totalFat === 'number' ? recipe.nutrition.totalFat.toFixed(1) : '0'}g
+                                            </span>
                                         </div>
                                     </div>
                                 ) : (
