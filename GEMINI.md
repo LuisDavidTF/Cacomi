@@ -22,6 +22,7 @@ Use these skills for detailed patterns on-demand:
 | `zustand-5` | State management patterns | [SKILL.md](.agent/skills/zustand-5/SKILL.md) |
 | `ai-sdk-5` | Vercel AI SDK patterns | [SKILL.md](.agent/skills/ai-sdk-5/SKILL.md) |
 | `learning-loop` | Protocol for QA, error verification, and skill evolution | [SKILL.md](.agent/skills/learning-loop/SKILL.md) |
+| `cacomi-daily-content` | Protocol for daily recommended menu updates | [SKILL.md](.agent/skills/cacomi-daily-content/SKILL.md) |
 | `cacomi-ui` | UI components and styling conventions | [SKILL.md](.agent/skills/cacomi-ui/SKILL.md) |
 | `cacomi-test-ui` | Frontend E2E testing patterns | [SKILL.md](.agent/skills/cacomi-test-ui/SKILL.md) |
 | `cacomi-git` | Git, Commits, and PR workflow | [SKILL.md](.agent/skills/cacomi-git/SKILL.md) |
@@ -42,6 +43,7 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | Using Zustand stores | `zustand-5` |
 | Working with Tailwind classes | `tailwind-4` |
 | Writing Playwright E2E tests | `playwright` |
+| Updating Recommended Menu | `cacomi-daily-content` |
 | Writing React components | `react-19` |
 | Writing TypeScript types/interfaces | `typescript` |
 
