@@ -133,7 +133,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Basic CSP (production only)
     const isDev = import.meta.env.DEV;
     if (!isDev) {
-        const csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://pagead2.googlesyndication.com https://www.google-analytics.com https://fonts.googleapis.com https://fonts.gstatic.com https://res.cloudinary.com;";
+        const csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' data: https://pagead2.googlesyndication.com https://www.google-analytics.com https://fonts.googleapis.com https://fonts.gstatic.com https://res.cloudinary.com;";
         response.headers.set('Content-Security-Policy', csp);
     }
 
