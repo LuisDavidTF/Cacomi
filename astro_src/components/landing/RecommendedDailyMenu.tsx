@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@context/SettingsContext';
-import { Sparkles, Plus, ArrowRight, ChevronDown, ChevronUp, Clock, Flame, Beef, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Plus, ArrowRight, ChevronDown, ChevronUp, Clock, Flame, Beef, CheckCircle2, X } from 'lucide-react';
+import { Modal } from '../ui/Modal';
 import { RECOMMENDED_DAILY_MENU } from '@/constants/recommendedMenu';
 import { cn, generateUUIDv7, formatDateToString } from '@/lib/utils';
 import { db } from '@/lib/db';
@@ -115,33 +116,43 @@ export function RecommendedDailyMenu() {
                 {/* Decorative Background */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
                 
-                {/* Success Notification Overlay - Upgraded to Studio Style */}
-                {showSuccess && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-500">
-                        <div className="absolute inset-0 bg-primary/20 backdrop-blur-xl" />
-                        <div className="relative bg-white dark:bg-gray-900 border border-white/20 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] rounded-[2.5rem] p-8 sm:p-12 w-full max-w-lg text-center animate-in zoom-in-95 slide-in-from-bottom-8 duration-700">
-                            <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary flex items-center justify-center mb-6 sm:mb-8 shadow-2xl shadow-primary/40">
-                                <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-white animate-bounce" />
-                            </div>
-                            <h3 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter mb-2 sm:mb-4 bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-                                {t.recommendedMenu?.success || '¡Plan Actualizado!'}
-                            </h3>
-                            <p className="text-sm sm:text-base text-muted-foreground font-medium mb-8 sm:mb-10 max-w-xs mx-auto leading-relaxed">
-                                {language === 'es' 
-                                    ? 'Hemos integrado el menú oficial en tu planeador para el día de hoy.' 
-                                    : 'We have integrated the official menu into your planner for today.'}
-                            </p>
-                            
-                            <button 
-                                onClick={() => window.location.href = '/planner'}
-                                className="w-full py-4 sm:py-5 bg-primary text-white rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-3"
-                            >
-                                {t.recommendedMenu?.viewInPlanner || 'Ir al Planeador'}
-                                <ArrowRight className="w-4 h-4" />
-                            </button>
+                {/* Success Notification Modal */}
+                <Modal 
+                    isOpen={showSuccess} 
+                    onClose={() => setShowSuccess(false)} 
+                    title="" 
+                    maxWidth="max-w-lg" 
+                    noPadding
+                >
+                    <div className="relative bg-white dark:bg-gray-900 p-8 sm:p-12 text-center animate-in zoom-in-95 duration-500">
+                        <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary flex items-center justify-center mb-6 sm:mb-8 shadow-2xl shadow-primary/40">
+                            <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-white animate-bounce" />
                         </div>
+                        <h3 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter mb-2 sm:mb-4 bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
+                            {t.recommendedMenu?.success || '¡Plan Actualizado!'}
+                        </h3>
+                        <p className="text-sm sm:text-base text-muted-foreground font-medium mb-8 sm:mb-10 max-w-xs mx-auto leading-relaxed">
+                            {language === 'es' 
+                                ? 'Hemos integrado el menú oficial en tu planeador para el día de hoy.' 
+                                : 'We have integrated the official menu into your planner for today.'}
+                        </p>
+                        
+                        <button 
+                            onClick={() => window.location.href = '/planner'}
+                            className="w-full py-4 sm:py-5 bg-primary text-white rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-3"
+                        >
+                            {t.recommendedMenu?.viewInPlanner || 'Ir al Planeador'}
+                            <ArrowRight className="w-4 h-4" />
+                        </button>
+
+                        <button
+                            onClick={() => setShowSuccess(false)}
+                            className="mt-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            {language === 'es' ? 'Cerrar' : 'Close'}
+                        </button>
                     </div>
-                )}
+                </Modal>
 
                 {/* Header / Actions */}
                 <div className="p-5 sm:p-8 lg:p-10 flex flex-col lg:flex-row items-center lg:items-center justify-between gap-6 sm:gap-8 relative z-10">

@@ -22,27 +22,39 @@ export function ShareMenuModal({ isOpen, onClose, date, meals, planMetadata, lan
     const isNativeShareSupported = typeof navigator !== 'undefined' && !!navigator.share && !!navigator.canShare;
 
     const generateImage = async (output: 'DOWNLOAD' | 'SHARE') => {
-        const elementId = `share-card-content-${format}`;
+        const elementId = `share-card-capture-${format}`;
         const element = document.getElementById(elementId);
         if (!element) return;
 
         setIsGenerating(true);
+        console.log(`Generating ${format} image for ${output}...`);
         try {
             // High quality settings
             const options = {
-                quality: 1,
-                pixelRatio: 2, // Higher resolution
+                quality: 0.95, // Slightly lower for better compatibility and performance
+                pixelRatio: 1.5, // Reduced from 2 to avoid memory limits while maintaining sharpness
                 cacheBust: true,
                 width: 1080,
                 height: format === 'STORY' ? 1920 : 1080,
+                backgroundColor: '#f7f2ea', // Match the card background
             };
 
             if (output === 'DOWNLOAD') {
                 const dataUrl = await toJpeg(element, options);
+                if (!dataUrl) throw new Error('Failed to generate image data URL');
+                
+                // Convert dataURL to Blob for a more reliable download in Chrome
+                const response = await fetch(dataUrl);
+                const blob = await response.blob();
+                
+                const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.download = `cacomi-menu-${format.toLowerCase()}-${date.toISOString().split('T')[0]}.jpg`;
-                link.href = dataUrl;
+                link.href = url;
                 link.click();
+                
+                // Cleanup
+                setTimeout(() => URL.revokeObjectURL(url), 100);
             } else if (output === 'SHARE' && isNativeShareSupported) {
                 const blob = await toBlob(element, options);
                 if (!blob) return;
@@ -59,6 +71,35 @@ export function ShareMenuModal({ isOpen, onClose, date, meals, planMetadata, lan
             }
         } catch (err) {
             console.error('Error generating image:', err);
+            // Fallback for font errors
+            if (err instanceof Error && err.message.includes('cssRules')) {
+                console.warn('Font rules blocked, trying without fonts...');
+                try {
+                    const fallbackOptions = { 
+                        pixelRatio: 1.5, 
+                        skipFonts: true,
+                        backgroundColor: '#f7f2ea',
+                        width: 1080,
+                        height: format === 'STORY' ? 1920 : 1080,
+                    };
+                    if (output === 'DOWNLOAD') {
+                        const dataUrl = await toJpeg(element, fallbackOptions);
+                        if (!dataUrl) throw new Error('Failed to generate fallback data URL');
+                        
+                        const response = await fetch(dataUrl);
+                        const blob = await response.blob();
+                        
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.download = `cacomi-menu-${format.toLowerCase()}-${date.toISOString().split('T')[0]}.jpg`;
+                        link.href = url;
+                        link.click();
+                        setTimeout(() => URL.revokeObjectURL(url), 100);
+                    }
+                } catch (fallbackErr) {
+                    console.error('Fallback failed:', fallbackErr);
+                }
+            }
         } finally {
             setIsGenerating(false);
         }
@@ -206,9 +247,13 @@ export function ShareMenuModal({ isOpen, onClose, date, meals, planMetadata, lan
                 </div>
             </div>
             {/* Hidden Full Size Render (For html-to-image to target) */}
-            <div className="fixed -left-[4000px] -top-[4000px] pointer-events-none">
-                 <DailyMenuShareCard date={date} meals={meals} planMetadata={planMetadata} language={language} format="POST" />
-                 <DailyMenuShareCard date={date} meals={meals} planMetadata={planMetadata} language={language} format="STORY" />
+            <div 
+                className="absolute opacity-0 pointer-events-none select-none overflow-hidden" 
+                style={{ top: '-10000px', left: '-10000px', width: '1080px', height: '1920px' }}
+                aria-hidden="true"
+            >
+                 <DailyMenuShareCard date={date} meals={meals} planMetadata={planMetadata} language={language} format="POST" isCapture />
+                 <DailyMenuShareCard date={date} meals={meals} planMetadata={planMetadata} language={language} format="STORY" isCapture />
             </div>
         </Modal>
     );

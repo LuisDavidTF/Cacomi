@@ -9,9 +9,10 @@ interface DailyMenuShareCardProps {
     planMetadata?: Omit<PlanResponse, 'meals'> | null;
     language?: string;
     format?: 'POST' | 'STORY';
+    isCapture?: boolean;
 }
 
-export function DailyMenuShareCard({ date, meals, planMetadata, language = 'es', format = 'POST' }: DailyMenuShareCardProps) {
+export function DailyMenuShareCard({ date, meals, planMetadata, language = 'es', format = 'POST', isCapture = false }: DailyMenuShareCardProps) {
     const isStory = format === 'STORY';
     const width = 1080;
     const height = isStory ? 1920 : 1080;
@@ -113,7 +114,7 @@ export function DailyMenuShareCard({ date, meals, planMetadata, language = 'es',
 
     return (
         <div 
-            id={`share-card-content-${format}`}
+            id={isCapture ? `share-card-capture-${format}` : `share-card-preview-${format}`}
             className="bg-[#f7f2ea] flex flex-col relative overflow-hidden font-sans text-[#111b27]"
             style={{ 
                 fontFamily: "'Inter', sans-serif",
@@ -122,13 +123,13 @@ export function DailyMenuShareCard({ date, meals, planMetadata, language = 'es',
                 padding: isStory ? '120px 80px' : '80px 80px'
             }}
         >
-            {/* Texture Overlay */}
-            <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]" />
+            {/* Texture Overlay - Local path to avoid CORS issues */}
+            <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('/images/textures/paper-fibers.png')]" />
 
             {/* Header */}
             <div className={`flex justify-between items-start z-10 ${isStory ? 'mb-10' : 'mb-4'}`}>
                 <div className="flex flex-col">
-                    <img src="/images/brand/logo_transparent.png" alt="Cacomi" className={`${isStory ? 'h-28' : 'h-20'} w-auto mb-2 object-contain self-start -ml-2`} />
+                    <img src="/images/brand/logo_transparent.png" alt="Cacomi" crossOrigin="anonymous" className={`${isStory ? 'h-28' : 'h-20'} w-auto mb-2 object-contain self-start -ml-2`} />
                     <p className="text-[#de7c5d] font-black uppercase tracking-[0.2em] text-sm max-w-[320px] leading-tight">
                         {language === 'es' 
                             ? 'Tu mejor versión empieza en tu plato. Personaliza este menú en Cacomi.' 
@@ -207,7 +208,7 @@ export function DailyMenuShareCard({ date, meals, planMetadata, language = 'es',
                                         "rounded-[32px] overflow-hidden shadow-2xl shadow-[#111b27]/10 border-4 border-white shrink-0 bg-white",
                                         imageSize
                                     )}>
-                                        <img src={meal.imageUrl || '/placeholder.jpg'} alt={meal.recipeName} className="w-full h-full object-cover" />
+                                        <img src={meal.imageUrl || '/placeholder.jpg'} alt={meal.recipeName} crossOrigin="anonymous" className="w-full h-full object-cover" />
                                     </div>
                                     
                                     {/* Portion Multiplier Badge - Overlay */}
@@ -218,7 +219,10 @@ export function DailyMenuShareCard({ date, meals, planMetadata, language = 'es',
                                     )}
 
                                     {/* Time Badge - Overlay Bottom */}
-                                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-1 bg-black/60 backdrop-blur-md text-white rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/10">
+                                    <div className={cn(
+                                        "absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-1 bg-black/60 text-white rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/10",
+                                        !isCapture && "backdrop-blur-md"
+                                    )}>
                                         <Clock className="w-3 h-3" />
                                         {meal.displayTime}
                                     </div>
