@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Star, Utensils, Info, ExternalLink, Sparkles, Beef, Coins, Package, Flame, Plus, Minus } from 'lucide-react';
+import { X, Star, Utensils, Info, ExternalLink, Sparkles, Beef, Coins, Package, Flame, Plus, Minus, Droplets, CircleDashed } from 'lucide-react';
 import { useSettings } from '@context/SettingsContext';
 import { RecipeScaleOverlay } from './RecipeScaleOverlay';
 
@@ -39,6 +39,8 @@ export function MealTrackingModal({ isOpen, onClose, mealData, onSave }: MealTra
     const [localMultiplier, setLocalMultiplier] = useState(1.0);
     const [displayCalories, setDisplayCalories] = useState(0);
     const [displayProtein, setDisplayProtein] = useState(0);
+    const [displayCarbs, setDisplayCarbs] = useState(0);
+    const [displayFat, setDisplayFat] = useState(0);
     const [displayCost, setDisplayCost] = useState(0);
 
     useEffect(() => {
@@ -64,6 +66,8 @@ export function MealTrackingModal({ isOpen, onClose, mealData, onSave }: MealTra
             setLocalMultiplier(mealData.portionMultiplier || 1.0);
             setDisplayCalories(mealData.calories || 0);
             setDisplayProtein(mealData.proteinGrams || 0);
+            setDisplayCarbs(mealData.carbsGrams || 0);
+            setDisplayFat(mealData.fatGrams || 0);
             setDisplayCost(mealData.estimatedCost || 0);
         }
     }, [mealData]);
@@ -88,10 +92,14 @@ export function MealTrackingModal({ isOpen, onClose, mealData, onSave }: MealTra
             const originalMult = mealData.portionMultiplier || 1.0;
             const baseCals = (mealData.calories || 0) / originalMult;
             const baseProt = (mealData.proteinGrams || 0) / originalMult;
+            const baseCarbs = (mealData.carbsGrams || 0) / originalMult;
+            const baseFat = (mealData.fatGrams || 0) / originalMult;
             const baseCost = (mealData.estimatedCost || 0) / originalMult;
 
             setDisplayCalories(baseCals * localMultiplier);
             setDisplayProtein(baseProt * localMultiplier);
+            setDisplayCarbs(baseCarbs * localMultiplier);
+            setDisplayFat(baseFat * localMultiplier);
             setDisplayCost(baseCost * localMultiplier);
         }
     }, [localMultiplier, mealData, isOpen]);
@@ -114,6 +122,8 @@ export function MealTrackingModal({ isOpen, onClose, mealData, onSave }: MealTra
                 portionMultiplier: localMultiplier,
                 calories: displayCalories,
                 proteinGrams: displayProtein,
+                carbsGrams: displayCarbs,
+                fatGrams: displayFat,
                 estimatedCost: displayCost
             });
             onClose();
@@ -177,36 +187,54 @@ export function MealTrackingModal({ isOpen, onClose, mealData, onSave }: MealTra
                                 <h2 className={`font-black text-white leading-[1.1] mb-6 drop-shadow-2xl tracking-tighter transition-all duration-500 line-clamp-3 ${isViewingRecipe ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl md:text-5xl'}`}>
                                     {mealData.recipeName}
                                 </h2>
-                                
-                                {(displayCalories > 0 || displayProtein > 0) ? (
-                                    <div className={`grid grid-cols-3 gap-2 sm:gap-4 mb-8 py-4 px-4 bg-black/30 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl transition-all duration-500 ${isViewingRecipe ? 'scale-90 origin-left' : ''}`}>
+                                                                 {(displayCalories > 0 || displayProtein > 0) ? (
+                                    <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 py-5 px-6 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[32px] shadow-2xl transition-all duration-500 ${isViewingRecipe ? 'scale-90 origin-left' : ''}`}>
                                         <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0">
-                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/50 tracking-widest mb-1 truncate w-full">
-                                                {trackingTexts?.stats?.energy || 'Energía'}
+                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/40 tracking-[0.2em] mb-1.5 truncate w-full">
+                                                {trackingTexts?.stats?.energy || 'Calorías'}
                                             </span>
-                                            <div className="flex items-center gap-1.5 text-white font-black text-sm sm:text-base truncate w-full">
-                                                <Flame className="w-3.5 h-3.5 sm:w-4 h-4 text-orange-400 shrink-0" />
-                                                <span>{displayCalories?.toFixed(0)}</span> <span className="text-[9px] font-medium opacity-60">KCAL</span>
+                                            <div className="flex items-center gap-2 text-white font-black text-base sm:text-lg truncate w-full">
+                                                <Flame className="w-4 h-4 text-orange-400 shrink-0" />
+                                                <span>{displayCalories?.toFixed(0)}</span>
                                             </div>
                                         </div>
                                         
-                                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4 min-w-0">
-                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/50 tracking-widest mb-1 truncate w-full">
+                                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0">
+                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/40 tracking-[0.2em] mb-1.5 truncate w-full">
                                                 {trackingTexts?.stats?.protein || 'Proteína'}
                                             </span>
-                                            <div className="flex items-center gap-1.5 text-white font-black text-sm sm:text-base truncate w-full">
-                                                <Beef className="w-3.5 h-3.5 sm:w-4 h-4 text-blue-400 shrink-0" />
-                                                <span>{displayProtein?.toFixed(0)}</span><span className="text-[9px] font-medium opacity-60">G</span>
+                                            <div className="flex items-center gap-2 text-white font-black text-base sm:text-lg truncate w-full">
+                                                <Beef className="w-4 h-4 text-blue-400 shrink-0" />
+                                                <span>{displayProtein?.toFixed(0)}</span><span className="text-[10px] font-medium opacity-40">g</span>
                                             </div>
                                         </div>
                                         
-                                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4 min-w-0">
-                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/50 tracking-widest mb-1 truncate w-full">
-                                                {trackingTexts?.stats?.cost || 'Costo'}
+                                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0">
+                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/40 tracking-[0.2em] mb-1.5 truncate w-full">
+                                                Carbohidratos
                                             </span>
-                                            <div className="flex items-center gap-1.5 text-white font-black text-sm sm:text-base truncate w-full">
-                                                <Coins className="w-3.5 h-3.5 sm:w-4 h-4 text-emerald-400 shrink-0" />
-                                                <span className="text-[9px] font-medium opacity-60">$</span><span>{displayCost?.toFixed(2)}</span>
+                                            <div className="flex items-center gap-2 text-white font-black text-base sm:text-lg truncate w-full">
+                                                <CircleDashed className="w-4 h-4 text-yellow-400 shrink-0" />
+                                                <span>{displayCarbs?.toFixed(0)}</span><span className="text-[10px] font-medium opacity-40">g</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0">
+                                            <span className="text-[9px] sm:text-[10px] uppercase font-black text-white/40 tracking-[0.2em] mb-1.5 truncate w-full">
+                                                Grasas
+                                            </span>
+                                            <div className="flex items-center gap-2 text-white font-black text-base sm:text-lg truncate w-full">
+                                                <Droplets className="w-4 h-4 text-emerald-400 shrink-0" />
+                                                <span>{displayFat?.toFixed(0)}</span><span className="text-[10px] font-medium opacity-40">g</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Cost Badge - Moved to a subtle floating position or secondary row */}
+                                        <div className="col-span-2 sm:col-span-4 pt-4 mt-2 border-t border-white/5 flex items-center justify-between">
+                                            <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">{trackingTexts?.stats?.cost || 'Costo Estimado'}</span>
+                                            <div className="flex items-center gap-1.5 text-white/80 font-bold text-xs">
+                                                <Coins className="w-3.5 h-3.5 text-emerald-400" />
+                                                <span>${displayCost?.toFixed(2)}</span>
                                             </div>
                                         </div>
                                     </div>

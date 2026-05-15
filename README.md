@@ -1,6 +1,9 @@
 # 🍽️ Cacomi — Planificador de comidas
 
-Cacomi es una aplicación web moderna e inteligente para planificar comidas, gestionar tu despensa y generar recetas con IA. Construida con tecnologías de punta y optimizada para ofrecer una experiencia premium en escritorio y móvil con soporte offline avanzado.
+Cacomi es una aplicación web moderna e inteligente para planificar comidas, gestionar tu despensa y generar recetas con IA. Nuestra misión es simplificar la alimentación saludable mediante tecnología de punta, facilitando el descubrimiento de recetas comunitarias y la organización semanal.
+
+> [!NOTE]
+> **Visión de Futuro**: Estamos evolucionando para convertirnos en un ecosistema completo de bienestar. Próximamente, los planes de comida personalizados podrán ser preparados por chefs certificados y entregados directamente a tu puerta.
 
 > [!NOTE]
 > **Lanzamiento Oficial**: La plataforma ha completado su fase beta inicial. Explora, planifica y cocina con la potencia de Google Gemini.
@@ -9,11 +12,12 @@ Cacomi es una aplicación web moderna e inteligente para planificar comidas, ges
 
 - **🤖 IA Generativa de Recetas** — Genera recetas personalizadas usando Google Gemini (vía API propia en Koyeb).
 - **📦 Gestión de Despensa (Pantry)** — Agrega, edita y elimina ingredientes con sincronización en tiempo real.
-- **📋 CRUD de Recetas** — Crea, edita, consulta y elimina tus recetas favoritas.
-- **🔐 Autenticación** — Registro e inicio de sesión seguros con sesiones basadas en cookies JWT (httpOnly) y autorización basada en roles (`ROLE_ADMIN`).
+- **📋 CRUD de Recetas** — Crea, edita, consulta y elimina tus recetas favoritas en una comunidad vibrante.
+- **🔐 Autenticación** — Registro e inicio de sesión seguros con sesiones basadas en cookies JWT (httpOnly), incluyendo soporte para Google OAuth.
 - **🛡️ Panel de Admin (Stealth Mode + Manual Training)** — Gestión administrativa oculta tras una ruta secreta. Incluye sistema auditado para entrenar la IA, revisar logs y moderar usuarios.
 - **📅 Planificador Universal Interactivo** — Organiza tus menús semanales con drag-and-drop optimizado para móviles/tablets (Pointer Events) y persistencia offline completa vía IndexedDB.
-- **🛒 Lista de Compras Inteligente** — Generación automática de listas de compras consolidadas semánticamente (ej. unifica variantes de aceites o especias) con flujo de compra integrado hacia la alacena.
+- **🛒 Lista de Compras Inteligente** — Generación automática de listas de compras consolidadas semánticamente con flujo de compra integrado hacia la alacena.
+- **🏠 Marketplace (Próximamente)** — Conexión directa con chefs para la preparación y entrega de menús personalizados.
 - **📱 PWA** — Instalable en móvil y escritorio. Soporte offline con Service Worker y sincronización local.
 - **🌙 Modo Oscuro** — Tema claro/oscuro con persistencia de preferencia.
 - **⚡ SSR + Edge Ready** — Renderizado en servidor con Astro 6.

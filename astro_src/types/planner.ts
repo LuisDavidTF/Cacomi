@@ -19,6 +19,8 @@ export interface Meal {
     isSynced?: number; // 0 or 1
 
     proteinGrams: number;
+    carbsGrams: number;
+    fatGrams: number;
     calories: number;
     estimatedCost: number;
     pantryUsage: number;

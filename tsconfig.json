@@ -46,6 +46,9 @@
       ],
       "@layouts/*": [
         "astro_src/layouts/*"
+      ],
+      "@store/*": [
+        "astro_src/store/*"
       ]
     }
   },

@@ -42,12 +42,15 @@ try {
 } catch (error) {
   console.error("Error fetching initial recipes:", error);
 }
+import { RecommendedDailyMenu } from '@components/landing/RecommendedDailyMenu';
 ---
 
 <Layout>
   {!isAuthenticated && (
     <CompactWelcome client:load />
   )}
+
+  <RecommendedDailyMenu client:load />
 
   <div id="latest-recipes" class={isAuthenticated ? "mt-0" : "mt-0"}>
     { !isAuthenticated && (

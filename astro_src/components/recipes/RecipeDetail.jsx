@@ -247,7 +247,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                 // Otherwise letting the <a> tag handle it goes cleanly to href="/"
                             }
                         }}
-                        className="inline-flex items-center bg-black/40 hover:bg-black/60 backdrop-blur-lg text-white border border-white/20 px-3 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 shadow-xl group"
+                        className="inline-flex items-center bg-black/40 hover:bg-black/60 backdrop-blur-lg [transform:translateZ(0)] text-white border border-white/20 px-3 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 shadow-xl group"
                     >
                         <ChevronLeftIcon className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                         {t.common?.back || 'Volver'}
@@ -255,7 +255,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                 </div>
 
                 {/* Hero Header with Image and Overlay Information */}
-                <div className="relative w-full h-[380px] sm:h-[450px] lg:h-[500px] bg-gray-100 overflow-hidden">
+                <div className="relative w-full h-[380px] sm:h-[450px] lg:h-[500px] bg-gray-100 overflow-hidden isolation-isolate">
                     <SmartImage
                         src={imageUrl}
                         alt={recipe.name}
@@ -277,16 +277,16 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                             </h1>
 
                             <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm font-medium">
-                                <span className="flex items-center bg-white/20 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10 shadow-sm">
+                                <span className="flex items-center bg-white/20 backdrop-blur-md [transform:translateZ(0)] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10 shadow-sm">
                                     <ClockIcon className="w-4 h-4 mr-2 text-emerald-400" />
                                     {prepTime} {t.recipe?.time || 'min'}
                                 </span>
-                                <span className="flex items-center bg-white/20 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10 shadow-sm">
+                                <span className="flex items-center bg-white/20 backdrop-blur-md [transform:translateZ(0)] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10 shadow-sm">
                                     <UserIcon className="w-4 h-4 mr-2 text-blue-400" />
                                     {authorName}
                                 </span>
                                 {createdAt && (
-                                    <span className="flex items-center bg-white/20 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10 shadow-sm">
+                                    <span className="flex items-center bg-white/20 backdrop-blur-md [transform:translateZ(0)] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10 shadow-sm">
                                         <CalendarIcon className="w-4 h-4 mr-2 text-purple-400" />
                                         {createdAt}
                                     </span>
@@ -299,7 +299,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                     variant="secondary"
                                     onClick={toggleDownload}
                                     disabled={isDownloading}
-                                    className={`border-0 backdrop-blur-md font-medium shadow-sm transition-all ${isDownloaded ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-white/20 hover:bg-white/30 text-white'}`}
+                                    className={`border-0 backdrop-blur-md [transform:translateZ(0)] font-medium shadow-sm transition-all ${isDownloaded ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-white/20 hover:bg-white/30 text-white'}`}
                                 >
                                     {isDownloading ? (
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -316,7 +316,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                 <Button
                                     variant="secondary"
                                     onClick={() => setShowShare(true)}
-                                    className="border-0 bg-primary/20 backdrop-blur-md hover:bg-primary/40 text-white font-medium shadow-sm transition-all"
+                                    className="border-0 bg-primary/20 backdrop-blur-md [transform:translateZ(0)] hover:bg-primary/40 text-white font-medium shadow-sm transition-all"
                                 >
                                     <ShareIcon className="w-4 h-4 mr-2" />
                                     {t.share?.shareGeneric || 'Compartir'}
@@ -490,7 +490,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
 
                     <div className="relative z-10 w-full grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8 items-center">
                         <div className="text-center md:text-left space-y-3">
-                            <span className="inline-block bg-white/20 backdrop-blur-md px-4 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
+                            <span className="inline-block bg-white/20 backdrop-blur-md [transform:translateZ(0)] px-4 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
                                 {t.recipe?.adSponsor || 'Patrocinado'}
                             </span>
                             <h3 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
@@ -502,7 +502,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                         </div>
                         
                         {/* Google AdSense Slot */}
-                        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10 flex items-center justify-center min-h-[150px]">
+                        <div className="bg-white/5 backdrop-blur-sm [transform:translateZ(0)] rounded-2xl p-4 border border-white/10 flex items-center justify-center min-h-[150px]">
                             <ins
                                 className="adsbygoogle block"
                                 style={{ display: "block", width: "100%", height: "100%", minWidth: "250px", minHeight: "100px" }}

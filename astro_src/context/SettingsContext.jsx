@@ -22,7 +22,7 @@ export const translations = {
             desc: 'Conoce la misión, los valores y el futuro de Cacomi, tu asistente de cocina con Inteligencia Artificial.',
             missionTag: 'Nuestra Misión',
             missionTitle: 'Conectando tu despensa con el futuro de la cocina.',
-            missionDesc: 'Cacomi nació de una necesidad simple: comer bien no debería costar tanto tiempo ni dinero. Usamos tecnología de punta para transformar tus ingredientes en la mejor comida de tu día.',
+            missionDesc: 'Cacomi nació de una necesidad simple: comer bien no debería costar tanto tiempo ni dinero. Usamos tecnología de punta para transformar tus ingredientes en la mejor comida de tu día, con la visión de conectar tus planes con chefs que cocinen por ti.',
             pillarsTitle: 'Nuestros Pilares',
             pillarsSubtitle: 'Cada línea de código que escribimos está fundamentada en principios creados para mejorar tu vida diaria.',
             pillar1Title: 'Sostenibilidad',
@@ -267,6 +267,15 @@ export const translations = {
             back: 'Volver',
             offlineMode: 'Modo Offline: Mostrando recetas guardadas.',
             offlineSaved: 'Receta guardada para uso sin conexión'
+        },
+        recommendedMenu: {
+            title: 'Menú Recomendado',
+            subtitle: 'El menú que compartimos hoy en nuestras redes. ¡Pruébalo!',
+            addToPlan: 'Añadir a mi plan',
+            viewInPlanner: 'Ver en el planeador',
+            showMenu: 'Ver Menú Recomendado',
+            hideMenu: 'Ocultar Menú',
+            success: '¡Menú añadido con éxito! Ya puedes verlo en tu planeador.',
         },
 
         auth: {
@@ -570,7 +579,7 @@ export const translations = {
             desc: 'Learn about the mission, values, and future of Cacomi, your AI-powered kitchen assistant.',
             missionTag: 'Our Mission',
             missionTitle: 'Connecting your pantry with the future of cooking.',
-            missionDesc: 'Cacomi was born from a simple need: eating well shouldn\'t cost so much time and money. We use cutting-edge tech to turn your ingredients into the best meal of your day.',
+            missionDesc: 'Cacomi was born from a simple need: eating well shouldn\'t cost so much time and money. We use cutting-edge tech to turn your ingredients into the best meal of your day, with the vision of connecting your plans with chefs who cook for you.',
             pillarsTitle: 'Our Pillars',
             pillarsSubtitle: 'Every line of code we write is grounded in principles designed to improve your daily life.',
             pillar1Title: 'Sustainability',
@@ -704,6 +713,15 @@ export const translations = {
             back: 'Back',
             offlineMode: 'Offline Mode: Showing saved recipes.',
             offlineSaved: 'Recipe saved for offline use'
+        },
+        recommendedMenu: {
+            title: 'Recommended Menu',
+            subtitle: 'The menu we shared today on our socials. Try it out!',
+            addToPlan: 'Add to my plan',
+            viewInPlanner: 'View in planner',
+            showMenu: 'Show Recommended Menu',
+            hideMenu: 'Hide Menu',
+            success: 'Menu added successfully! You can now see it in your planner.',
         },
 
         planner: {

@@ -5,10 +5,45 @@ import { useAuth } from '@context/AuthContext';
 import { useSettings } from '@context/SettingsContext';
 import { ClockIcon, EditIcon, TrashIcon, UserIcon, FlameIcon, ActivityIcon, ShareIcon } from '@components/ui/Icons';
 import { ShareModal } from '@components/ui/ShareModal';
+import { Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useRecommendedMenuStore } from '@store/useRecommendedMenuStore';
 
 export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const { user } = useAuth();
   const { t, language } = useSettings();
+  const { addMeal, selection } = useRecommendedMenuStore();
+  
+  const isAdmin = user?.role === 'ADMIN';
+  const isSelected = selection.some(m => m.recipeUUID === (recipe.publicId || recipe.id));
+
+  const handleAddToRecommended = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const uuid = recipe.publicId || recipe.id;
+      const isAlreadySelected = selection.some(m => m.recipeUUID === uuid);
+
+      if (isAlreadySelected) {
+          useRecommendedMenuStore.getState().removeMeal(uuid);
+          return;
+      }
+
+      addMeal({
+          recipeUUID: uuid,
+          recipeName: recipe.name,
+          imageUrl: recipe.imageUrl || 'https://placehold.co/600x400/f3f4f6/9ca3af',
+          calories: Math.round(recipe.calories || recipe.nutrition?.totalCalories || 0),
+          proteinGrams: Math.round(recipe.protein || recipe.nutrition?.totalProtein || 0),
+          carbsGrams: Math.round(recipe.carbs || recipe.nutrition?.totalCarbohydrates || 0),
+          fatGrams: Math.round(recipe.fat || recipe.nutrition?.totalFat || 0),
+          mealType: 'LUNCH',
+          portionMultiplier: 1,
+          selectionLogicCode: 'PROTEIN_FILL',
+          aiReasoning: 'Este plato es ideal para mantener tu energía hoy.',
+          estimatedCost: recipe.estimatedCost || 0
+      });
+  };
   // Safe accessor for user ID comparison - Robust against String/Int mismatches and undefined
   // FALLBACK: Name comparison (requested by user due to missing API IDs)
   // Normalized to handle "Luis" vs "luis" and potential missing fields
@@ -75,8 +110,26 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
             </div>
           )}
 
-          <div className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className={cn(
+            "absolute top-3 left-3 z-10 transition-opacity duration-300",
+            isAdmin ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+          )}>
             <div className="flex gap-2">
+                {isAdmin && (
+                  <button 
+                      onClick={handleAddToRecommended} 
+                      className={cn(
+                        "p-2 rounded-full transition-all shadow-sm",
+                        isSelected 
+                          ? "bg-primary text-white scale-110" 
+                          : "bg-white/90 text-primary hover:bg-primary hover:text-primary-foreground"
+                      )}
+                      title="Añadir al Menú Recomendado"
+                  >
+                      <Sparkles className={cn("w-4 h-4", isSelected && "animate-pulse")} />
+                  </button>
+                )}
+
                 <button 
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowShare(true); }} 
                     className="bg-white/90 p-2 rounded-full text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"

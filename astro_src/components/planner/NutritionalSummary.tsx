@@ -1,11 +1,13 @@
 import React from 'react';
 import { useSettings } from '@context/SettingsContext';
-import { Zap, Flame } from 'lucide-react';
+import { Zap, Flame, CircleDashed, Droplets } from 'lucide-react';
 
 interface NutritionalSummaryProps {
     isHorizontal?: boolean;
     targetCalories?: number;
     targetProtein?: number;
+    targetCarbs?: number;
+    targetFat?: number;
     meals?: any[];
 }
 
@@ -13,6 +15,8 @@ export function NutritionalSummary({
     isHorizontal = false, 
     targetCalories = 2000, 
     targetProtein = 120, 
+    targetCarbs = 250,
+    targetFat = 70,
     meals = [] 
 }: NutritionalSummaryProps) {
     const { t } = useSettings();
@@ -23,10 +27,14 @@ export function NutritionalSummary({
 
     const totalCalories = meals.reduce((sum, m) => sum + (m.calories || 0), 0);
     const totalProtein = meals.reduce((sum, m) => sum + (m.proteinGrams || 0), 0);
+    const totalCarbs = meals.reduce((sum, m) => sum + (m.carbsGrams || 0), 0);
+    const totalFat = meals.reduce((sum, m) => sum + (m.fatGrams || 0), 0);
     
     // Average based on planned days (more intuitive for partial weeks)
     const avgCalories = Math.round(totalCalories / daysToDivide);
     const avgProtein = Math.round(totalProtein / daysToDivide);
+    const avgCarbs = Math.round(totalCarbs / daysToDivide);
+    const avgFat = Math.round(totalFat / daysToDivide);
 
     const proteinPercentage = Math.min(Math.round((avgProtein / targetProtein) * 100), 100);
 
@@ -70,6 +78,42 @@ export function NutritionalSummary({
                             {avgCalories.toLocaleString()}<span className="text-[10px] font-medium text-muted-foreground/50 ml-0.5">kcal</span>
                         </span>
 
+                    </div>
+                </div>
+
+                {/* Carbs */}
+                <div className="flex items-center gap-2.5 px-4 py-3
+                                bg-background border border-border/50 rounded-2xl
+                                shadow-sm hover:shadow-md transition-shadow
+                                shrink-0 min-w-[110px]">
+                    <div className="w-7 h-7 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-600 shrink-0">
+                        <CircleDashed className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                            Carbs
+                        </span>
+                        <span className="text-sm font-bold text-foreground tabular-nums leading-tight">
+                            {avgCarbs}g
+                        </span>
+                    </div>
+                </div>
+
+                {/* Fats */}
+                <div className="flex items-center gap-2.5 px-4 py-3
+                                bg-background border border-border/50 rounded-2xl
+                                shadow-sm hover:shadow-md transition-shadow
+                                shrink-0 min-w-[110px]">
+                    <div className="w-7 h-7 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
+                        <Droplets className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                            Fats
+                        </span>
+                        <span className="text-sm font-bold text-foreground tabular-nums leading-tight">
+                            {avgFat}g
+                        </span>
                     </div>
                 </div>
             </div>
@@ -124,7 +168,24 @@ export function NutritionalSummary({
                         <span className="text-xl font-bold text-foreground tabular-nums">{avgCalories.toLocaleString()}</span>
                     </div>
                     <p className="text-[10px] text-muted-foreground/40 text-right">Budget {targetCalories.toLocaleString()} kcal</p>
+                </div>
 
+                {/* Macros Breakdown (Carbs/Fat) */}
+                <div className="pt-6 border-t border-border/30 grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                        <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">Carbs</span>
+                        <div className="flex items-center gap-2 text-foreground font-bold">
+                            <CircleDashed className="w-3 h-3 text-yellow-500" />
+                            <span>{avgCarbs}g</span>
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">Fats</span>
+                        <div className="flex items-center gap-2 text-foreground font-bold">
+                            <Droplets className="w-3 h-3 text-emerald-500" />
+                            <span>{avgFat}g</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

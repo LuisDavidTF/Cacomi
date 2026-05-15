@@ -162,3 +162,19 @@ if (response.ok) {
 > **AVOID** gating the Dexie update exclusively on `data.items && Array.isArray(data.items)` after a successful POST.
 > **BECAUSE** some backend implementations return `{ success: true }` or similar without the full item list. If `data.items` is missing, Dexie items remain with `isSynced: 0`, and the next call to `updateStatusState()` will find pending changes and set the status back to `'pending'` — making it appear the sync never happened.
 > **CORRECT APPROACH**: On any `response.ok`, always guarantee that the items involved in that sync are marked as resolved in Dexie, either by replacing from `data.items` (if present) or by manually updating each item's `isSynced` flag.
+
+---
+
+## 7. Deployment & Cache Invalidation (Mandatory)
+
+To ensure users always receive the latest stable code without manually clearing their browser cache (which can lead to mismatched client-side JS and server-side Astro payloads):
+
+**CRITICAL RULE:** On every deployment that includes code changes, you MUST increment the `CURRENT_VERSION` constant in `src/layouts/Layout.astro` (e.g., from `cacomi-pwa-v4` to `cacomi-pwa-v5`).
+
+This triggers an automatic cleanup of:
+1. **Service Workers:** Unregisters all old workers to allow the new version to take control.
+2. **Cache Storage:** Deletes all named caches (images, pages, etc.) to force fresh fetching.
+3. **PWA Shell:** Ensures the user doesn't get stuck with an old offline shell.
+
+> [!IMPORTANT]
+> Failure to increment this version on deployment may result in "ghost bugs" where users see old UI components or encounter hydration errors due to cached assets.

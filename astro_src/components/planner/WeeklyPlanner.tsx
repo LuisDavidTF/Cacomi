@@ -32,6 +32,7 @@ import { ShoppingListModal } from './ShoppingListModal';
 import { NativeAdCard } from '../ads/NativeAdCard';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { ShareMenuModal } from './ShareMenuModal';
 import type { PlanResponse, Meal, GroupedMeals } from '@/types/planner';
 import { db, type LocalPlannedMeal } from '@/lib/db';
 import { generateUUIDv7, formatDateToString } from '@/lib/utils';
@@ -236,6 +237,7 @@ export function WeeklyPlanner() {
     } | null>(null);
 
     const [isShoppingListOpen, setIsShoppingListOpen] = useState(false);
+    const [shareDayData, setShareDayData] = useState<{ date: Date, meals: Meal[] } | null>(null);
 
     const mealsForNextWeek = React.useMemo(() => {
         if (!planData?.meals) return [];
@@ -458,6 +460,8 @@ export function WeeklyPlanner() {
 
         try {
             const protein = recipe.proteinGrams ?? recipe.protein ?? 0;
+            const carbs = recipe.carbsGrams ?? recipe.carbohydrates ?? recipe.carbs ?? 0;
+            const fat = recipe.fatGrams ?? recipe.fat ?? 0;
             const calories = recipe.calories ?? recipe.kcal ?? 0;
             const cost = recipe.estimatedCost ?? recipe.cost ?? 0;
 
@@ -468,6 +472,8 @@ export function WeeklyPlanner() {
                     recipeName: recipe.name,
                     imageUrl: recipe.imageUrl,
                     proteinGrams: protein,
+                    carbsGrams: carbs,
+                    fatGrams: fat,
                     calories: calories,
                     estimatedCost: cost,
                     isSynced: 0,
@@ -485,6 +491,8 @@ export function WeeklyPlanner() {
                     mealType: targetType.toUpperCase() as any,
                     portionMultiplier: 1.0,
                     proteinGrams: protein,
+                    carbsGrams: carbs,
+                    fatGrams: fat,
                     calories: calories,
                     estimatedCost: cost,
                     pantryUsage: 0,
@@ -2172,6 +2180,10 @@ export function WeeklyPlanner() {
                                     onPointerDown={handlePointerDown}
                                     pendingMealSlot={pendingMealSlot}
                                     viewMode={viewMode}
+                                    onShare={() => setShareDayData({ 
+                                        date: date, 
+                                        meals: groupedMeals[formatDateToString(date)] || [] 
+                                    })}
                                 />
                             ))}
                             </div>
@@ -2204,6 +2216,10 @@ export function WeeklyPlanner() {
                                         onPinMeal={handleTogglePinMeal}
                                         pendingMealSlot={pendingMealSlot}
                                         viewMode={viewMode}
+                                        onShare={() => setShareDayData({ 
+                                            date: activeDate, 
+                                            meals: groupedMeals[formatDateToString(activeDate)] || [] 
+                                        })}
                                     />
                                 );
                             })()}
@@ -2342,7 +2358,16 @@ export function WeeklyPlanner() {
             <ShoppingListModal
                 isOpen={isShoppingListOpen}
                 onClose={() => setIsShoppingListOpen(false)}
-                meals={planData?.meals || []}
+                meals={mealsForNextWeek}
+            />
+
+            <ShareMenuModal
+                isOpen={!!shareDayData}
+                onClose={() => setShareDayData(null)}
+                date={shareDayData?.date || new Date()}
+                meals={shareDayData?.meals || []}
+                planMetadata={planData}
+                language={language}
             />
         </div>
     );

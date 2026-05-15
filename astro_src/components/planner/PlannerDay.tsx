@@ -2,7 +2,7 @@ import React from 'react';
 import { formatDateToString } from '@/lib/utils';
 import { useSettings } from '@context/SettingsContext';
 import { PlannerSlot } from './PlannerSlot';
-import { Plus } from 'lucide-react';
+import { Plus, Share2 } from 'lucide-react';
 
 interface PlannerDayProps {
     date: Date;
@@ -17,6 +17,7 @@ interface PlannerDayProps {
     onPointerDown?: (e: React.PointerEvent, recipe: any, mealId?: string) => void;
     viewMode?: 'WEEK' | 'DAY';
     id?: string;
+    onShare?: () => void;
 }
 
 
@@ -72,9 +73,9 @@ function SnackDivider({ isEditable, onClick, viewMode, vertical }: { isEditable:
     );
 }
 
-export function PlannerDay({ date, meals, isEditable = true, onMealClick, onAddMeal, onDropRecipe, onDeleteMeal, onPinMeal, onPointerDown, pendingMealSlot, viewMode = 'WEEK', id }: PlannerDayProps) {
+export function PlannerDay({ date, meals, isEditable = true, onMealClick, onAddMeal, onDropRecipe, onDeleteMeal, onPinMeal, onPointerDown, pendingMealSlot, viewMode = 'WEEK', id, onShare }: PlannerDayProps) {
 
-    const { t } = useSettings();
+    const { t, language } = useSettings();
     const dayName = date.toLocaleDateString('es-ES', { weekday: 'short' }).toUpperCase();
     const dayNumber = date.getDate();
     const isToday = new Date().toDateString() === date.toDateString();
@@ -145,40 +146,59 @@ export function PlannerDay({ date, meals, isEditable = true, onMealClick, onAddM
             )}
 
             {/* Day Header */}
-            <div className="relative z-10 text-center">
-                <p className={`text-[10px] font-black tracking-[0.2em] ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {dayName}
-                </p>
-                <p className={`text-2xl font-bold leading-tight mt-0.5 ${isToday ? 'text-primary' : 'text-foreground'}`}>
-                    {dayNumber}
-                </p>
-                {isToday && (
-                    <div className="mt-1 w-1.5 h-1.5 rounded-full bg-primary mx-auto" />
-                )}
+            <div className="relative z-10 flex items-start justify-between">
+                <div className="w-8" /> {/* Spacer for symmetry */}
+                
+                <div className="text-center flex-1">
+                    <p className={`text-[10px] font-black tracking-[0.2em] ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
+                        {dayName}
+                    </p>
+                    <p className={`text-2xl font-bold leading-tight mt-0.5 ${isToday ? 'text-primary' : 'text-foreground'}`}>
+                        {dayNumber}
+                    </p>
+                    {isToday && (
+                        <div className="mt-1 w-1.5 h-1.5 rounded-full bg-primary mx-auto" />
+                    )}
+                </div>
+
+                <button
+                    onClick={onShare}
+                    title={language === 'es' ? 'Compartir menú del día' : 'Share daily menu'}
+                    className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all duration-300 active:scale-90"
+                >
+                    <Share2 className="w-5 h-5" />
+                </button>
             </div>
 
             {/* Meal Slots with Snack Dividers between them */}
             <div className={`relative z-10 w-full flex ${viewMode === 'DAY' ? 'flex-row flex-wrap gap-4 md:gap-6 justify-center items-stretch' : 'flex-col gap-1'}`}>
                 
+                {/* 1. Breakfast */}
                 {renderSlot('breakfast', breakfast)}
 
+                {/* 2. Snack 1 (Between Breakfast and Lunch) */}
                 <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={viewMode === 'DAY'} />
-                
+                {snacks[0] && renderSlot('snack', snacks[0])}
+
+                {/* 3. Lunch */}
                 {renderSlot('lunch', lunch)}
 
+                {/* 4. Snack 2 (Between Lunch and Dinner) */}
                 <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={viewMode === 'DAY'} />
-                
+                {snacks[1] && renderSlot('snack', snacks[1])}
+
+                {/* 5. Dinner */}
                 {renderSlot('dinner', dinner)}
 
-                {/* Additional Snacks from DB */}
-                {snacks.map((snack, idx) => (
+                {/* 6. Remaining Snacks (After Dinner) */}
+                {snacks.slice(2).map((snack, idx) => (
                     <React.Fragment key={snack.id || idx}>
                          <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={viewMode === 'DAY'} />
                          {renderSlot('snack', snack)}
                     </React.Fragment>
                 ))}
 
-                {/* Final Add Button (Always available if editable) */}
+                {/* Final Add Button (Always available if editable and fewer than 3 snacks to maintain balance) */}
                 {isEditable && (
                     <div className="w-full">
                         <SnackDivider isEditable={isEditable} onClick={() => onAddMeal?.('snack')} viewMode={viewMode} vertical={false} />

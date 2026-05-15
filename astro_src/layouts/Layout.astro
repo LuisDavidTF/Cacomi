@@ -2,6 +2,7 @@
 import { AppProviders } from '@components/providers/AppProviders';
 import { Navbar } from '@components/ui/Navbar';
 import { Footer } from '@components/ui/Footer';
+import { RecommendedMenuManager } from '@components/admin/RecommendedMenuManager';
 import { LegalsConsent } from '@components/ui/LegalsConsent';
 import { ClientRouter } from 'astro:transitions';
 // import { ADMIN_PATH_PREFIX } from 'astro:env/server';
@@ -53,7 +54,7 @@ const gaId = 'G-X50BSFS1NL';
 		<script is:inline>
 			// Force cleanup of legacy Service Workers and caches from the old Next.js / Culina Smart version
 			(function() {
-				const CURRENT_VERSION = 'cacomi-pwa-v4';
+				const CURRENT_VERSION = 'cacomi-pwa-v5';
 				const storedVersion = localStorage.getItem('pwa_version');
 				
 				if (storedVersion !== CURRENT_VERSION) {
@@ -121,10 +122,10 @@ const gaId = 'G-X50BSFS1NL';
 		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f2ea" />
 		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#010006" />
 		
-		<!-- Google Fonts: Inter -->
+		<!-- Google Fonts: Inter & Playfair Display -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
 		
 		<style>
 			html {
@@ -186,6 +187,7 @@ const gaId = 'G-X50BSFS1NL';
 			</div>
 
 			<LegalsConsent client:load />
+			<RecommendedMenuManager client:load />
 		</AppProviders>
 	</body>
 </html>
