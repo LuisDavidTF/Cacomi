@@ -37,12 +37,30 @@ export interface LocalSavedRecipe {
     protein?: number;
     carbs?: number;
     fat?: number;
+    proteinGrams?: number;
+    carbsGrams?: number;
+    fatGrams?: number;
+    carbohydrates?: number;
+    kcal?: number;
     type?: string;
     mealType?: string;
     authorName?: string;
     user_id?: string | number;
     ingredients?: any[];
     instructions?: any[];
+    nutrition?: {
+        totalCalories?: number;
+        totalProtein?: number;
+        totalCarbs?: number;
+        totalFat?: number;
+        totalCarbohydrates?: number;
+        protein?: number;
+        carbohydrates?: number;
+        carbs?: number;
+        fat?: number;
+        calories?: number;
+        kcal?: number;
+    };
     savedAt: string; // ISO Date
 }
 

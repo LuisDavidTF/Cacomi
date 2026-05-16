@@ -18,10 +18,52 @@ interface ShareMenuModalProps {
 export function ShareMenuModal({ isOpen, onClose, date, meals, planMetadata, language = 'es' }: ShareMenuModalProps) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [format, setFormat] = useState<'POST' | 'STORY'>('POST');
+    const [hydratedMeals, setHydratedMeals] = useState<Meal[]>(meals);
+    const [isHydrating, setIsHydrating] = useState(false);
+
+    // Sync hydration logic - same as summary
+    React.useEffect(() => {
+        if (isOpen && meals.length > 0) {
+            const performHydration = async () => {
+                setIsHydrating(true);
+                try {
+                    const { db } = await import('@/lib/db');
+                    const results = await Promise.all(meals.map(async m => {
+                        let mCarb = m.carbsGrams ?? m.carbohydrates ?? m.carbs ?? m.nutrition?.totalCarbs ?? m.nutrition?.totalCarbohydrates ?? m.nutrition?.carbohydrates ?? m.nutrition?.carbs ?? 0;
+                        let mFat = m.fatGrams ?? m.fat ?? m.nutrition?.totalFat ?? m.nutrition?.fat ?? 0;
+
+                        if ((mCarb === 0 || mFat === 0) && m.recipeUUID) {
+                            const saved = await db.savedRecipes.get(String(m.recipeUUID));
+                            if (saved) {
+                                const n = saved.nutrition || {};
+                                return {
+                                    ...m,
+                                    proteinGrams: m.proteinGrams || saved.proteinGrams || saved.protein || n.totalProtein || n.protein || 0,
+                                    carbsGrams: m.carbsGrams || saved.carbsGrams || saved.carbohydrates || saved.carbs || n.totalCarbs || n.totalCarbohydrates || n.carbohydrates || n.carbs || 0,
+                                    fatGrams: m.fatGrams || saved.fatGrams || saved.fat || n.totalFat || n.fat || 0,
+                                    calories: m.calories || saved.calories || saved.kcal || n.totalCalories || n.calories || n.kcal || 0
+                                };
+                            }
+                        }
+                        return m;
+                    }));
+                    setHydratedMeals(results);
+                } catch (e) {
+                    console.error("Share hydration error", e);
+                } finally {
+                    setIsHydrating(false);
+                }
+            };
+            performHydration();
+        } else if (!isOpen) {
+            setHydratedMeals(meals);
+        }
+    }, [isOpen, meals]);
     
     const isNativeShareSupported = typeof navigator !== 'undefined' && !!navigator.share && !!navigator.canShare;
 
     const generateImage = async (output: 'DOWNLOAD' | 'SHARE') => {
+        if (isHydrating) return; // Wait for data
         const elementId = `share-card-capture-${format}`;
         const element = document.getElementById(elementId);
         if (!element) return;
@@ -165,7 +207,7 @@ export function ShareMenuModal({ isOpen, onClose, date, meals, planMetadata, lan
                             transformOrigin: 'center'
                         }}
                     >
-                        <DailyMenuShareCard date={date} meals={meals} planMetadata={planMetadata} language={language} format={format} />
+                        <DailyMenuShareCard date={date} meals={hydratedMeals} planMetadata={planMetadata} language={language} format={format} />
                     </div>
                 </div>
 
@@ -219,11 +261,11 @@ export function ShareMenuModal({ isOpen, onClose, date, meals, planMetadata, lan
                     <div className="mt-auto space-y-3">
                         <button
                             onClick={() => generateImage('DOWNLOAD')}
-                            disabled={isGenerating}
+                            disabled={isGenerating || isHydrating}
                             className="w-full flex items-center justify-center gap-4 px-8 py-5 bg-primary text-primary-foreground rounded-2xl text-sm font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/30 hover:translate-y-[-2px] active:translate-y-[0px] transition-all disabled:opacity-50"
                         >
-                            {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
-                            {language === 'es' ? 'Descargar' : 'Download'}
+                            {(isGenerating || isHydrating) ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+                            {isHydrating ? (language === 'es' ? 'Cargando datos...' : 'Loading data...') : (language === 'es' ? 'Descargar' : 'Download')}
                         </button>
                         
                         {isNativeShareSupported && (
@@ -252,8 +294,8 @@ export function ShareMenuModal({ isOpen, onClose, date, meals, planMetadata, lan
                 style={{ top: '-10000px', left: '-10000px', width: '1080px', height: '1920px' }}
                 aria-hidden="true"
             >
-                 <DailyMenuShareCard date={date} meals={meals} planMetadata={planMetadata} language={language} format="POST" isCapture />
-                 <DailyMenuShareCard date={date} meals={meals} planMetadata={planMetadata} language={language} format="STORY" isCapture />
+                 <DailyMenuShareCard date={date} meals={hydratedMeals} planMetadata={planMetadata} language={language} format="POST" isCapture />
+                 <DailyMenuShareCard date={date} meals={hydratedMeals} planMetadata={planMetadata} language={language} format="STORY" isCapture />
             </div>
         </Modal>
     );

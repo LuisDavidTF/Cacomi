@@ -247,9 +247,9 @@ export function RecipeSidebar({ isMobile = false, onSelectRecipe, selectionMode 
                                                     {t.recipeTypes?.[recipe.mealType?.toUpperCase()] || recipe.mealType}
                                                 </span>
                                                 <span className="text-[10px] text-muted-foreground flex items-center">
-                                                    {(recipe.calories > 0 || recipe.protein > 0 || recipe.proteinGrams > 0) ? (
+                                                    {(recipe.calories > 0 || recipe.protein > 0 || recipe.proteinGrams > 0 || recipe.nutrition?.totalCalories > 0) ? (
                                                         <>
-                                                            {Math.round(recipe.calories || 0)} kcal
+                                                            {Math.round(recipe.calories || recipe.nutrition?.totalCalories || 0)} kcal
                                                         </>
                                                     ) : (
                                                         <span className="text-amber-600 dark:text-amber-400 font-bold animate-pulse">

@@ -240,7 +240,7 @@ export function DailyMenuShareCard({ date, meals, planMetadata, language = 'es',
 
             {/* Footer: Nutritional Info */}
             <div className={`${isStory ? 'mt-10 pt-8' : 'mt-4 pt-4'} border-t-2 border-[#111b27]/10 z-10`}>
-                <div className="grid grid-cols-2 gap-8 mb-6">
+                <div className="grid grid-cols-4 gap-4 mb-6">
                     {/* Calories */}
                     <div className="flex flex-col items-center">
                         <span className={`${isStory ? 'text-6xl' : 'text-4xl'} font-black tabular-nums text-orange-600`}>{Math.round(totals.calories)}</span>
@@ -253,17 +253,17 @@ export function DailyMenuShareCard({ date, meals, planMetadata, language = 'es',
                         <span className="text-[12px] font-black uppercase tracking-widest text-[#111b27]/40">{t.protein}</span>
                     </div>
 
-                    {/* TODO: Add Carbs and Fats when data is available */}
-                    {/*
+                    {/* Carbs */}
                     <div className="flex flex-col items-center">
-                        <span className="text-3xl font-black tabular-nums text-yellow-600">{Math.round(totals.carbs)}g</span>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#111b27]/40">{t.carbs}</span>
+                        <span className={`${isStory ? 'text-6xl' : 'text-4xl'} font-black tabular-nums text-yellow-600`}>{Math.round(totals.carbs)}<span className="text-xl font-bold ml-1 opacity-40">g</span></span>
+                        <span className="text-[12px] font-black uppercase tracking-widest text-[#111b27]/40">{t.carbs}</span>
                     </div>
+
+                    {/* Fats */}
                     <div className="flex flex-col items-center">
-                        <span className="text-3xl font-black tabular-nums text-emerald-600">{Math.round(totals.fat)}g</span>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#111b27]/40">{t.fat}</span>
+                        <span className={`${isStory ? 'text-6xl' : 'text-4xl'} font-black tabular-nums text-emerald-600`}>{Math.round(totals.fat)}<span className="text-xl font-bold ml-1 opacity-40">g</span></span>
+                        <span className="text-[12px] font-black uppercase tracking-widest text-[#111b27]/40">{t.fat}</span>
                     </div>
-                    */}
                 </div>
                 
                 {/* Website URL (Spotify Style) */}

@@ -22,10 +22,28 @@ export interface Meal {
     carbsGrams: number;
     fatGrams: number;
     calories: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    carbohydrates?: number;
+    kcal?: number;
     estimatedCost: number;
     pantryUsage: number;
     selectionLogicCode: SelectionLogicCode;
     aiReasoning: string;
+    nutrition?: {
+        totalCalories?: number;
+        totalProtein?: number;
+        totalCarbs?: number;
+        totalFat?: number;
+        totalCarbohydrates?: number;
+        protein?: number;
+        carbohydrates?: number;
+        carbs?: number;
+        fat?: number;
+        calories?: number;
+        kcal?: number;
+    };
     tracking?: {
         isEating: boolean;
         rating?: number;

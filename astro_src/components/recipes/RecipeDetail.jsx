@@ -104,14 +104,26 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                     const res = await fetch(`/api/recipes/${currentId}`);
                     if (res.ok) {
                         const data = await res.json();
-                        setRecipe(data);
-                        CacheManager.saveVisitedRecipe(data);
+                        
+                        // Normalize nutritional data
+                        const normalizedData = {
+                            ...data,
+                            nutrition: {
+                                totalCalories: data.nutrition?.totalCalories ?? data.nutrition?.calories ?? data.nutrition?.kcal ?? data.calories ?? data.kcal ?? 0,
+                                totalProtein: data.nutrition?.totalProtein ?? data.nutrition?.protein ?? data.proteinGrams ?? data.protein ?? 0,
+                                totalCarbs: data.nutrition?.totalCarbs ?? data.nutrition?.totalCarbohydrates ?? data.carbsGrams ?? data.carbohydrates ?? data.carbs ?? 0,
+                                totalFat: data.nutrition?.totalFat ?? data.nutrition?.fat ?? data.fatGrams ?? data.fat ?? 0
+                            }
+                        };
+
+                        setRecipe(normalizedData);
+                        CacheManager.saveVisitedRecipe(normalizedData);
                         
                         // Truco Pro: Si la receta estaba guardada en offline, 
                         // la actualizamos silenciosamente con los datos frescos
                         const isSaved = await db.savedRecipes.get(String(currentId));
                         if (isSaved) {
-                            await db.savedRecipes.put({ ...data, id: String(currentId), savedAt: new Date().toISOString() });
+                            await db.savedRecipes.put({ ...normalizedData, id: String(currentId), savedAt: new Date().toISOString() });
                         }
                         
                         setIsLoading(false);
@@ -127,7 +139,19 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                 const offlineRecipe = await db.savedRecipes.get(String(currentId));
                 if (offlineRecipe) {
                     console.log("[Offline] Receta cargada desde base de datos local (Dexie)");
-                    setRecipe(offlineRecipe);
+                    
+                    // Normalize even for offline to ensure consistency
+                    const normalizedOffline = {
+                        ...offlineRecipe,
+                        nutrition: {
+                            totalCalories: offlineRecipe.nutrition?.totalCalories ?? offlineRecipe.nutrition?.calories ?? offlineRecipe.nutrition?.kcal ?? offlineRecipe.calories ?? offlineRecipe.kcal ?? 0,
+                            totalProtein: offlineRecipe.nutrition?.totalProtein ?? offlineRecipe.nutrition?.protein ?? offlineRecipe.proteinGrams ?? offlineRecipe.protein ?? 0,
+                            totalCarbs: offlineRecipe.nutrition?.totalCarbs ?? offlineRecipe.nutrition?.totalCarbohydrates ?? offlineRecipe.carbsGrams ?? offlineRecipe.carbohydrates ?? offlineRecipe.carbs ?? 0,
+                            totalFat: offlineRecipe.nutrition?.totalFat ?? offlineRecipe.nutrition?.fat ?? offlineRecipe.fatGrams ?? offlineRecipe.fat ?? 0
+                        }
+                    };
+
+                    setRecipe(normalizedOffline);
                     setIsLoading(false);
                     return;
                 }

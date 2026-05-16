@@ -68,10 +68,30 @@ export function RecommendedDailyMenu() {
                     try {
                         const recipeData = await RecipeService.getById(meal.recipeUUID);
                         if (recipeData) {
+                            const n = recipeData.nutrition || {};
+                            const normalizedNutrition = {
+                                totalCalories: n.totalCalories ?? n.calories ?? n.kcal ?? recipeData.calories ?? recipeData.kcal ?? 0,
+                                totalProtein: n.totalProtein ?? n.protein ?? recipeData.proteinGrams ?? recipeData.protein ?? 0,
+                                totalCarbs: n.totalCarbs ?? n.totalCarbohydrates ?? n.carbohydrates ?? n.carbs ?? recipeData.carbsGrams ?? recipeData.carbohydrates ?? recipeData.carbs ?? 0,
+                                totalFat: n.totalFat ?? n.fat ?? recipeData.fatGrams ?? recipeData.fat ?? 0
+                            };
+
                             await db.savedRecipes.put({
                                 ...recipeData,
+                                nutrition: normalizedNutrition,
                                 id: meal.recipeUUID,
-                                savedAt: new Date().toISOString()
+                                savedAt: new Date().toISOString(),
+                                proteinGrams: normalizedNutrition.totalProtein,
+                                carbsGrams: normalizedNutrition.totalCarbs,
+                                fatGrams: normalizedNutrition.totalFat,
+                                calories: normalizedNutrition.totalCalories,
+                                // Alternative keys
+                                protein: normalizedNutrition.totalProtein,
+                                carbs: normalizedNutrition.totalCarbs,
+                                fat: normalizedNutrition.totalFat,
+                                carbohydrates: normalizedNutrition.totalCarbs,
+                                kcal: normalizedNutrition.totalCalories,
+                                estimatedCost: recipeData.estimatedCost || 0
                             });
                         }
                     } catch (fetchErr) {

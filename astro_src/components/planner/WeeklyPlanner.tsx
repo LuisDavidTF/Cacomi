@@ -283,9 +283,13 @@ export function WeeklyPlanner() {
         const id = String(recipe.publicId || recipe.id || recipe.recipeUUID);
         
         try {
-            // Check if already in savedRecipes with ingredients
+            // Check if already in savedRecipes with ingredients AND macros
             const existing = await db.savedRecipes.get(id);
-            if (existing && existing.ingredients && existing.ingredients.length > 0) {
+            const hasIngredients = existing && existing.ingredients && existing.ingredients.length > 0;
+            const hasMacros = existing && existing.nutrition && 
+                              ((existing.nutrition.totalCalories || 0) > 0 || (existing.nutrition.totalCarbs || 0) > 0);
+
+            if (hasIngredients && hasMacros) {
                 return;
             }
 
@@ -297,12 +301,62 @@ export function WeeklyPlanner() {
 
                 if (response.ok) {
                     const fullRecipe = await response.json();
-                    await db.savedRecipes.put({
+                    console.log(`[Offline Sync] Full recipe fetched for: ${fullRecipe.name}`, { id });
+                    
+                    // NORMALIZE before saving to DB
+                    const n = fullRecipe.nutrition || {};
+                    const normalizedNutrition = {
+                        totalCalories: fullRecipe.calories ?? fullRecipe.kcal ?? n.totalCalories ?? n.calories ?? n.kcal ?? 0,
+                        totalProtein: fullRecipe.proteinGrams ?? fullRecipe.protein ?? n.totalProtein ?? n.protein ?? 0,
+                        totalCarbs: fullRecipe.carbsGrams ?? fullRecipe.carbohydrates ?? fullRecipe.carbs ?? n.totalCarbs ?? n.totalCarbohydrates ?? n.carbohydrates ?? n.carbs ?? 0,
+                        totalFat: fullRecipe.fatGrams ?? fullRecipe.fat ?? n.totalFat ?? n.fat ?? 0
+                    };
+
+                    // Normalize for savedRecipes table
+                    const normalizedRecipe = {
                         ...fullRecipe,
-                        id,
+                        nutrition: normalizedNutrition,
+                        id: id,
                         savedAt: new Date().toISOString()
-                    });
-                    console.log(`[Offline Sync] Full recipe saved: ${fullRecipe.name}`);
+                    };
+
+                    await db.savedRecipes.put(normalizedRecipe);
+                    
+                    // NEW: Update any planned meals that use this recipe and might be missing macros
+                    const mealsToUpdate = await db.plannedMeals.where('recipeUUID').equals(String(id)).toArray();
+                    console.log(`[Offline Sync] Found ${mealsToUpdate.length} meals to update for recipe ${id}`);
+                    
+                    if (mealsToUpdate.length > 0) {
+                        const n = fullRecipe.nutrition || {};
+                        const protein = n.totalProtein ?? n.protein ?? fullRecipe.proteinGrams ?? fullRecipe.protein ?? 0;
+                        const carbs = n.totalCarbs ?? n.totalCarbohydrates ?? n.carbohydrates ?? n.carbs ?? fullRecipe.carbsGrams ?? fullRecipe.carbohydrates ?? fullRecipe.carbs ?? 0;
+                        const fat = n.totalFat ?? n.fat ?? fullRecipe.fatGrams ?? fullRecipe.fat ?? 0;
+                        const calories = n.totalCalories ?? n.calories ?? n.kcal ?? fullRecipe.calories ?? fullRecipe.kcal ?? 0;
+
+                        console.log(`[Offline Sync] Applying macros to ${mealsToUpdate.length} meals:`, { protein, carbs, fat, calories });
+
+                        for (const meal of mealsToUpdate) {
+                            // Only update if current data is zero/missing to avoid overwriting custom tracking
+                            if (!meal.carbsGrams || meal.carbsGrams === 0) {
+                                await db.plannedMeals.update(meal.id, {
+                                    proteinGrams: protein,
+                                    carbsGrams: carbs,
+                                    fatGrams: fat,
+                                    calories: calories,
+                                    // Alternative keys for compatibility
+                                    protein: protein,
+                                    carbs: carbs,
+                                    fat: fat,
+                                    carbohydrates: carbs,
+                                    kcal: calories
+                                });
+                            }
+                        }
+                        // Refresh UI to show newly calculated macros
+                        await refreshLocalData();
+                    }
+
+                    console.log(`[Offline Sync] Full recipe and macros updated for: ${fullRecipe.name}`);
                 }
             } else if (recipe.ingredients || recipe.instructions) {
                 // If we happen to have data but no connection, save what we have
@@ -459,11 +513,17 @@ export function WeeklyPlanner() {
         }
 
         try {
-            const protein = recipe.proteinGrams ?? recipe.protein ?? 0;
-            const carbs = recipe.carbsGrams ?? recipe.carbohydrates ?? recipe.carbs ?? 0;
-            const fat = recipe.fatGrams ?? recipe.fat ?? 0;
-            const calories = recipe.calories ?? recipe.kcal ?? 0;
-            const cost = recipe.estimatedCost ?? recipe.cost ?? 0;
+            // Try to find the full recipe in the local database to get better nutritional data
+            const recipeId = String(recipe.publicId || recipe.id);
+            const savedRecipe = await db.savedRecipes.get(recipeId);
+            const source = savedRecipe || recipe;
+
+            const n = source.nutrition || {};
+            const protein = n.totalProtein ?? n.protein ?? source.proteinGrams ?? source.protein ?? 0;
+            const carbs = n.totalCarbs ?? n.totalCarbohydrates ?? n.carbohydrates ?? n.carbs ?? source.carbsGrams ?? source.carbohydrates ?? source.carbs ?? 0;
+            const fat = n.totalFat ?? n.fat ?? source.fatGrams ?? source.fat ?? 0;
+            const calories = n.totalCalories ?? n.calories ?? n.kcal ?? source.calories ?? source.kcal ?? 0;
+            const cost = source.estimatedCost ?? source.cost ?? 0;
 
             if (idToUpdate) {
                 // UPDATE existing meal
@@ -481,19 +541,29 @@ export function WeeklyPlanner() {
                 });
             } else {
                 // ADD new meal
+                const normalizedDate = typeof targetDate === 'string' && targetDate.includes('T') 
+                    ? formatDateToString(new Date(targetDate)) 
+                    : targetDate;
+
                 const newMeal = {
                     id: generateUUIDv7(),
                     planId: (planData?.planId !== undefined && planData?.planId !== null) ? planData.planId : 0,
                     recipeUUID: recipe.publicId || recipe.id,
                     recipeName: recipe.name,
                     imageUrl: recipe.imageUrl,
-                    mealDate: targetDate,
+                    mealDate: normalizedDate,
                     mealType: targetType.toUpperCase() as any,
                     portionMultiplier: 1.0,
                     proteinGrams: protein,
                     carbsGrams: carbs,
                     fatGrams: fat,
                     calories: calories,
+                    // Alternative keys for full sync
+                    protein: protein,
+                    carbs: carbs,
+                    fat: fat,
+                    carbohydrates: carbs,
+                    kcal: calories,
                     estimatedCost: cost,
                     pantryUsage: 0,
                     selectionLogicCode: 'PROTEIN_FILL' as any,
@@ -507,6 +577,9 @@ export function WeeklyPlanner() {
             
             // Ensure full recipe is available offline
             await ensureRecipeDetailSaved(recipe);
+            
+            // Refresh UI to show newly calculated macros
+            await refreshLocalData();
             
             // Reconstruct plan data with the changes
             const allMeals = await db.plannedMeals
@@ -782,14 +855,35 @@ export function WeeklyPlanner() {
 
                     // Sync meals to local DB
                     for (const meal of meals) {
+                        const normalizedDate = typeof meal.mealDate === 'string' && meal.mealDate.includes('T') 
+                            ? formatDateToString(new Date(meal.mealDate)) 
+                            : meal.mealDate;
+
                         const existing = await db.plannedMeals
-                            .where('mealDate').equals(meal.mealDate)
+                            .where('mealDate').equals(normalizedDate)
                             .and(m => m.mealType === meal.mealType)
                             .first();
 
+                        // NORMALIZE meal data before saving (handle different field names from backend)
+                        const n = meal.nutrition || {};
+                        const normalizedMeal = {
+                            ...meal,
+                            mealDate: normalizedDate,
+                            proteinGrams: meal.proteinGrams ?? meal.protein ?? n.totalProtein ?? n.protein ?? 0,
+                            carbsGrams: meal.carbsGrams ?? meal.carbohydrates ?? meal.carbs ?? n.totalCarbs ?? n.totalCarbohydrates ?? n.carbohydrates ?? n.carbs ?? 0,
+                            fatGrams: meal.fatGrams ?? meal.fat ?? n.totalFat ?? n.fat ?? 0,
+                            calories: meal.calories ?? meal.kcal ?? n.totalCalories ?? n.calories ?? n.kcal ?? 0,
+                            // Alternative keys for full sync
+                            protein: meal.proteinGrams ?? meal.protein ?? n.totalProtein ?? n.protein ?? 0,
+                            carbs: meal.carbsGrams ?? meal.carbohydrates ?? meal.carbs ?? n.totalCarbs ?? n.totalCarbohydrates ?? n.carbohydrates ?? n.carbs ?? 0,
+                            fat: meal.fatGrams ?? meal.fat ?? n.totalFat ?? n.fat ?? 0,
+                            carbohydrates: meal.carbsGrams ?? meal.carbohydrates ?? meal.carbs ?? n.totalCarbs ?? n.totalCarbohydrates ?? n.carbohydrates ?? n.carbs ?? 0,
+                            kcal: meal.calories ?? meal.kcal ?? n.totalCalories ?? n.calories ?? n.kcal ?? 0
+                        };
+
                         if (!existing) {
                             await db.plannedMeals.add({
-                                ...meal,
+                                ...normalizedMeal,
                                 planId: data.planId,
                                 id: generateUUIDv7(),
                                 isSynced: 1,
@@ -798,7 +892,7 @@ export function WeeklyPlanner() {
                             } as LocalPlannedMeal);
                         } else if (existing.isSynced === 1 || force) {
                             await db.plannedMeals.update(existing.id, {
-                                ...meal,
+                                ...normalizedMeal,
                                 planId: data.planId,
                                 isSynced: 1,
                                 isDeleted: 0
@@ -1241,6 +1335,45 @@ export function WeeklyPlanner() {
                 message: language === 'es' ? "Error de conexión al solicitar el plan." : "Connection error while requesting plan.",
                 type: 'error'
             });
+        }
+    };
+
+    const refreshLocalData = async (forcedPlanId?: number) => {
+        let targetId = forcedPlanId || planData?.planId;
+        
+        if (!targetId) {
+            const activeMetadata = await db.planMetadata.where('isActive').equals(1).first();
+            if (activeMetadata) targetId = activeMetadata.planId;
+        }
+
+        if (!targetId) return;
+
+        const allMeals = await db.plannedMeals
+            .where('planId').equals(targetId)
+            .and(m => m.isDeleted === 0)
+            .toArray();
+        
+        console.log(`[Refresh] Found ${allMeals.length} meals for plan ${targetId}`);
+        if (allMeals.length > 0) {
+            console.log(`[Refresh] First meal macros:`, {
+                p: allMeals[0].proteinGrams,
+                c: allMeals[0].carbsGrams,
+                f: allMeals[0].fatGrams
+            });
+        }
+
+        setPlanData(prev => {
+            if (!prev) return null;
+            return { ...prev, meals: allMeals };
+        });
+
+        // Also update selectedMeal if it's open to reflect new macros in the modal
+        if (selectedMeal) {
+            const updated = allMeals.find(m => m.id === selectedMeal.id);
+            if (updated) {
+                console.log(`[Refresh] Updating selectedMeal in modal:`, updated.recipeName);
+                setSelectedMeal(updated);
+            }
         }
     };
 
