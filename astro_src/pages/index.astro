@@ -10,7 +10,7 @@ import { RecipeService } from '@/lib/services/recipes';
 export const prerender = false;
 
 // Cache feed for Cloudflare On-Demand Invalidation
-Astro.response.headers.set('Cache-Control', 'public, s-maxage=0, stale-while-revalidate=31536000');
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=31536000');
 Astro.response.headers.set('Cache-Tag', 'recipes-feed');
 
 const CURRENT_APP_VERSION = 'v1.1.0';
