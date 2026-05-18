@@ -255,7 +255,9 @@ export function RecommendedDailyMenu() {
                                     {/* Image Container */}
                                     <div className="relative aspect-video sm:aspect-[4/3] lg:aspect-video rounded-[1.8rem] overflow-hidden mb-4 sm:mb-6 bg-muted shadow-2xl">
                                         <img 
-                                            src={meal.imageUrl} 
+                                            src={meal.imageUrl?.includes('cloudinary.com') 
+                                                ? meal.imageUrl.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_600,c_limit/') 
+                                                : meal.imageUrl} 
                                             alt={meal.recipeName}
                                             className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-[1500ms] ease-out"
                                             loading="lazy"

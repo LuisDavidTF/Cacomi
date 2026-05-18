@@ -64,7 +64,10 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   );
 
   // Data correctness mapping from provided JSON
-  const imageUrl = recipe.imageUrl || 'https://placehold.co/600x400/f3f4f6/9ca3af?text=Sin+Imagen';
+  const rawImageUrl = recipe.imageUrl || 'https://placehold.co/600x400/f3f4f6/9ca3af?text=Sin+Imagen';
+  const imageUrl = rawImageUrl.includes('cloudinary.com') 
+    ? rawImageUrl.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_500,c_limit/') 
+    : rawImageUrl;
   const prepTime = recipe.preparationTimeMinutes;
   const authorName = recipe.authorName || recipe.user?.name;
   const typeValue = recipe.type || recipe.mealType;
