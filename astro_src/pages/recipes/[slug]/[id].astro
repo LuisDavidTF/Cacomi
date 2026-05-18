@@ -19,12 +19,30 @@ try {
   error = e.message;
 }
 
-// Canonical title for SEO
 const title = recipe ? `${recipe.name} | Cacomi` : 'Receta | Cacomi';
 const description = recipe ? (recipe.description || `Aprende a preparar ${recipe.name} con nuestra guía paso a paso.`) : 'Cargando receta...';
+const image = recipe?.imageUrl || recipe?.image || '/og-image.jpg';
+
+const schema = recipe ? {
+  "@context": "https://schema.org/",
+  "@type": "Recipe",
+  "name": recipe.name,
+  "image": image !== '/og-image.jpg' ? [new URL(image, Astro.url).toString()] : [],
+  "description": description,
+  "recipeIngredient": recipe.ingredients?.map((i: any) => typeof i === 'object' ? `${i.quantity || ''} ${i.unitOfMeasure || i.unit || ''} ${i.name || ''}`.trim() : i) || [],
+  "recipeInstructions": recipe.instructions?.map((step: any) => ({
+    "@type": "HowToStep",
+    "text": typeof step === 'object' ? (step.text || step.description || '') : step
+  })) || []
+} : null;
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={description} image={image}>
+  {schema && (
+    <Fragment slot="head">
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    </Fragment>
+  )}
   <main>
     <RecipeDetail client:load recipe={recipe} recipeId={id} />
   </main>

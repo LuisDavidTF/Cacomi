@@ -67,3 +67,6 @@ public/fallback-*
 
 astro_src/node_modules
 .wrangler/
+
+# Archivos locales de trabajo para IA
+archivos_locales_no_git/
