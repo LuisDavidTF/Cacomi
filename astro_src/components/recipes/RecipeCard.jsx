@@ -95,6 +95,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
             src={imgSrc}
             alt={recipe.name}
             className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-in-out"
+            loading="lazy"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={() => setImgSrc('https://placehold.co/600x400/f3f4f6/9ca3af?text=Error+Carga')}
           />

@@ -258,6 +258,7 @@ export function RecommendedDailyMenu() {
                                             src={meal.imageUrl} 
                                             alt={meal.recipeName}
                                             className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-[1500ms] ease-out"
+                                            loading="lazy"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-700" />
                                     </div>

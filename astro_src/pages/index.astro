@@ -47,10 +47,10 @@ import { RecommendedDailyMenu } from '@components/landing/RecommendedDailyMenu';
 
 <Layout>
   {!isAuthenticated && (
-    <CompactWelcome client:load />
+    <CompactWelcome client:idle />
   )}
 
-  <RecommendedDailyMenu client:load />
+  <RecommendedDailyMenu client:visible />
 
   <div id="latest-recipes" class={isAuthenticated ? "mt-0" : "mt-0"}>
     { !isAuthenticated && (
@@ -59,16 +59,16 @@ import { RecommendedDailyMenu } from '@components/landing/RecommendedDailyMenu';
         <p class="text-sm md:text-base text-muted-foreground mt-1">Descubre lo que otros están cocinando hoy.</p>
       </div>
     )}
-    <RecipeFeed initialData={initialData} client:load />
+    <RecipeFeed initialData={initialData} client:visible />
   </div>
 
   {isNewUser && (
-    <FloatingWelcome client:load />
+    <FloatingWelcome client:idle />
   )}
 
   {hasNewFeatures && (
     <div id="new-feature-announcement">
-      <FeatureAnnouncement version={CURRENT_APP_VERSION} client:load />
+      <FeatureAnnouncement version={CURRENT_APP_VERSION} client:idle />
     </div>
   )}
 </Layout>
