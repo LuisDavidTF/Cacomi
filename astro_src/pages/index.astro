@@ -26,10 +26,9 @@ const isNewUser = !hasEverLoggedIn && visitCount < 3;
 const hasNewFeatures = false; // Planificador en desarrollo - ocultar banner
 
 // Server-side Cookie Setting
-if (!hasEverLoggedIn && !isAuthenticated) {
-  // If showing landing to a non-authenticated user, increment valid visits
-  Astro.cookies.set('home_visit_count', String(visitCount + 1), { path: '/', maxAge: 31536000 });
-}
+// NOTE: For unauthenticated users, the home_visit_count tracking has been moved
+// to a client-side inline script (see below in Layout) to avoid sending 'Set-Cookie'
+// headers. 'Set-Cookie' headers on SSR responses completely disable CDN edge caching (Vercel/Cloudflare).
 
 if (isAuthenticated && !Astro.cookies.has('has_ever_logged_in')) {
   // Mark permanently as a user who has logged in
@@ -71,4 +70,25 @@ import { RecommendedDailyMenu } from '@components/landing/RecommendedDailyMenu';
       <FeatureAnnouncement version={CURRENT_APP_VERSION} client:idle />
     </div>
   )}
+
+  <script is:inline>
+    (function() {
+      const isAuthenticated = document.cookie.includes('auth_token');
+      const hasEverLoggedIn = document.cookie.includes('has_ever_logged_in') || isAuthenticated;
+      
+      if (!hasEverLoggedIn && !isAuthenticated) {
+        // Read visit count
+        const match = document.cookie.match(/(^| )home_visit_count=([^;]+)/);
+        const visitCount = match ? parseInt(match[2], 10) : 0;
+        
+        // Increment and set cookie
+        const nextCount = visitCount + 1;
+        const expires = new Date();
+        expires.setFullYear(expires.getFullYear() + 1); // 1 year expiry
+        
+        // Set SameSite=Lax for compatibility and secure edge-caching
+        document.cookie = "home_visit_count=" + nextCount + "; path=/; expires=" + expires.toUTCString() + "; SameSite=Lax";
+      }
+    })();
+  </script>
 </Layout>
