@@ -122,3 +122,4 @@ export default defineConfig({
         })
     ]
 });
+// Trigger dev server content sync config reload

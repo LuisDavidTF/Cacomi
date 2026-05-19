@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { BackToHomeLink } from '@components/ui/BackToHomeLink';
+import { SafeEmail } from '@components/ui/SafeEmail';
+import { translations } from '@context/SettingsContext';
+
+export const prerender = false;
+
+const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
+const t = translations[lang] || translations.es;
+---
+
+<Layout 
+    title={`${t.contact?.title || 'Contacto'} | Cacomi`} 
+    description={t.contact?.subtitle || 'Contacta al equipo de Cacomi.'}
+>
+    <div class="max-w-4xl mx-auto py-12 px-6 sm:px-8 bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+        <div class="bg-card shadow-sm rounded-xl p-8 border border-border">
+            <h1 class="text-3xl font-bold text-foreground mb-2">
+                {t.contact?.title || 'Contacto'}
+            </h1>
+            <p class="text-muted-foreground text-sm mb-8">
+                {t.contact?.subtitle || '¿Tienes alguna duda o sugerencia? Ponte en contacto con el equipo de Cacomi.'}
+            </p>
+
+            <div class="space-y-8 text-foreground leading-relaxed">
+                <!-- Sección Correo -->
+                <section class="p-6 bg-muted/20 rounded-xl border border-border flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div class="text-4xl">📧</div>
+                    <div class="flex-grow">
+                        <h2 class="text-xl font-semibold mb-1 text-foreground">
+                            {t.contact?.emailSection || 'Correo Electrónico'}
+                        </h2>
+                        <p class="text-muted-foreground text-sm mb-3">
+                            {t.contact?.emailDesc || 'Para consultas generales, soporte técnico o solicitudes de privacidad.'}
+                        </p>
+                        <div class="p-3 bg-card rounded border border-border/60 inline-block text-sm">
+                            <SafeEmail client:load />
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sección Redes Sociales -->
+                <section class="p-6 bg-muted/20 rounded-xl border border-border flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div class="text-4xl">📱</div>
+                    <div class="flex-grow">
+                        <h2 class="text-xl font-semibold mb-1 text-foreground">
+                            {t.contact?.networksSection || 'Redes Sociales'}
+                        </h2>
+                        <p class="text-muted-foreground text-sm mb-3">
+                            {t.contact?.networksDesc || 'Síguenos para estar al día de novedades, recetas y actualizaciones semanales.'}
+                        </p>
+                        <div class="flex gap-4">
+                            <a href={t.common?.instagramUrl} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline text-sm font-semibold flex items-center gap-1">
+                                Instagram
+                            </a>
+                            <span class="text-muted-foreground/30">|</span>
+                            <a href={t.common?.facebookUrl} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline text-sm font-semibold flex items-center gap-1">
+                                Facebook
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="pt-8 border-t border-border mt-10">
+                <BackToHomeLink client:load className="" />
+            </div>
+        </div>
+    </div>
+</Layout>

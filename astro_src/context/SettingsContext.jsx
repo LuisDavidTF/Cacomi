@@ -250,6 +250,7 @@ export const translations = {
             appName: 'Cacomi',
             rights: 'Todos los derechos reservados.',
             aboutLink: 'Acerca de',
+            contactLink: 'Contacto',
             instagramUrl: 'https://www.instagram.com/cacomi_oficial',
             facebookUrl: 'https://www.facebook.com/people/Cacomi-Planificador-de-Comidas-con-IA/61589350700287',
             followUs: 'Síguenos en redes sociales',
@@ -559,6 +560,14 @@ export const translations = {
             expirationDate: 'Fecha de caducidad',
             saveToPantry: 'Guardar en Alacena',
             buySuccess: '¡Añadido a tu alacena!'
+        },
+        contact: {
+            title: 'Contacto',
+            subtitle: '¿Tienes alguna duda o sugerencia? Ponte en contacto con el equipo de Cacomi.',
+            emailSection: 'Correo Electrónico',
+            emailDesc: 'Para consultas generales, soporte técnico o solicitudes de privacidad.',
+            networksSection: 'Redes Sociales',
+            networksDesc: 'Síguenos para estar al día de novedades, recetas y actualizaciones semanales.'
         }
     },
     en: {
@@ -696,6 +705,7 @@ export const translations = {
             appName: 'Cacomi',
             rights: 'All rights reserved.',
             aboutLink: 'About Us',
+            contactLink: 'Contact Us',
             instagramUrl: 'https://www.instagram.com/cacomi_oficial',
             facebookUrl: 'https://www.facebook.com/people/Cacomi-Planificador-de-Comidas-con-IA/61589350700287',
             followUs: 'Follow us',
@@ -1084,6 +1094,14 @@ export const translations = {
             expirationDate: 'Expiration date',
             saveToPantry: 'Save to Pantry',
             buySuccess: 'Added to your pantry!'
+        },
+        contact: {
+            title: 'Contact Us',
+            subtitle: 'Have any questions or suggestions? Get in touch with the Cacomi team.',
+            emailSection: 'Email Support',
+            emailDesc: 'For general inquiries, technical support, or privacy requests.',
+            networksSection: 'Social Networks',
+            networksDesc: 'Follow us to stay updated with news, recipes, and weekly updates.'
         }
     },
     fr: {
@@ -1554,6 +1572,14 @@ export const translations = {
             expirationDate: 'Date d\'expiration',
             saveToPantry: 'Enregistrer au Garde-manger',
             buySuccess: 'Ajouté à votre réserve !'
+        },
+        contact: {
+            title: 'Contact',
+            subtitle: 'Vous avez des questions ou des suggestions ? Contactez l\'équipe Cacomi.',
+            emailSection: 'Support E-mail',
+            emailDesc: 'Pour les questions générales, le support technique ou les demandes de confidentialité.',
+            networksSection: 'Réseaux Sociaux',
+            networksDesc: 'Suivez-nous pour rester au courant des nouveautés, des recettes et des mises à jour hebdomadaires.'
         }
     }
 };

@@ -21,6 +21,7 @@ const revistaCollection = defineCollection({
     description: z.string(),
     date: z.string(),
     number: z.number(), // Número de edición
+    image: z.string().optional(), // Cover image
     articles: z.array(z.string()) // Array of blog slugs
   })
 });

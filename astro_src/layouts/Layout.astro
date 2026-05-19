@@ -190,8 +190,14 @@ const gaId = 'G-X50BSFS1NL';
 				</main>
 
 				<Footer client:visible />
-				{/* Static link for Google OAuth crawler - Footer is client:visible so bots may miss it */}
-				<a href="/privacy" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;" aria-hidden="true">Privacy Policy</a>
+				{/* Static links for crawlers (Googlebot, AdSense, OAuth) - Footer is client:visible so bots may miss it */}
+				<div style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;" aria-hidden="true">
+					<a href="/privacy">Privacy Policy</a>
+					<a href="/terms">Terms of Service</a>
+					<a href="/about">Acerca de Cacomi</a>
+					<a href="/contacto">Contacto</a>
+					<a href="/blog">Blog y Consejos</a>
+				</div>
 			</div>
 
 			<LegalsConsent client:idle />

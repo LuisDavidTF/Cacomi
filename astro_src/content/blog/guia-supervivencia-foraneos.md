@@ -1,5 +1,6 @@
 ---
 title: "Guía de supervivencia para foráneos: Come bien con poco dinero"
+image: "/images/blog/guia-supervivencia-foraneos.png"
 description: "Vivir solo por primera vez es un reto. Descubre cómo organizar tus comidas, hacer rendir tu presupuesto y no vivir a base de fideos instantáneos."
 date: "2026-05-02"
 author: "Equipo Cacomi"

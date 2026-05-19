@@ -27,6 +27,7 @@ Use these skills for detailed patterns on-demand:
 | `cacomi-test-ui` | Frontend E2E testing patterns | [SKILL.md](.agent/skills/cacomi-test-ui/SKILL.md) |
 | `cacomi-git` | Git, Commits, and PR workflow | [SKILL.md](.agent/skills/cacomi-git/SKILL.md) |
 | `cacomi-ticket-workflow` | Ticket-based branching and merging workflow | [SKILL.md](.agent/skills/cacomi-ticket-workflow/SKILL.md) |
+| `cacomi-image-generation` | Reglas y obligatoriedad de logos en generación de imágenes | [SKILL.md](.agent/skills/cacomi-image-generation/SKILL.md) |
 
 ### Auto-invoke Skills
 
@@ -46,6 +47,7 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | Updating Recommended Menu | `cacomi-daily-content` |
 | Writing React components | `react-19` |
 | Writing TypeScript types/interfaces | `typescript` |
+| Generación de imágenes, portadas y artículos | `cacomi-image-generation` |
 
 ---
 

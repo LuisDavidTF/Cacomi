@@ -1,5 +1,6 @@
 ---
 title: "Guía Definitiva para Planificar tus Comidas Semanales y Ahorrar Dinero"
+image: "/images/blog/como-planificar-comidas-semanales.png"
 description: "Descubre cómo organizar tu menú semanal paso a paso. Ahorra tiempo en la cocina, reduce el desperdicio de comida y mejora tu alimentación."
 date: "2026-05-10"
 author: "Equipo Cacomi"

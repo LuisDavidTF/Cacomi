@@ -1,5 +1,6 @@
 ---
 title: "Transparencia: Cómo usamos la Inteligencia Artificial en Cacomi"
+image: "/images/blog/transparencia-ia-cacomi.png"
 description: "Un vistazo técnico y ético a cómo funciona el 'cerebro' detrás de tu planificador de comidas y por qué siempre tienes el control final."
 date: "2026-05-09"
 author: "Equipo Técnico de Cacomi"

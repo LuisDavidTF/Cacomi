@@ -1,5 +1,6 @@
 ---
 title: "Cómo lograr que tus hijos coman verduras sin quejas (y sin gastar de más)"
+image: "/images/blog/ninos-coman-verduras.png"
 description: "Estrategias probadas para incorporar vegetales en la dieta familiar de forma inteligente, ahorrando tiempo en la cocina."
 date: "2026-05-04"
 author: "Equipo Cacomi"

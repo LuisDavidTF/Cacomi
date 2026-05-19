@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+import { Calendar, ArrowRight } from 'lucide-react';
+
+const allPosts = await getCollection('blog');
+const sortedPosts = allPosts
+  .sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf())
+  .slice(0, 3);
+---
+
+<section class="container mx-auto px-4 py-16 md:py-24 bg-muted/20 border-t border-border/50">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+      <div>
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-4">
+          Descubre Nuestro Blog
+        </h2>
+        <p class="text-muted-foreground max-w-2xl text-lg">
+          Consejos prácticos, guías de nutrición y secretos para dominar tu cocina y ahorrar dinero.
+        </p>
+      </div>
+      <a href="/blog" class="inline-flex items-center gap-2 text-primary font-bold hover:underline transition-all">
+        Ver todos los artículos <ArrowRight className="w-4 h-4" />
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {sortedPosts.map(post => (
+        <a href={`/blog/${post.id}`} class="group flex flex-col h-full bg-card rounded-3xl border border-border overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div class="aspect-video w-full overflow-hidden relative">
+            <img 
+              src={post.data.image || '/images/default-blog.jpg'} 
+              alt={post.data.title}
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300"></div>
+          </div>
+          <div class="p-6 flex flex-col flex-grow">
+            <div class="flex items-center gap-2 text-xs text-muted-foreground mb-3 font-medium uppercase tracking-wider">
+              <Calendar className="w-3.5 h-3.5" />
+              <time datetime={new Date(post.data.date).toISOString()}>
+                {new Date(post.data.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </time>
+            </div>
+            <h3 class="text-xl font-bold mb-3 text-foreground group-hover:text-primary transition-colors line-clamp-2">
+              {post.data.title}
+            </h3>
+            <p class="text-muted-foreground text-sm line-clamp-3 mb-6 flex-grow">
+              {post.data.description}
+            </p>
+            <div class="mt-auto flex items-center text-primary text-sm font-bold">
+              Leer más <ArrowRight className="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

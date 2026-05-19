@@ -1,5 +1,6 @@
 ---
 title: "5 Beneficios Inesperados de Cocinar en Casa"
+image: "/images/blog/beneficios-cocinar-en-casa.png"
 description: "Más allá de ahorrar dinero, cocinar tus propias comidas tiene un impacto profundo en tu salud física y mental. Descubre por qué deberías encender los fogones."
 date: "2026-05-08"
 author: "Equipo Cacomi"

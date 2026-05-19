@@ -1,5 +1,6 @@
 ---
 title: "Alcanza tus metas fitness: Por qué la preparación es más importante que el gimnasio"
+image: "/images/blog/metas-fitness-preparacion.png"
 description: "Puedes entrenar dos horas diarias, pero si tu alimentación no está alineada, no verás resultados. Descubre cómo planificar tus macros sin volverte loco."
 date: "2026-05-11"
 author: "Equipo Cacomi"

@@ -15,22 +15,55 @@ const sortedRevistas = allRevistas.sort((a, b) => {
 	description="Ediciones semanales con colecciones de nuestros mejores artículos sobre nutrición, ahorro y recetas."
 >
 	<div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-20">
-		<header class="text-center mb-16">
+		<header class="text-center mb-16 relative">
+			<div class="absolute left-0 top-0 hidden sm:block">
+				<a href="/blog" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-500 transition-colors">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+						<path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+					</svg>
+					Volver al Blog
+				</a>
+			</div>
+			
 			<h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
 				Hemeroteca Cacomi
 			</h1>
-			<p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+			<p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
 				Explora nuestras ediciones semanales, donde agrupamos artículos y guías como una revista tradicional de lectura continua.
 			</p>
+			
+			<div class="sm:hidden mb-8">
+				<a href="/blog" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-500 transition-colors">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+						<path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+					</svg>
+					Volver al Blog
+				</a>
+			</div>
 		</header>
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 			{sortedRevistas.map((revista) => (
 				<a href={`/revista/${revista.id}`} class="group block h-full">
-                    <article class="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 p-8 h-full flex flex-col hover:shadow-xl transition-all duration-300 hover:-translate-y-2 relative overflow-hidden">
+                    <article class="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 h-full flex flex-col hover:shadow-xl transition-all duration-300 hover:-translate-y-2 relative overflow-hidden">
                         
                         <!-- Elemento decorativo de portada -->
                         <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+                        
+                        {revista.data.image && (
+                            <div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800/80 mb-6 bg-gray-50 dark:bg-gray-950 flex justify-center items-center">
+                                <div 
+                                    class="absolute inset-0 bg-cover bg-center blur-lg opacity-25 scale-110 pointer-events-none" 
+                                    style={`background-image: url(${revista.data.image});`}
+                                ></div>
+                                <img 
+                                    src={revista.data.image} 
+                                    alt={revista.data.title} 
+                                    class="relative z-10 max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy"
+                                />
+                            </div>
+                        )}
                         
                         <div class="flex items-center gap-2 text-sm text-primary font-bold mb-4 tracking-wide uppercase relative z-10">
                             <span>Edición #{revista.data.number}</span>
@@ -58,5 +91,22 @@ const sortedRevistas = allRevistas.sort((a, b) => {
                 </a>
 			))}
 		</div>
+
+        <!-- CTA a Buscador del Blog -->
+        <div class="mt-20 text-center border-t border-gray-100 dark:border-gray-800 pt-16">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                ¿Buscas un tema en específico?
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                En nuestro buscador del blog puedes filtrar todos los artículos y guías de forma individual e instantánea.
+            </p>
+            <a href="/blog" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-colors gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Buscar Artículos Individuales
+            </a>
+        </div>
 	</div>
 </Layout>

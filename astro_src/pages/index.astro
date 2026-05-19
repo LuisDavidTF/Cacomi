@@ -42,6 +42,8 @@ try {
   console.error("Error fetching initial recipes:", error);
 }
 import { RecommendedDailyMenu } from '@components/landing/RecommendedDailyMenu';
+import SeoContentBlock from '@components/landing/SeoContentBlock.astro';
+import RecentPosts from '@components/landing/RecentPosts.astro';
 ---
 
 <Layout>
@@ -69,6 +71,13 @@ import { RecommendedDailyMenu } from '@components/landing/RecommendedDailyMenu';
     <div id="new-feature-announcement">
       <FeatureAnnouncement version={CURRENT_APP_VERSION} client:idle />
     </div>
+  )}
+
+  {!isAuthenticated && (
+    <>
+      <RecentPosts />
+      <SeoContentBlock />
+    </>
   )}
 
   <script is:inline>

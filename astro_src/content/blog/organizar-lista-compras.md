@@ -1,5 +1,6 @@
 ---
 title: "Cómo Organizar tu Lista de Compras para no Olvidar Nada"
+image: "/images/blog/organizar-lista-compras.png"
 description: "El supermercado puede ser un campo de minas para tu presupuesto si no vas preparado. Aprende a dominar la lista de compras y sal rápido y con todo lo que necesitas."
 date: "2026-05-06"
 author: "Equipo Cacomi"
