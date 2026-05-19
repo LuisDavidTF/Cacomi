@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "astro dev -p 5173",
     "dev:astro": "astro dev -p 5173",
-    "build": "astro build && npm run postbuild",
+    "build": "node scripts/build.cjs",
     "postbuild": "node scripts/postbuild.cjs",
     "build:astro": "astro build",
     "preview": "wrangler pages dev dist",
