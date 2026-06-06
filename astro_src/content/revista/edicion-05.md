@@ -35,9 +35,9 @@ Hoy queremos compartir con toda nuestra comunidad un anuncio que marcará un ant
 ¿Qué significa esto?
 *   Prepararemos platillos basados en las recetas de la comunidad, de Cacomi, y de ustedes mismos, garantizando ingredientes frescos, saludables y de la mejor calidad.
 *   **Piloto inicial:** Comenzaremos pruebas en un **municipio del estado de Puebla**, ofreciendo y repartiendo el menú semanal que habitualmente compartimos a través de nuestras redes sociales.
-*   **Planes de expansión:** Si todo marcha bien durante las primeras semanas, nuestra meta es expandirnos en un par de meses hacia el municipio, ciudad o localidad **que cuente con mayor cantidad de usuarios registrados y activos en nuestra app web.**
+*   **Planes de expansión:** Si todo marcha bien durante las primeras semanas, nuestra meta es expandirnos en un par de meses hacia la ciudad, municipio o localidad donde tengamos más usuarios y mayor demanda.
 
-¡Así que la invitación está abierta! Corran la voz con sus amigos y familiares, asegúrense de registrar su ubicación en la aplicación y estén muy al pendiente de nuestras redes sociales para conocer las fechas oficiales de lanzamiento y el primer menú semanal disponible para pedido. ¡Nos emociona muchísimo cocinar para ustedes!
+¡Así que la invitación está abierta! Corran la voz con sus amigos y familiares y estén muy al pendiente de nuestras redes sociales para conocer las fechas oficiales de lanzamiento y el primer menú semanal disponible para pedido. ¡Nos emociona muchísimo cocinar para ustedes!
 
 ---
 
