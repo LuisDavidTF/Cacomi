@@ -1,0 +1,4 @@
+Contact: mailto:soporte@cacomi.app
+Expires: 2027-06-08T18:00:00Z
+Preferred-Languages: es, en
+Canonical: https://cacomi.app/.well-known/security.txt

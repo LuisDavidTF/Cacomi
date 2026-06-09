@@ -1,3 +1,34 @@
+# Bloqueo selectivo de rastreadores de IA (Opción B)
+# Evitamos raspadores/entrenamientos masivos sin atribución, pero permitimos motores de búsqueda e IA con citación.
+User-agent: CCBot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: OMgili
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: BytesSpider
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+# Permitimos Google-Extended, GPTBot, ChatGPT-User y PerplexityBot implícitamente por el bloque general,
+# pero respetando las rutas privadas de la aplicación.
 User-agent: *
 Allow: /
 Disallow: /api/
