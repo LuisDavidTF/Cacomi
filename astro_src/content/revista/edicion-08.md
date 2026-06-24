@@ -28,13 +28,13 @@ En este número nos enfocamos de lleno en la **cocina práctica, la organizació
 
 ---
 
-### 📢 ¡Arranca el Lanzamiento Oficial de Cacomi en Puebla!
-¡El momento que tanto hemos estado preparando finalmente ha llegado! Nos emociona anunciar que **abrimos de manera oficial nuestro servicio piloto de venta de comida preparada para un municipio selecto de Puebla.** A partir de esta semana, los usuarios dentro de la zona de cobertura podrán ordenar su menú semanal de comida saludable directamente desde nuestra plataforma o a través del botón de pedidos. 
+### 📢 ¡Preparando el Siguiente Paso en Puebla!
+Seguimos avanzando con los preparativos de nuestro **servicio piloto de venta y reparto de comida preparada** en el estado de Puebla. Aunque el servicio aún no está activo, nuestro equipo de desarrollo y cocina está trabajando intensamente para que la experiencia sea perfecta desde el primer día.
 
-*   **¿Cómo funciona?** Preparamos los platillos basados en las recetas más populares y balanceadas de Cacomi, utilizando ingredientes frescos y locales, envasados listos para calentar y disfrutar.
-*   **Autorización de Ubicación:** Para validar si te encuentras en nuestra zona de reparto, al ingresar a la sección de pedidos la aplicación te solicitará autorización de ubicación mediante las cookies del navegador. Esta información será visible únicamente para ti y podrás editarla o desactivarla en cualquier momento desde tu panel de configuración.
+*   **¿En qué estamos trabajando ahora?** Estamos finalizando las pruebas de nuestras recetas y diseñando la integración tecnológica. Para el lanzamiento, la plataforma contará con un sistema de validación de cobertura de reparto automático que te solicitará autorización de ubicación mediante las cookies del navegador. Esta información será visible únicamente para ti y te servirá para confirmar si te encuentras dentro del municipio piloto.
+*   **Próximamente:** Mantente atento a nuestras redes sociales y a las siguientes ediciones para conocer la fecha oficial de apertura y el primer menú semanal que tendremos disponible para pedido.
 
-¡Acompáñanos en este gran viaje gastronómico y comparte Cacomi con tus seres queridos!
+¡Gracias por acompañarnos y formar parte de la comunidad Cacomi!
 
 ---
 
