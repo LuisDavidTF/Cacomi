@@ -1,0 +1,224 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { BackToHomeLink } from '@components/ui/BackToHomeLink';
+import { SafeEmail } from '@components/ui/SafeEmail';
+import { translations } from '@context/SettingsContext';
+
+export const prerender = false;
+
+const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
+const t = translations[lang] || translations.es;
+---
+
+<Layout title="Términos y Condiciones | Cacomi" description="Términos y condiciones de uso de la plataforma Cacomi.">
+    <div class="max-w-4xl mx-auto py-12 px-6 sm:px-8 bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+        <div class="bg-card shadow-sm rounded-xl p-8 border border-border">
+            <h1 class="text-3xl font-bold text-foreground mb-2">Términos y Condiciones de Uso</h1>
+            <p class="text-muted-foreground text-sm mb-8">
+                Última actualización: 15 de mayo de 2026 (Revisión de Visión de Marketplace y Google OAuth)
+            </p>
+
+            <div class="space-y-8 text-foreground leading-relaxed">
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">1. Introducción</h2>
+                    <p>
+                        Bienvenido a Cacomi. Al acceder o utilizar esta aplicación web, aceptas quedar legalmente vinculado por los presentes Términos y Condiciones.
+                        Si no estás de acuerdo con alguno de ellos, debes abstenerte de utilizar el servicio.
+                    </p>
+                    <div class="bg-amber-500/10 border border-amber-500/20 p-4 rounded-lg mt-4">
+                        <p class="font-medium text-amber-700 dark:text-amber-400 text-sm">
+                            ⚠️ Advertencia de Edad: Este servicio está dirigido exclusivamente a usuarios mayores de 18 años. Los menores de edad solo podrán utilizar la plataforma bajo la supervisión directa y responsabilidad de un padre o tutor legal.
+                        </p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">2. Descripción del Servicio</h2>
+                    <p class="mb-2">Cacomi es una plataforma digital que permite a los usuarios:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Registrarse e iniciar sesión (incluyendo autenticación vía Google)</li>
+                        <li>Crear, publicar y compartir recetas en una red comunitaria</li>
+                        <li>Consultar recetas públicas y descubrir nuevas tendencias culinarias</li>
+                        <li>Generar recetas y planes de comida mediante herramientas de inteligencia artificial</li>
+                        <li>Gestionar un inventario personal de despensa (<em>pantry</em>), incluyendo sincronización offline</li>
+                        <li>Interactuar con funcionalidades relacionadas con la planificación y organización culinaria</li>
+                    </ul>
+                    <p class="mt-4 font-medium">🚀 Visión de Marketplace:</p>
+                    <p class="text-sm">
+                        Cacomi está evolucionando hacia un modelo de mercado (Marketplace) donde los usuarios podrán conectar con chefs certificados para la preparación y entrega de los menús planificados en la plataforma. Esta funcionalidad se rige por términos específicos que se activarán al momento de su lanzamiento oficial.
+                    </p>
+                    <p class="mt-2">Actualmente, la plataforma no maneja pagos ni suscripciones directamente para los servicios básicos de planificación.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">3. Registro y Uso de la Cuenta</h2>
+                    <p class="mb-2">El usuario es responsable de:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Proporcionar información veraz y actualizada</li>
+                        <li>Mantener la confidencialidad de sus credenciales</li>
+                        <li>Todas las actividades realizadas desde su cuenta</li>
+                    </ul>
+                    <p class="mt-2">Cacomi no se hace responsable por accesos no autorizados derivados del uso indebido de credenciales por parte del usuario.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">4. Contenido Generado por Usuarios</h2>
+                    <p class="mb-2">Los usuarios son los únicos responsables del contenido que publican, incluyendo textos, recetas, enlaces e imágenes.</p>
+                    <div class="bg-muted/30 p-4 rounded-lg border border-border">
+                        <p class="font-semibold text-destructive/80 mb-1">Advertencia sobre información sensible</p>
+                        <p class="text-sm">
+                            Cacomi no se hace responsable si un usuario publica datos personales, sensibles o confidenciales dentro del contenido público.
+                            Se recomienda revisar cuidadosamente el contenido antes de publicarlo.
+                        </p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">5. Uso de Inteligencia Artificial</h2>
+                    <p class="mb-4">
+                        Las funciones de IA generan contenido de forma automática y pueden presentar "alucinaciones" (información incorrecta o inventada).
+                    </p>
+                    <p class="mb-4 text-sm text-muted-foreground italic">
+                        {t.legal.internalTrainingClause}
+                    </p>
+                    <div class="bg-destructive/10 border border-destructive/20 p-4 rounded-lg">
+                        <h3 class="font-bold text-destructive mb-2">⛔ DESCARGO DE RESPONSABILIDAD: SALUD Y SEGURIDAD ALIMENTARIA</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-sm text-foreground/90">
+                            <li>
+                                <strong>Tecnología Subyacente (Google Gemini):</strong> El motor de generación de planes de comida y recetas utiliza modelos de inteligencia artificial proporcionados por Google LLC. Al utilizar estas funciones, usted reconoce que la información es generada automáticamente por algoritmos y no por expertos, dietistas o nutricionistas humanos.
+                            </li>
+                            <li>
+                                <strong>NO es asesoramiento médico ni nutricional:</strong> La IA no reemplaza el juicio de un profesional. Ni Cacomi ni Google LLC brindan servicios médicos.
+                            </li>
+                            <li>
+                                <strong>Riesgos de Alérgenos:</strong> La IA puede omitir ingredientes alérgenos graves o sugerir combinaciones peligrosas.
+                            </li>
+                            <li>
+                                <strong>Seguridad Alimentaria:</strong> La IA puede sugerir tiempos de cocción inadecuados o prácticas de manipulación unsafe.
+                            </li>
+                            <li>
+                                <strong>Responsabilidad del Usuario:</strong> Usted es el ÚNICO responsable de verificar cada ingrediente e instrucción antes de cocinar o consumir cualquier receta generada. Cacomi NO asume responsabilidad alguna por reacciones alérgicas, enfermedades o daños derivados del uso de estas recetas.
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">6. Propiedad Intelectual e Imágenes</h2>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Cacomi no aloja imágenes directamente.</li>
+                        <li>Las imágenes se muestran mediante URLs externas proporcionadas por los usuarios.</li>
+                        <li>Cacomi no reclama derechos sobre dichas imágenes.</li>
+                        <li>El usuario garantiza que tiene derecho a usar y compartir los recursos enlazados.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">7. Enlaces a Terceros y Publicidad</h2>
+                    <p class="mb-2">
+                        El servicio puede contener enlaces a sitios web de terceros o mostrar anuncios publicitarios (incluyendo Google AdSense) que no son propiedad ni están controlados por Cacomi.
+                    </p>
+                    <p>
+                        Cacomi no controla ni asume responsabilidad alguna por el contenido, las políticas de privacidad o las prácticas de sitios web o servicios de terceros. El usuario reconoce y acepta que Cacomi no será responsable, directa o indirectamente, de ningún daño o pérdida causados por el uso de dicho contenido, bienes o servicios disponibles a través de dichos sitios web o servicios.
+                    </p>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">8. Moderación y Eliminación de Contenido</h2>
+                    <p class="mb-2">Cacomi se reserva el derecho, sin obligación, de:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Editar</li>
+                        <li>Ocultar</li>
+                        <li>Eliminar</li>
+                        <li>Bloquear contenido o cuentas</li>
+                    </ul>
+                    <p class="mt-2">cuando considere que violan estos términos, la ley o resulten inapropiados, sin previo aviso.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">9. Limitación de Responsabilidad</h2>
+                    <p class="mb-2">
+                        El servicio se proporciona <strong>"AS IS" (TAL CUAL)</strong> y <strong>"SEGÚN DISPONIBILIDAD"</strong>. Cacomi renuncia expresamente a todas las garantías, incluidas las implícitas de comerciabilidad e idoneidad para un propósito particular.
+                    </p>
+                    <ul class="list-disc pl-5 space-y-1 mb-4">
+                        <li>Disponibilidad continua o ininterrumpida del servicio.</li>
+                        <li>Ausencia de errores, virus u otros componentes dañinos.</li>
+                        <li>Seguridad absoluta de los datos transmitidos.</li>
+                        <li>Exactitud o fiabilidad del contenido.</li>
+                    </ul>
+                    <p class="font-medium text-sm">
+                        El usuario reconoce y acepta que el uso de servicios basados en internet conlleva riesgos inherentes de seguridad y que Cacomi no puede garantizar que el servicio esté libre de ataques cibernéticos, interferencias o interrupciones técnicas.
+                    </p>
+                    <p class="mt-2 text-sm text-muted-foreground">
+                        En la medida máxima permitida por la ley, Cacomi no será responsable por daños directos, indirectos, incidentales, especiales, consecuentes o punitivos resultantes del uso o la imposibilidad de uso del servicio.
+                    </p>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">10. Terminación del Servicio</h2>
+                    <p class="mb-4">
+                        Cacomi puede suspender o cancelar cuentas que incumplan estos términos, de forma temporal o permanente.
+                    </p>
+                    <div class="bg-muted/30 border border-border/50 p-4 rounded-lg">
+                        <h3 class="font-bold text-foreground mb-2">Consecuencias de la cancelación de cuenta:</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-sm text-foreground/90">
+                            <li>
+                                <strong>Retención de 30 días:</strong> Por motivos de seguridad, prevención de abusos y cumplimiento legal estándar, al solicitar la eliminación de tu cuenta retendremos tus datos durante 30 días en un periodo de gracia antes de su borrado físico permanente.
+                            </li>
+                            <li>
+                                <strong>Propiedad de Recetas Públicas:</strong> Si has publicado recetas con visibilidad "Pública" y decides desactivar o eliminar tu cuenta, reconoces y aceptas que dichas recetas podrán ser transferidas a una cuenta del sistema (ej. "Cacomi Community") para garantizar que los demás usuarios no pierdan acceso a ellas. Las recetas privadas serán eliminadas por completo tras el periodo de gracia.
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">11. Modificaciones</h2>
+                    <p>
+                        Los términos pueden actualizarse en cualquier momento.
+                        La fecha de actualización reflejará el último cambio y el uso continuado del servicio implica aceptación de los nuevos términos.
+                    </p>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">12. Ley Aplicable y Jurisdicción</h2>
+                    <p>
+                        Estos términos se rigen por las leyes aplicables de México, y cualquier controversia se someterá a los tribunales competentes del país.
+                    </p>
+                </section>
+
+                <section id="contacto" class="pt-6 border-t border-border/40">
+                    <h2 class="text-xl font-semibold mb-3">13. Contacto</h2>
+                    <p class="mb-4">
+                        Para cualquier duda, comentario o solicitud relacionada con estos términos, puedes ponerte en contacto con nuestro equipo de soporte técnico a través de los siguientes canales:
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 bg-muted/20 rounded-lg border border-border flex items-center gap-3">
+                            <span class="text-2xl">📧</span>
+                            <div>
+                                <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Email</p>
+                                <SafeEmail client:load />
+                            </div>
+                        </div>
+                        <div class="p-4 bg-muted/20 rounded-lg border border-border flex items-center gap-3">
+                            <span class="text-2xl">📱</span>
+                            <div>
+                                <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t.common.followUs}</p>
+                                <div class="flex gap-3 mt-1">
+                                    <a href={t.common.instagramUrl} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline text-sm font-medium">Instagram</a>
+                                    <span class="text-muted-foreground/30">|</span>
+                                    <a href={t.common.facebookUrl} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline text-sm font-medium">Facebook</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="pt-8 border-t border-border mt-10">
+                <BackToHomeLink client:load className="" />
+            </div>
+        </div>
+    </div>
+</Layout>

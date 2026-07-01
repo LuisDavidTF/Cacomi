@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { LegalAiDisclaimer } from '@components/ui/LegalAiDisclaimer';
 
 export const metadata = {
     title: 'Política de Privacidad | Culina Smart',
@@ -101,7 +102,15 @@ export default function PrivacyPage() {
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold mb-3">9. Derechos del Usuario (ARCO)</h2>
+                        <h2 className="text-xl font-semibold mb-3">9. Uso de Inteligencia Artificial y Verificación de Contenido</h2>
+                        <p className="mb-2">
+                            Cacomi utiliza herramientas basadas en modelos de inteligencia artificial y facilita que los usuarios compartan recetas. Para garantizar la seguridad del usuario, declaramos las siguientes políticas de descargo de responsabilidad y verificación:
+                        </p>
+                        <LegalAiDisclaimer />
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold mb-3">10. Derechos del Usuario (ARCO)</h2>
                         <p className="mb-2">El usuario puede solicitar:</p>
                         <ul className="list-disc pl-5 space-y-1">
                             <li>Acceso</li>
@@ -118,14 +127,14 @@ export default function PrivacyPage() {
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold mb-3">10. Conservación de Datos</h2>
+                        <h2 className="text-xl font-semibold mb-3">11. Conservación de Datos</h2>
                         <p>
                             Los datos se conservan mientras la cuenta esté activa o sea necesario para cumplir con las finalidades descritas.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold mb-3">11. Cambios a esta Política</h2>
+                        <h2 className="text-xl font-semibold mb-3">12. Cambios a esta Política</h2>
                         <p>
                             Esta política puede modificarse en cualquier momento.
                             Los cambios se reflejarán en la fecha de actualización.
