@@ -159,6 +159,13 @@ export function Navbar() {
                                     BETA
                                 </span>
                             </a>
+                            <a href="/preorder" className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/preorder') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                                <ShoppingBasket className="w-6 h-6" />
+                                <span className="hidden xl:inline">{t?.nav?.preorder || 'Comprar Comida'}</span>
+                                <span className="absolute -top-1 -right-0.5 flex h-4 px-1.5 items-center justify-center rounded-full bg-amber-500 text-[8px] font-black text-white uppercase tracking-tighter shadow-md border border-background scale-90 group-hover:scale-100 transition-transform">
+                                    {t?.nav?.preorderBadge || 'NUEVO'}
+                                </span>
+                            </a>
                         </div>
                         
                         {/* Center: Search Bar */}
@@ -463,6 +470,13 @@ export function Navbar() {
                                 El Reto Diario
                                 <span className="absolute top-3 right-4 bg-green-500 text-[10px] font-black text-white uppercase px-2 py-0.5 rounded-full">
                                     NUEVO
+                                </span>
+                            </a>
+                            <a href="/preorder" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base relative ${getIsActive('/preorder') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={(e) => { setIsMobileMenuOpen(false); if (currentPath === '/preorder') e.preventDefault(); }}>
+                                <ShoppingBasket className="w-6 h-6 mr-3 opacity-70" />
+                                <span className="flex-1">{t?.nav?.preorder || 'Comprar Comida'}</span>
+                                <span className="bg-amber-500 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-md ml-2 tracking-widest">
+                                    {t?.nav?.preorderBadge || 'NUEVO'}
                                 </span>
                             </a>
                             <a href="/settings" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/settings') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>

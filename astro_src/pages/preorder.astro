@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { translations } from '../context/SettingsContext';
+import { PreorderScreen } from '../components/preorder/PreorderScreen';
+
+export const prerender = false;
+
+const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
+const t = translations[lang] || translations.es;
+---
+
+<Layout title={`${t.preorder?.title || 'Pre-venta de Comida'} - Cacomi`} noindex={true}>
+  <PreorderScreen client:load />
+</Layout>

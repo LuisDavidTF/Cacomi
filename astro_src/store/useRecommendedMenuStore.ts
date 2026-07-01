@@ -10,7 +10,8 @@ export interface RecommendedMeal {
     proteinGrams: number;
     carbsGrams: number;
     fatGrams: number;
-    mealType: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+    mealType: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'SNACK_1' | 'SNACK_2';
+    dayOfWeek?: 'lun' | 'mar' | 'mie' | 'jue' | 'vie' | 'sab' | 'dom';
     portionMultiplier: number;
     selectionLogicCode: SelectionLogicCode;
     aiReasoning: string;
@@ -31,8 +32,8 @@ export const useRecommendedMenuStore = create<RecommendedMenuState>()(
         (set) => ({
             selection: [],
             addMeal: (meal) => set((state) => {
-                if (state.selection.length >= 5) return state;
-                if (state.selection.some(m => m.recipeUUID === meal.recipeUUID)) return state;
+                if (state.selection.length >= 35) return state;
+                if (state.selection.some(m => m.recipeUUID === meal.recipeUUID && m.dayOfWeek === meal.dayOfWeek)) return state;
                 
                 const fullMeal: RecommendedMeal = {
                     recipeUUID: meal.recipeUUID,
@@ -43,6 +44,7 @@ export const useRecommendedMenuStore = create<RecommendedMenuState>()(
                     carbsGrams: meal.carbsGrams || 0,
                     fatGrams: meal.fatGrams || 0,
                     mealType: meal.mealType || 'LUNCH',
+                    dayOfWeek: meal.dayOfWeek || 'lun',
                     portionMultiplier: meal.portionMultiplier || 1,
                     selectionLogicCode: meal.selectionLogicCode || 'PROTEIN_FILL',
                     aiReasoning: meal.aiReasoning || 'Este plato es ideal para mantener tu energía hoy.',

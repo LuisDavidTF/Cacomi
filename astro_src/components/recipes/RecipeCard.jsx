@@ -17,7 +17,11 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const isAdmin = user?.role === 'ADMIN';
   const isSelected = selection.some(m => m.recipeUUID === (recipe.publicId || recipe.id));
 
-  const handleAddToRecommended = (e) => {
+  const [showRecommendedModal, setShowRecommendedModal] = useState(false);
+  const [selectedDay, setSelectedDay] = useState('lun');
+  const [selectedType, setSelectedType] = useState('LUNCH');
+
+  const handleStarClick = (e) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -29,20 +33,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
           return;
       }
 
-      addMeal({
-          recipeUUID: uuid,
-          recipeName: recipe.name,
-          imageUrl: recipe.imageUrl || 'https://placehold.co/600x400/f3f4f6/9ca3af',
-          calories: Math.round(recipe.calories || recipe.nutrition?.totalCalories || 0),
-          proteinGrams: Math.round(recipe.protein || recipe.nutrition?.totalProtein || 0),
-          carbsGrams: Math.round(recipe.carbs || recipe.nutrition?.totalCarbohydrates || 0),
-          fatGrams: Math.round(recipe.fat || recipe.nutrition?.totalFat || 0),
-          mealType: 'LUNCH',
-          portionMultiplier: 1,
-          selectionLogicCode: 'PROTEIN_FILL',
-          aiReasoning: 'Este plato es ideal para mantener tu energía hoy.',
-          estimatedCost: recipe.estimatedCost || 0
-      });
+      setShowRecommendedModal(true);
   };
   // Safe accessor for user ID comparison - Robust against String/Int mismatches and undefined
   // FALLBACK: Name comparison (requested by user due to missing API IDs)
@@ -121,7 +112,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
             <div className="flex gap-2">
                 {isAdmin && (
                   <button 
-                      onClick={handleAddToRecommended} 
+                      onClick={handleStarClick} 
                       className={cn(
                         "p-2 rounded-full transition-all shadow-sm",
                         isSelected 
@@ -199,6 +190,85 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
           </div>
 
         </div>
+
+        {showRecommendedModal && (
+              <div 
+                  className="absolute inset-0 z-30 bg-black/95 backdrop-blur-md p-4 flex flex-col justify-center animate-in fade-in duration-200"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              >
+                  <h4 className="text-xs font-black text-white uppercase tracking-widest mb-3 flex items-center gap-1.5 justify-center">
+                      <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                      Menú Recomendado
+                  </h4>
+                  
+                  <div className="space-y-3">
+                      <div>
+                          <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Día</label>
+                          <select 
+                              value={selectedDay}
+                              onChange={(e) => setSelectedDay(e.target.value)}
+                              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-1 text-xs text-white font-bold focus:outline-none"
+                          >
+                              <option value="lun">Lunes</option>
+                              <option value="mar">Martes</option>
+                              <option value="mie">Miércoles</option>
+                              <option value="jue">Jueves</option>
+                              <option value="vie">Viernes</option>
+                              <option value="sab">Sábado</option>
+                              <option value="dom">Domingo</option>
+                          </select>
+                      </div>
+
+                      <div>
+                          <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Tipo de Comida</label>
+                          <select 
+                              value={selectedType}
+                              onChange={(e) => setSelectedType(e.target.value)}
+                              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-1 text-xs text-white font-bold focus:outline-none"
+                          >
+                              <option value="BREAKFAST">Desayuno</option>
+                              <option value="SNACK_1">Colación 1</option>
+                              <option value="LUNCH">Almuerzo</option>
+                              <option value="SNACK_2">Colación 2</option>
+                              <option value="DINNER">Cena</option>
+                          </select>
+                      </div>
+                  </div>
+
+                  <div className="flex gap-2 mt-4">
+                      <button
+                          onClick={() => setShowRecommendedModal(false)}
+                          className="flex-1 py-2 bg-slate-800 text-slate-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                      >
+                          Cancelar
+                      </button>
+                      <button
+                          onClick={() => {
+                              const uuid = recipe.publicId || recipe.id;
+                              addMeal({
+                                  recipeUUID: uuid,
+                                  recipeName: recipe.name,
+                                  imageUrl: recipe.imageUrl || 'https://placehold.co/600x400/f3f4f6/9ca3af',
+                                  calories: Math.round(recipe.calories || recipe.nutrition?.totalCalories || 0),
+                                  proteinGrams: Math.round(recipe.protein || recipe.nutrition?.totalProtein || 0),
+                                  carbsGrams: Math.round(recipe.carbs || recipe.nutrition?.totalCarbohydrates || 0),
+                                  fatGrams: Math.round(recipe.fat || recipe.nutrition?.totalFat || 0),
+                                  mealType: selectedType,
+                                  dayOfWeek: selectedDay,
+                                  portionMultiplier: 1,
+                                  selectionLogicCode: 'PROTEIN_FILL',
+                                  aiReasoning: 'Este plato es ideal para mantener tu energía hoy.',
+                                  estimatedCost: recipe.estimatedCost || 0
+                              });
+                              setShowRecommendedModal(false);
+                          }}
+                          className="flex-1 py-2 bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                      >
+                          Añadir
+                      </button>
+                  </div>
+              </div>
+          )}
       </div>
 
       {/* Content */}
