@@ -12,6 +12,7 @@ import { Button } from '@components/ui/Button';
 import { EditIcon, TrashIcon } from '@components/ui/Icons';
 import { useToast } from '@context/ToastContext';
 import { Modal } from '@components/ui/Modal';
+import { BadgeCheck } from 'lucide-react';
 
 function useRecipeData(id, initialData) {
     const [recipe, setRecipe] = useState(initialData || null);
@@ -79,7 +80,7 @@ function useRecipeData(id, initialData) {
 
 function RecipeDetailContent({ recipe }) {
     const { user } = useAuth();
-    const { t } = useSettings();
+    const { t, language } = useSettings();
     const router = useRouter();
     const { showToast } = useToast();
     const api = useApiClient();
@@ -145,7 +146,14 @@ function RecipeDetailContent({ recipe }) {
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent flex items-end">
                     <div className="p-6 md:p-8 text-white w-full flex justify-between items-end">
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-bold mb-2 shadow-sm">{recipe.name}</h1>
+                            <h1 className="text-3xl md:text-4xl font-bold mb-2 shadow-sm flex items-center gap-2 flex-wrap">
+                                {recipe.name}
+                                {(recipe.verified || recipe.isVerified || recipe.is_verified) && (
+                                    <span className="inline-flex items-center" title={t.recipe.verifiedBadgeTooltip || "Receta Verificada por Chefs de Cacomi"}>
+                                        <BadgeCheck className="text-blue-400 w-7 h-7 fill-blue-400/20 flex-shrink-0 drop-shadow-md" />
+                                    </span>
+                                )}
+                            </h1>
                             <div className="flex items-center gap-4 text-sm font-medium">
                                 <span className="flex items-center bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
                                     <ClockIcon className="w-4 h-4 mr-2" />
@@ -184,6 +192,28 @@ function RecipeDetailContent({ recipe }) {
 
                 {/* Main Content */}
                 <div className="space-y-8">
+                    {/* Legal AI & User-Generated Content Disclaimer */}
+                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 space-y-3">
+                        <div className="flex items-center gap-2 text-amber-800 dark:text-amber-400 font-bold">
+                            <span className="text-lg">⚠️</span>
+                            <h3>{t.recipe.aiWarningTitle || 'Advertencia de Contenido'}</h3>
+                        </div>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                            {t.recipe.aiWarningDesc}
+                        </p>
+                        <hr className="border-amber-500/20 my-2" />
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                            {t.recipe.chefVerificationNotice}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mt-2 flex-wrap">
+                            <span>{t.recipe.verifiedBadgeDesc}</span>
+                            <span className="inline-flex items-center bg-blue-500/10 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full font-bold gap-1 shadow-xs border border-blue-500/20">
+                                <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500/20" />
+                                {language === 'es' ? 'Verificado' : language === 'fr' ? 'Vérifié' : 'Verified'}
+                            </span>
+                        </div>
+                    </div>
+
                     {/* Mobile Actions */}
                     {isOwner && (
                         <div className="flex sm:hidden gap-3 mb-6">

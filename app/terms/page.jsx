@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { useSettings } from '@context/SettingsContext';
+import { LegalAiDisclaimer } from '@components/ui/LegalAiDisclaimer';
 
 export const metadata = {
     title: 'Términos y Condiciones | Culina Smart',
@@ -89,6 +89,7 @@ export default function TermsPage() {
                                 </li>
                             </ul>
                         </div>
+                        <LegalAiDisclaimer />
                     </section>
 
                     <section>
