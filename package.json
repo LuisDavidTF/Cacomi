@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 5173",
-    "build": "next build --webpack",
+    "build": "next build --webpack && npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
     "preview": "npm run pages:build && wrangler pages dev .vercel/output/static",
     "start": "next start",
@@ -40,5 +40,12 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "wrangler": "^4.59.3"
+  },
+  "overrides": {
+    "postcss": "^8.5.10",
+    "esbuild": "^0.25.0",
+    "serialize-javascript": "^7.0.7",
+    "undici": "^6.20.0",
+    "ws": "^8.18.0"
   }
 }
