@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { BackToHomeLink } from '@components/ui/BackToHomeLink';
 import { SafeEmail } from '@components/ui/SafeEmail';
 import { translations } from '@context/SettingsContext';
+import { LegalAiDisclaimer } from '@components/ui/LegalAiDisclaimer';
 
 export const prerender = false;
 
@@ -102,6 +103,7 @@ const t = translations[lang] || translations.es;
                             </li>
                         </ul>
                     </div>
+                    <LegalAiDisclaimer client:load />
                 </section>
 
                 <section>

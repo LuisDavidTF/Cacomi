@@ -15,7 +15,7 @@ import { slugify } from '@utils/slugify';
 import { getEnv } from '@utils/env';
 import { db } from '@/lib/db';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { CloudDownload, CheckCircle2, Loader2 } from 'lucide-react';
+import { CloudDownload, CheckCircle2, Loader2, BadgeCheck } from 'lucide-react';
 
 /**
  * RecipeDetail Component
@@ -296,8 +296,13 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                 </div>
                             )}
 
-                            <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 lg:mb-6 leading-tight drop-shadow-md">
+                            <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 lg:mb-6 leading-tight drop-shadow-md flex items-center gap-3 flex-wrap">
                                 {recipe.name}
+                                {(recipe.verified || recipe.isVerified || recipe.is_verified) && (
+                                    <span className="inline-flex items-center" title={t.recipe?.verifiedBadgeTooltip || "Receta Verificada por Chefs de Cacomi"}>
+                                        <BadgeCheck className="text-blue-400 w-8 h-8 md:w-10 md:h-10 fill-blue-400/20 flex-shrink-0 drop-shadow-md" />
+                                    </span>
+                                )}
                             </h1>
 
                             <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm font-medium">
@@ -355,6 +360,28 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
 
                     {/* Column 1, Row 1: Description */}
                     <div className="space-y-8 lg:col-start-1 lg:row-start-1 min-w-0">
+                        {/* Legal AI & User-Generated Content Disclaimer */}
+                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 space-y-3">
+                            <div className="flex items-center gap-2 text-amber-850 dark:text-amber-400 font-bold">
+                                <span className="text-lg">⚠️</span>
+                                <h3>{t.recipe?.aiWarningTitle || 'Advertencia de Contenido'}</h3>
+                            </div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                {t.recipe?.aiWarningDesc}
+                            </p>
+                            <hr className="border-amber-500/20 my-2" />
+                            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                                {t.recipe?.chefVerificationNotice}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mt-2 flex-wrap">
+                                <span>{t.recipe?.verifiedBadgeDesc}</span>
+                                <span className="inline-flex items-center bg-blue-500/10 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full font-bold gap-1 shadow-sm border border-blue-500/20">
+                                    <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500/20" />
+                                    {language === 'es' ? 'Verificado' : language === 'fr' ? 'Vérifié' : 'Verified'}
+                                </span>
+                            </div>
+                        </div>
+
                         {/* Mobile Button */}
                         <div className="flex sm:hidden w-full gap-2">
                             <Button

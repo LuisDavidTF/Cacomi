@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { BackToHomeLink } from '@components/ui/BackToHomeLink';
 import { SafeEmail } from '@components/ui/SafeEmail';
 import { translations } from '@context/SettingsContext';
+import { LegalAiDisclaimer } from '@components/ui/LegalAiDisclaimer';
 
 export const prerender = false;
 
@@ -139,7 +140,15 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">10. Derechos del Usuario (ARCO)</h2>
+                    <h2 class="text-xl font-semibold mb-3">10. Uso de Inteligencia Artificial y Verificación de Contenido</h2>
+                    <p class="mb-2">
+                        Cacomi utiliza herramientas basadas en modelos de inteligencia artificial y facilita que los usuarios compartan recetas. Para garantizar la seguridad del usuario, declaramos las siguientes políticas de descargo de responsabilidad y verificación:
+                    </p>
+                    <LegalAiDisclaimer client:load />
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">11. Derechos del Usuario (ARCO)</h2>
                     <p class="mb-2">El usuario puede solicitar:</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li>Acceso</li>
@@ -159,7 +168,7 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">11. Conservación de Datos</h2>
+                    <h2 class="text-xl font-semibold mb-3">12. Conservación de Datos</h2>
                     <p class="mb-4">
                         Los datos se conservan mientras la cuenta esté activa o sea necesario para cumplir con las finalidades descritas.
                     </p>
@@ -176,7 +185,7 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold mb-3">12. Cambios a esta Política</h2>
+                    <h2 class="text-xl font-semibold mb-3">13. Cambios a esta Política</h2>
                     <p>
                         Esta política puede modificarse en cualquier momento.
                         Los cambios se reflejarán en la fecha de actualización.
@@ -184,7 +193,7 @@ const t = translations[lang] || translations.es;
                 </section>
 
                 <section id="contacto" class="pt-6 border-t border-border/40">
-                    <h2 class="text-xl font-semibold mb-3">13. Contacto</h2>
+                    <h2 class="text-xl font-semibold mb-3">14. Contacto</h2>
                     <p class="mb-4">
                         Si tienes preguntas sobre esta Política de Privacidad, puedes contactarnos a través de los siguientes canales oficiales:
                     </p>

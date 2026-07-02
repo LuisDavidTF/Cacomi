@@ -462,7 +462,12 @@ export const translations = {
             calories: 'Calorías',
             protein: 'Proteína',
             carbs: 'Carbohidratos',
-            fat: 'Grasas'
+            fat: 'Grasas',
+            aiWarningTitle: 'Advertencia de Contenido',
+            aiWarningDesc: 'Casi todo o en su mayoría el contenido disponible en Cacomi puede estar o no generado con inteligencia artificial o por otros usuarios. Te pedimos tener precaución en su uso y verificar los pasos, ingredientes y porciones, ya que podrían contener errores.',
+            chefVerificationNotice: 'Próximamente: En las próximas semanas comenzaremos a ofrecer recetas verificadas por nuestros chefs de Cacomi. Estas serán 100% seguras, comestibles y con los pasos correctos.',
+            verifiedBadgeDesc: 'Las recetas verificadas se mostrarán así:',
+            verifiedBadgeTooltip: 'Receta Verificada por Chefs de Cacomi'
         },
 
         settings: {
@@ -588,7 +593,11 @@ export const translations = {
         },
         legal: {
             googleAiDisclaimer: 'Google LLC (Gemini API): Procesamiento temporal de preferencias dietéticas e ingredientes para generar recetas mediante IA. El procesamiento se rige por los términos de servicio de Google AI Studio, los cuales pueden incluir el uso de datos anonimizados para la mejora del modelo en su versión gratuita.',
-            internalTrainingClause: 'Cacomi podrá utilizar datos de interacción anonimizados para el entrenamiento y optimización de sus algoritmos internos de recomendación y mejora del servicio.'
+            internalTrainingClause: 'Cacomi podrá utilizar datos de interacción anonimizados para el entrenamiento y optimización de sus algoritmos internos de recomendación y mejora del servicio.',
+            aiWarningTermsTitle: 'Descargo de Responsabilidad de Contenido por IA',
+            aiWarningTermsDesc: 'Casi todo o en su mayoría el contenido disponible en Cacomi (incluyendo recetas, instrucciones y sugerencias) puede estar o no generado con inteligencia artificial o compartido por otros usuarios. Los usuarios deben tener precaución extrema en su uso. Cacomi no asume responsabilidad alguna por errores en las recetas, cantidades incorrectas o ingredientes dañinos.',
+            chefVerificationNotice: 'Trabajamos activamente para implementar recetas verificadas en las próximas semanas. Dichas recetas serán validadas por nuestros chefs profesionales para asegurar que son comestibles, seguras y correctas.',
+            verificationIconExplanation: 'Las recetas validadas y seguras contarán con una palomita azul que se mostrará en su título como vista previa a continuación:'
         },
         shoppingList: {
             title: 'Lista de Compras',
@@ -1044,7 +1053,12 @@ export const translations = {
             calories: 'Calories',
             protein: 'Protein',
             carbs: 'Carbs',
-            fat: 'Fat'
+            fat: 'Fat',
+            aiWarningTitle: 'Content Warning',
+            aiWarningDesc: 'Almost all or most of the content available on Cacomi may or may not be generated with artificial intelligence or shared by other users. We ask you to exercise caution in its use and verify the steps, ingredients, and portions, as they may contain errors.',
+            chefVerificationNotice: 'Coming soon: In the next few weeks, we will start offering verified recipes by our Cacomi chefs. These will be 100% safe, edible, and with the correct steps.',
+            verifiedBadgeDesc: 'Verified recipes will be shown as:',
+            verifiedBadgeTooltip: 'Recipe Verified by Cacomi Chefs'
         },
 
         settings: {
@@ -1170,7 +1184,11 @@ export const translations = {
         },
         legal: {
             googleAiDisclaimer: 'Google LLC (Gemini API): Temporary processing of dietary preferences and ingredients to generate recipes via AI. Processing is governed by the Google AI Studio terms of service, which may include the use of anonymized data for model improvement in its free version.',
-            internalTrainingClause: 'Cacomi may use anonymized interaction data for the training and optimization of its internal recommendation algorithms and service improvement.'
+            internalTrainingClause: 'Cacomi may use anonymized interaction data for the training and optimization of its internal recommendation algorithms and service improvement.',
+            aiWarningTermsTitle: 'AI Content Disclaimer',
+            aiWarningTermsDesc: 'Almost all or most of the content available on Cacomi (including recipes, instructions, and suggestions) may or may not be generated with artificial intelligence or shared by other users. Users must exercise extreme caution. Cacomi assumes no responsibility for recipe errors, incorrect quantities, or harmful ingredients.',
+            chefVerificationNotice: 'We are actively working to implement verified recipes in the coming weeks. These recipes will be validated by our professional chefs to ensure they are edible, safe, and correct.',
+            verificationIconExplanation: 'Validated and safe recipes will feature a blue checkmark shown in their title as previewed below:'
         },
         shoppingList: {
             title: 'Shopping List',
@@ -1597,7 +1615,12 @@ export const translations = {
             calories: 'Calories',
             protein: 'Protéines',
             carbs: 'Glucides',
-            fat: 'Lipides'
+            fat: 'Lipides',
+            aiWarningTitle: 'Avertissement de Contenu',
+            aiWarningDesc: 'Presque tout ou la majorité du contenu disponible sur Cacomi peut être ou non généré par intelligence artificielle ou partagé par d\'autres utilisateurs. Nous vous demandons d\'être prudent dans son utilisation et de vérifier les étapes, les ingrédients et les portions, car ils peuvent contenir des erreurs.',
+            chefVerificationNotice: 'Prochainement : Dans les prochaines semaines, nous commencerons à proposer des recettes vérifiées par nos chefs de Cacomi. Celles-ci seront 100 % sûres, comestibles et avec les bonnes étapes.',
+            verifiedBadgeDesc: 'Les recettes vérifiées seront affichées ainsi :',
+            verifiedBadgeTooltip: 'Recette vérifiée par les chefs Cacomi'
         },
 
         settings: {
@@ -1705,7 +1728,11 @@ export const translations = {
         },
         legal: {
             googleAiDisclaimer: 'Google LLC (Gemini API) : Traitement temporaire des préférences diététiques et des ingrédients pour générer des recettes via l\'IA. Le traitement est régi par les conditions d\'utilisation de Google AI Studio, qui peuvent inclure l\'utilisation de données anonymisées pour l\'amélioration du modèle dans sa version gratuite.',
-            internalTrainingClause: 'Cacomi peut utilizar des données d\'interaction anonymisées pour l\'entraînement et l\'optimisation de ses propres algorithmes de recommandation internes et l\'amélioration du service.'
+            internalTrainingClause: 'Cacomi peut utilizar des données d\'interaction anonymisées pour l\'entraînement et l\'optimisation de ses propres algorithmes de recommandation internes et l\'amélioration du service.',
+            aiWarningTermsTitle: 'Clause de non-responsabilité pour le contenu généré par l\'IA',
+            aiWarningTermsDesc: 'Presque tout ou la majorité du contenu disponible sur Cacomi (y compris les recettes, les instructions et les suggestions) peut être ou non généré par intelligence artificielle ou partagé par d\'autres utilisateurs. Les utilisateurs doivent faire preuve d\'une prudence extrême. Cacomi décline toute responsabilité pour les erreurs de recettes, les quantités incorrectes ou les ingrédients nocifs.',
+            chefVerificationNotice: 'Nous travaillons activement à la mise en œuvre de recettes vérifiées dans les semaines à venir. Ces recettes seront validées par nos chefs professionnels afin de garantir qu\'elles soient comestibles, sûres et correctes.',
+            verificationIconExplanation: 'Les recettes validées et sûres comporteront une coche bleue qui apparaîtra dans leur titre, comme illustré ci-dessous :'
         },
         shoppingList: {
             title: 'Liste de Courses',
