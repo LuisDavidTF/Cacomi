@@ -32,6 +32,11 @@ import {
 } from 'lucide-react';
 import { RECOMMENDED_WEEKLY_MENU } from '@/constants/recommendedMenu';
 import { cn, generateUUIDv7 } from '@/lib/utils';
+import { db } from '../../lib/db';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51MockKeyForPreviewPurposes1234567890');
 
 // Central kitchen coordinates (Monterrey Centro)
 const KITCHEN_LAT = 25.6866;
@@ -106,9 +111,11 @@ const INITIAL_COMBOS: PreorderCombo[] = [
     }
 ];
 
-export function PreorderScreen() {
+function PreorderScreenForm() {
     const { t, language } = useSettings();
     const { isAuthenticated, user } = useAuth();
+    const stripe = useStripe();
+    const elements = useElements();
 
     // Admin vs Customer View Mode
     const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
@@ -131,10 +138,43 @@ export function PreorderScreen() {
         return INITIAL_COMBOS;
     });
 
-    // Save combos on edit
+    // Load combos from server on mount
+    useEffect(() => {
+        async function loadServerCombos() {
+            try {
+                const res = await fetch('/api/preorder/combos');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        setCombos(data);
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not load combos from server, using local fallback:", err);
+            }
+        }
+        loadServerCombos();
+    }, []);
+
+    // Save combos on edit (locally & server if Admin)
     useEffect(() => {
         localStorage.setItem('cacomi_preorder_combos', JSON.stringify(combos));
-    }, [combos]);
+
+        if (user?.role === 'ADMIN') {
+            const saveToServer = async () => {
+                try {
+                    await fetch('/api/preorder/combos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(combos)
+                    });
+                } catch (err) {
+                    console.error("Error updating server combos:", err);
+                }
+            };
+            saveToServer();
+        }
+    }, [combos, user]);
 
     // Customer Selection State (Structured by Day and Combo ID)
     const [orderSelection, setOrderSelection] = useState<{ [day: string]: { [comboId: string]: SelectedComboConfig } }>({});
@@ -297,14 +337,14 @@ export function PreorderScreen() {
         });
     };
 
-    // Run AI Portion calculations
-    const runAIPortionCalculation = (day: string, combo: PreorderCombo) => {
+    // Run AI Portion calculations (reading from Dexie userProfile)
+    const runAIPortionCalculation = async (day: string, combo: PreorderCombo) => {
         const key = `${day}_${combo.id}`;
         setIsCalculatingAI(prev => ({ ...prev, [key]: true }));
 
         const steps = [
             'Buscando perfil metabólico de Cacomi...',
-            'Calculando meta proteica diaria (95g)...',
+            'Calculando requerimientos diarios con Mifflin-St Jeor...',
             'Ajustando porciones según calorías y macros...',
             '¡Optimización completada por Chef IA!'
         ];
@@ -312,22 +352,103 @@ export function PreorderScreen() {
         let currentStepIdx = 0;
         setAiStep(steps[0]);
 
-        const interval = setInterval(() => {
+        // Load profile from Dexie database
+        let localProfile: any = null;
+        try {
+            localProfile = await db.userProfile.get('current');
+        } catch (dbErr) {
+            console.warn("Dexie profile query error:", dbErr);
+        }
+
+        const interval = setInterval(async () => {
             currentStepIdx++;
             if (currentStepIdx < steps.length) {
                 setAiStep(steps[currentStepIdx]);
             } else {
                 clearInterval(interval);
                 
-                // Set optimized portions (e.g. 1.25x for Breakfast, 0.9x for Snack)
+                // Physical metrics calculations
+                let weight = 70;
+                let height = 170;
+                let age = 30;
+                let gender = 'MALE';
+                let activity = 'SEDENTARY';
+                let goal = 'MAINTENANCE';
+                
+                if (localProfile) {
+                    weight = localProfile.currentWeightKg || 70;
+                    height = localProfile.heightCm || 170;
+                    gender = localProfile.gender || 'MALE';
+                    activity = localProfile.activityLevel || 'SEDENTARY';
+                    goal = localProfile.goalType || 'MAINTENANCE';
+                    
+                    if (localProfile.birthDate) {
+                        const birth = new Date(localProfile.birthDate);
+                        const today = new Date();
+                        age = today.getFullYear() - birth.getFullYear();
+                        const m = today.getMonth() - birth.getMonth();
+                        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                            age--;
+                        }
+                    }
+                }
+                
+                // Mifflin-St Jeor Formula
+                let bmr = 10 * weight + 6.25 * height - 5 * age;
+                if (gender === 'MALE') bmr += 5;
+                else bmr -= 161;
+                
+                // TDEE activity factor
+                let actFactor = 1.2;
+                if (activity === 'SEDENTARY') actFactor = 1.2;
+                else if (activity === 'LIGHTLY_ACTIVE' || activity === 'LIGHT') actFactor = 1.375;
+                else if (activity === 'MODERATELY_ACTIVE' || activity === 'MODERATE') actFactor = 1.55;
+                else if (activity === 'VERY_ACTIVE' || activity === 'HIGH') actFactor = 1.725;
+                else if (activity === 'EXTREMELY_ACTIVE' || activity === 'EXTRA') actFactor = 1.9;
+                
+                const tdee = bmr * actFactor;
+                
+                // Adjust for calorie goals
+                let targetCalories = tdee;
+                if (goal === 'LOSE_WEIGHT' || goal === 'DEFICIT') targetCalories -= 500;
+                else if (goal === 'GAIN_WEIGHT' || goal === 'SURPLUS') targetCalories += 400;
+                
+                targetCalories = Math.max(1200, Math.round(targetCalories));
+                
+                const calculatedPortions: { [key: string]: number } = {};
+                let explanation = '';
+                
+                if (localProfile) {
+                    explanation = `Chef IA (Mifflin-St Jeor): Detectado perfil de ${gender === 'MALE' ? 'Hombre' : 'Mujer'} de ${age} años (${weight} kg, ${height} cm). Tu requerimiento diario estimado es de ${Math.round(tdee)} kcal, ajustado a ${Math.round(targetCalories)} kcal/día para ${goal === 'LOSE_WEIGHT' || goal === 'DEFICIT' ? 'pérdida de peso' : goal === 'GAIN_WEIGHT' || goal === 'SURPLUS' ? 'ganancia muscular' : 'mantenimiento'}.`;
+                } else {
+                    explanation = `Chef IA (Genérico): No se halló perfil físico en Dexie. Usando promedio (70 kg, Mantenimiento) para calcular. Meta diaria: ~2000 kcal.`;
+                }
+
                 setOrderSelection(prev => {
                     const daySelection = { ...prev[day] };
                     const config = { ...daySelection[combo.id] };
                     const portions = { ...config.portions };
                     
-                    combo.recipes.forEach((r, idx) => {
-                        const optimizedVal = idx === 0 ? 1.25 : 0.85; // Simulated optimization
-                        portions[r.mealType] = Math.max(combo.minPortion, Math.min(combo.maxPortion, optimizedVal));
+                    combo.recipes.forEach((r) => {
+                         const mealData = getMealDetails(day, r.mealType);
+                         const baseCal = mealData?.calories || 450;
+                         
+                         // Calories allocation per meal type:
+                         // Breakfast = 30%, Snack 1 = 10%, Lunch = 35%, Snack 2 = 10%
+                         let mealWeight = 0.30;
+                         if (r.mealType === 'BREAKFAST') mealWeight = 0.30;
+                         else if (r.mealType === 'SNACK_1' || r.mealType === 'SNACK_2') mealWeight = 0.10;
+                         else if (r.mealType === 'LUNCH') mealWeight = 0.35;
+                         
+                         const targetMealCal = targetCalories * mealWeight;
+                         let multiplier = targetMealCal / baseCal;
+                         
+                         // Clamp and round portions to 0.05 step
+                         multiplier = Math.max(combo.minPortion, Math.min(combo.maxPortion, multiplier));
+                         multiplier = Math.round(multiplier * 20) / 20;
+                         
+                         portions[r.mealType] = multiplier;
+                         calculatedPortions[r.mealType] = multiplier;
                     });
 
                     config.portions = portions;
@@ -335,9 +456,13 @@ export function PreorderScreen() {
                     return { ...prev, [day]: daySelection };
                 });
 
+                const portionsDetail = Object.entries(calculatedPortions)
+                    .map(([mType, mult]) => `${mType === 'BREAKFAST' ? 'Desayuno' : mType === 'LUNCH' ? 'Almuerzo' : 'Colación'}: x${mult.toFixed(2)}`)
+                    .join(', ');
+
                 setAiExplanations(prev => ({
                     ...prev,
-                    [key]: `Chef IA: Se ajustó el plato principal a 1.25x (+30% proteína) y el snack a 0.85x (-15% carbohidratos simples) para optimizar tu objetivo de recomposición corporal.`
+                    [key]: `${explanation} Porciones sugeridas óptimas: ${portionsDetail}.`
                 }));
                 setIsCalculatingAI(prev => ({ ...prev, [key]: false }));
             }
@@ -437,9 +562,11 @@ export function PreorderScreen() {
 
         const errors: Record<string, string> = {};
         if (!cardName.trim()) errors.cardName = language === 'es' ? 'Nombre requerido' : 'Name required';
-        if (cardNumber.replace(/\s/g, '').length < 15) errors.cardNumber = language === 'es' ? 'Número inválido' : 'Invalid number';
-        if (cardExpiry.length < 5) errors.cardExpiry = language === 'es' ? 'MM/YY inválido' : 'Invalid MM/YY';
-        if (cardCvc.length < 3) errors.cardCvc = language === 'es' ? 'CVC inválido' : 'Invalid CVC';
+        if (!stripe && !cardNumber.trim()) {
+            if (cardNumber.replace(/\s/g, '').length < 15) errors.cardNumber = language === 'es' ? 'Número inválido' : 'Invalid number';
+            if (cardExpiry.length < 5) errors.cardExpiry = language === 'es' ? 'MM/YY inválido' : 'Invalid MM/YY';
+            if (cardCvc.length < 3) errors.cardCvc = language === 'es' ? 'CVC inválido' : 'Invalid CVC';
+        }
         if (!cardZip.trim()) errors.cardZip = language === 'es' ? 'CP requerido' : 'ZIP required';
 
         if (Object.keys(errors).length > 0) {
@@ -485,12 +612,52 @@ export function PreorderScreen() {
             const data = await response.json();
 
             if (response.ok && data.success) {
+                // Stripe payment confirmation if clientSecret and Stripe SDK are ready
+                if (data.clientSecret && stripe && elements) {
+                    const cardElement = elements.getElement(CardElement);
+                    if (cardElement) {
+                        const stripeResult = await stripe.confirmCardPayment(data.clientSecret, {
+                            payment_method: {
+                                card: cardElement,
+                                billing_details: {
+                                    name: cardName,
+                                    address: {
+                                        postal_code: cardZip
+                                    }
+                                }
+                            }
+                        });
+
+                        if (stripeResult.error) {
+                            alert(stripeResult.error.message || 'Error al procesar pago en Stripe.');
+                            setIsProcessing(false);
+                            return;
+                        }
+                    }
+                }
+
+                // Save preorder ticket locally to Dexie
+                const orderId = data.orderId || generateUUIDv7().slice(0, 8).toUpperCase();
+                const preorderItem = {
+                    id: orderId,
+                    orderNumber: orderId,
+                    date: new Date().toISOString(),
+                    meals: checkoutData,
+                    amountPaid: cart.deposit,
+                    remaining: cart.remaining,
+                    status: 'CONFIRMED',
+                    paymentPlan,
+                    deliveryDateRange: language === 'es' ? 'Próxima Semana (Lunes a Domingo)' : 'Next Week (Mon to Sun)',
+                    userEmail: user?.email || ''
+                };
+                await db.preorders.add(preorderItem as any);
+
                 setTicketData({
-                    orderNumber: data.orderId || generateUUIDv7().slice(0, 8).toUpperCase(),
+                    orderNumber: orderId,
                     totalPaid: cart.deposit,
                     remaining: cart.remaining,
                     itemsCount: cart.selectedCount,
-                    deliveryDateRange: language === 'es' ? 'Próxima Semana (Lunes a Domingo)' : 'Next Week (Mon to Sun)'
+                    deliveryDateRange: preorderItem.deliveryDateRange
                 });
                 setIsSuccess(true);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1264,59 +1431,26 @@ export function PreorderScreen() {
                                     {formErrors.cardName && <p className="text-[9px] font-black text-red-500 uppercase">{formErrors.cardName}</p>}
                                 </div>
 
-                                <div className="space-y-1 relative">
+                                <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                                        Número de tarjeta
+                                        Información de la tarjeta (Stripe)
                                     </label>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={cardNumber}
-                                            onChange={handleCardNumberChange}
-                                            placeholder="4242 4242 4242 4242"
-                                            className="w-full pl-4 pr-12 py-3 rounded-xl border border-border bg-muted/20 text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none font-mono"
-                                        />
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                                            {cardBrand === 'visa' && (
-                                                <span className="text-[9px] font-black uppercase bg-blue-600 text-white px-2 py-0.5 rounded border border-blue-500 shadow-sm tracking-wider">VISA</span>
-                                            )}
-                                            {cardBrand === 'mastercard' && (
-                                                <span className="text-[9px] font-black uppercase bg-orange-500 text-white px-2 py-0.5 rounded border border-orange-400 shadow-sm tracking-wider">MC</span>
-                                            )}
-                                            {cardBrand === 'amex' && (
-                                                <span className="text-[9px] font-black uppercase bg-cyan-600 text-white px-2 py-0.5 rounded border border-cyan-500 shadow-sm tracking-wider">AMEX</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {formErrors.cardNumber && <p className="text-[9px] font-black text-red-500 uppercase">{formErrors.cardNumber}</p>}
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                                            Expiración
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={cardExpiry}
-                                            onChange={handleExpiryChange}
-                                            placeholder="MM/YY"
-                                            className="w-full px-4 py-3 rounded-xl border border-border bg-muted/20 text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none font-mono"
-                                        />
-                                        {formErrors.cardExpiry && <p className="text-[9px] font-black text-red-500 uppercase">{formErrors.cardExpiry}</p>}
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                                            CVC
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={cardCvc}
-                                            onChange={handleCvcChange}
-                                            placeholder="123"
-                                            className="w-full px-4 py-3 rounded-xl border border-border bg-muted/20 text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none font-mono"
-                                        />
-                                        {formErrors.cardCvc && <p className="text-[9px] font-black text-red-500 uppercase">{formErrors.cardCvc}</p>}
+                                    <div className="w-full px-4 py-3.5 rounded-xl border border-border bg-white dark:bg-slate-800 text-xs focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
+                                        <CardElement options={{
+                                            style: {
+                                                base: {
+                                                    fontSize: '13px',
+                                                    color: '#0f172a',
+                                                    '::placeholder': {
+                                                        color: '#94a3b8',
+                                                    },
+                                                    fontFamily: 'Outfit, Inter, sans-serif'
+                                                },
+                                                invalid: {
+                                                    color: '#ef4444',
+                                                },
+                                            },
+                                        }} />
                                     </div>
                                 </div>
 
@@ -1370,5 +1504,13 @@ export function PreorderScreen() {
             )}
 
         </div>
+    );
+}
+
+export function PreorderScreen() {
+    return (
+        <Elements stripe={stripePromise}>
+            <PreorderScreenForm />
+        </Elements>
     );
 }

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { ChevronRight, User, Calendar, Ruler, Activity, Target, Weight, Info } from 'lucide-react';
+import { db } from '../../lib/db';
 
 interface BiometricModalProps {
     isOpen: boolean;
@@ -23,6 +24,61 @@ export function BiometricModal({ isOpen, onClose, onSaveSuccess, language }: Bio
 
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Load profile from Dexie and Server on mount
+    useEffect(() => {
+        async function loadProfile() {
+            if (!isOpen) return;
+            try {
+                // 1. Load from Dexie first (instant offline response)
+                const localProfile = await db.userProfile.get('current');
+                if (localProfile) {
+                    setFormData({
+                        gender: localProfile.gender || 'MALE',
+                        birthDate: localProfile.birthDate || '',
+                        heightCm: localProfile.heightCm || 0,
+                        activityLevel: localProfile.activityLevel || 'SEDENTARY',
+                        currentWeightKg: localProfile.currentWeightKg || 0,
+                        goalType: localProfile.goalType || 'MAINTENANCE',
+                        targetWeightKg: localProfile.targetWeightKg || 0
+                    });
+                }
+                
+                // 2. Load from server to sync latest
+                const res = await fetch('/api/proxy/users/me/biometric-profile', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (res.ok) {
+                    const serverProfile = await res.json();
+                    if (serverProfile) {
+                        const updatedData = {
+                            gender: serverProfile.gender || 'MALE',
+                            birthDate: serverProfile.birthDate || '',
+                            heightCm: serverProfile.heightCm || 0,
+                            activityLevel: serverProfile.activityLevel || 'SEDENTARY',
+                            currentWeightKg: serverProfile.currentWeightKg || 0,
+                            goalType: serverProfile.goalType || 'MAINTENANCE',
+                            targetWeightKg: serverProfile.targetWeightKg || 0
+                        };
+                        setFormData(updatedData);
+                        
+                        // Sync with Dexie
+                        await db.userProfile.put({
+                            id: 'current',
+                            ...updatedData,
+                            lastUpdated: new Date().toISOString()
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn('Could not load or sync biometric profile:', err);
+            }
+        }
+        
+        loadProfile();
+    }, [isOpen]);
 
     const handleSave = async () => {
         // Validation
@@ -55,6 +111,19 @@ export function BiometricModal({ isOpen, onClose, onSaveSuccess, language }: Bio
             });
 
             if (response.ok) {
+                // Also save to local Dexie
+                await db.userProfile.put({
+                    id: 'current',
+                    gender: formData.gender,
+                    birthDate: formData.birthDate,
+                    heightCm: formData.heightCm,
+                    activityLevel: formData.activityLevel,
+                    currentWeightKg: formData.currentWeightKg,
+                    goalType: formData.goalType,
+                    targetWeightKg: formData.targetWeightKg,
+                    lastUpdated: new Date().toISOString()
+                });
+
                 onSaveSuccess();
                 onClose();
             } else {

@@ -64,6 +64,41 @@ export interface LocalSavedRecipe {
     savedAt: string; // ISO Date
 }
 
+export interface LocalUserProfile {
+    id: string; // 'current' or user id
+    name?: string;
+    email?: string;
+    biography?: string;
+    profilePictureUrl?: string;
+    gender?: string; // MALE, FEMALE
+    birthDate?: string; // YYYY-MM-DD
+    heightCm?: number;
+    currentWeightKg?: number;
+    activityLevel?: string; // SEDENTARY, LIGHTLY_ACTIVE, MODERATELY_ACTIVE, VERY_ACTIVE, EXTREMELY_ACTIVE
+    goalType?: string; // LOSE_WEIGHT, GAIN_WEIGHT, MAINTENANCE
+    targetWeightKg?: number;
+    lastUpdated?: string;
+}
+
+export interface LocalPreorder {
+    id: string; // UUID or order number
+    orderNumber: string;
+    date: string; // ISO Date
+    meals: Array<{
+        day: string;
+        comboId: string;
+        comboName: string;
+        portions: { [recipeMealType: string]: number };
+        extras: string[];
+    }>;
+    amountPaid: number;
+    remaining: number;
+    status: string; // CONFIRMED
+    paymentPlan: 'half' | 'full';
+    deliveryDateRange: string;
+    userEmail: string;
+}
+
 export type { LocalPantryItem as PantryItemType };
 
 // Extend Dexie class to handle typescript properly for specific tables
@@ -72,15 +107,20 @@ const db = new Dexie('CacomiPlannerDB_v2') as Dexie & {
     plannedMeals: EntityTable<LocalPlannedMeal, 'id'>;
     planMetadata: EntityTable<LocalPlanMetadata, 'planId'>;
     savedRecipes: EntityTable<LocalSavedRecipe, 'id'>;
+    userProfile: EntityTable<LocalUserProfile, 'id'>;
+    preorders: EntityTable<LocalPreorder, 'id'>;
 };
 
 // Schema registration
-db.version(8).stores({
+db.version(9).stores({
     pantryItems: 'id, ingredientId, isSynced, isDeleted',
     plannedMeals: 'id, planId, mealDate, mealType, isSynced, isDeleted, isPinned',
     planMetadata: 'planId, isActive',
-    savedRecipes: 'id, name, type, authorName'
+    savedRecipes: 'id, name, type, authorName',
+    userProfile: 'id',
+    preorders: 'id, orderNumber, date, userEmail'
 });
 
 export { db };
+
 

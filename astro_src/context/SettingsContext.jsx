@@ -324,7 +324,17 @@ export const translations = {
             simulatedDay: 'Día de la semana a simular',
             simulatedLocationTitle: 'Dirección a simular',
             actualCoordinates: 'Coordenadas del usuario',
-            distanceToKitchen: 'Distancia a la cocina central'
+            distanceToKitchen: 'Distancia a la cocina central',
+            historyTitle: 'Historial de Preventas',
+            noHistory: 'No tienes preventas registradas todavía.',
+            noHistorySub: 'Tus compras de combos semanales aparecerán aquí para que puedas hacerles seguimiento.',
+            statusConfirmed: 'Confirmado',
+            payHalfLabel: 'Anticipo 50%',
+            payFullLabel: 'Pago 100%',
+            amountPaidLabel: 'Pagado',
+            remainingLabel: 'Pendiente',
+            orderItems: 'Combos en este pedido',
+            deliverySchedule: 'Entrega programada para'
         },
 
         auth: {
@@ -836,7 +846,17 @@ export const translations = {
             simulatedDay: 'Day of the week to simulate',
             simulatedLocationTitle: 'Address to simulate',
             actualCoordinates: 'User coordinates',
-            distanceToKitchen: 'Distance to kitchen'
+            distanceToKitchen: 'Distance to kitchen',
+            historyTitle: 'Preorder History',
+            noHistory: 'No preorders registered yet.',
+            noHistorySub: 'Your weekly combo purchases will appear here so you can track them.',
+            statusConfirmed: 'Confirmed',
+            payHalfLabel: '50% Deposit',
+            payFullLabel: '100% Payment',
+            amountPaidLabel: 'Paid',
+            remainingLabel: 'Remaining',
+            orderItems: 'Combos in this order',
+            deliverySchedule: 'Delivery scheduled for'
         },
 
         planner: {
@@ -1471,7 +1491,17 @@ export const translations = {
             simulatedDay: 'Jour de la semaine à simuler',
             simulatedLocationTitle: 'Adresse à simuler',
             actualCoordinates: 'Coordenadas de l\'utilisateur',
-            distanceToKitchen: 'Distance de la cuisine centrale'
+            distanceToKitchen: 'Distance de la cuisine centrale',
+            historyTitle: 'Historique de Précommande',
+            noHistory: 'Aucune précommande enregistrée.',
+            noHistorySub: 'Vos achats de combos hebdomadaires apparaîtront ici pour que vous puissiez les suivre.',
+            statusConfirmed: 'Confirmé',
+            payHalfLabel: 'Acompte 50%',
+            payFullLabel: 'Paiement 100%',
+            amountPaidLabel: 'Payé',
+            remainingLabel: 'Restant',
+            orderItems: 'Combos dans cette commande',
+            deliverySchedule: 'Livraison prévue pour'
         },
         common: {
             appName: 'Cacomi',

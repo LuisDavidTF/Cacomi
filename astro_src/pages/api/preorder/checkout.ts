@@ -57,6 +57,7 @@ export const POST: APIRoute = async ({ request }) => {
         // Stripe API integration preparation (BFF proxy pattern)
         const stripeSecretKey = import.meta.env.STRIPE_SECRET_KEY;
         let transactionId = 'ch_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        let clientSecret = '';
 
         if (stripeSecretKey) {
             try {
@@ -81,6 +82,7 @@ export const POST: APIRoute = async ({ request }) => {
                 });
                 
                 transactionId = paymentIntent.id;
+                clientSecret = paymentIntent.client_secret || '';
             } catch (stripeErr: any) {
                 console.error("[BFF Stripe Error]:", stripeErr);
                 return new Response(JSON.stringify({ 
@@ -98,6 +100,7 @@ export const POST: APIRoute = async ({ request }) => {
             success: true,
             orderId: 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
             transactionId,
+            clientSecret,
             amountPaid,
             remaining,
             mealsCount: meals.length,

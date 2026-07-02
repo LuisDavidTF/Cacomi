@@ -1,0 +1,34 @@
+[
+  {
+    "id": "combo_breakfast",
+    "name": "Combo Desayuno & Fit (Desayuno + Colación 1)",
+    "description": "Combina el desayuno recomendado del día con el primer snack energético para arrancar tu mañana al máximo.",
+    "basePrice": 150,
+    "minPortion": 0.5,
+    "maxPortion": 2.0,
+    "recipes": [
+      { "id": "recipe_breakfast", "name": "Desayuno del Día", "mealType": "BREAKFAST" },
+      { "id": "recipe_snack_1", "name": "Colación 1", "mealType": "SNACK_1" }
+    ],
+    "extras": [
+      { "id": "extra_sauce_1", "name": "Salsa Casera Molcajeteada", "price": 15 },
+      { "id": "extra_drink_1", "name": "Agua de Coco Orgánica", "price": 35 }
+    ]
+  },
+  {
+    "id": "combo_lunch",
+    "name": "Combo Almuerzo Completo (Almuerzo + Colación 2)",
+    "description": "Tu almuerzo principal junto con una colación saludable para mantener tu energía estable durante la tarde.",
+    "basePrice": 180,
+    "minPortion": 0.5,
+    "maxPortion": 2.0,
+    "recipes": [
+      { "id": "recipe_lunch", "name": "Almuerzo del Día", "mealType": "LUNCH" },
+      { "id": "recipe_snack_2", "name": "Colación 2", "mealType": "SNACK_2" }
+    ],
+    "extras": [
+      { "id": "extra_sauce_2", "name": "Aderezo Chipotle Cremoso", "price": 15 },
+      { "id": "extra_side_1", "name": "Guarnición de Arroz integral", "price": 25 }
+    ]
+  }
+]
