@@ -35,6 +35,8 @@ import { cn, generateUUIDv7 } from '@/lib/utils';
 import { db } from '../../lib/db';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useToast } from '../../context/ToastContext';
+import { Modal } from '../ui/Modal';
 
 const stripePromise = loadStripe(import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51MockKeyForPreviewPurposes1234567890');
 
@@ -116,9 +118,29 @@ function PreorderScreenForm() {
     const { isAuthenticated, user } = useAuth();
     const stripe = useStripe();
     const elements = useElements();
+    const { showToast } = useToast();
 
     // Admin vs Customer View Mode
     const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
+
+    // Admin Prompts State
+    const [adminModalConfig, setAdminModalConfig] = useState<{
+        isOpen: boolean;
+        type: 'recipe' | 'extra';
+        comboId: string;
+        mealType?: string;
+        recipeName: string;
+        extraName: string;
+        extraPrice: string;
+    }>({
+        isOpen: false,
+        type: 'recipe',
+        comboId: '',
+        mealType: '',
+        recipeName: '',
+        extraName: '',
+        extraPrice: '15'
+    });
 
     // Simulated settings (Dev panel)
     const [simulatedDayOfWeek, setSimulatedDayOfWeek] = useState<number>(3); // 3 = Wednesday (Open)
@@ -266,7 +288,7 @@ function PreorderScreenForm() {
 
     const detectRealLocation = () => {
         if (!navigator.geolocation) {
-            alert(language === 'es' ? 'La geolocalización no es soportada.' : 'Geolocation not supported.');
+            showToast(language === 'es' ? 'La geolocalización no es soportada.' : 'Geolocation not supported.', 'error');
             return;
         }
 
@@ -280,7 +302,7 @@ function PreorderScreenForm() {
             },
             (error) => {
                 console.error(error);
-                alert(language === 'es' ? 'No se pudo detectar tu ubicación. Intenta simular una.' : 'Could not detect location.');
+                showToast(language === 'es' ? 'No se pudo detectar tu ubicación. Intenta simular una.' : 'Could not detect location.', 'error');
                 setIsDetectingLocation(false);
             },
             { enableHighAccuracy: true, timeout: 8000 }
@@ -629,7 +651,7 @@ function PreorderScreenForm() {
                         });
 
                         if (stripeResult.error) {
-                            alert(stripeResult.error.message || 'Error al procesar pago en Stripe.');
+                            showToast(stripeResult.error.message || 'Error al procesar pago en Stripe.', 'error');
                             setIsProcessing(false);
                             return;
                         }
@@ -662,11 +684,11 @@ function PreorderScreenForm() {
                 setIsSuccess(true);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                alert(data.message || 'Error procesando preventa.');
+                showToast(data.message || 'Error procesando preventa.', 'error');
             }
         } catch (err) {
             console.error(err);
-            alert(language === 'es' ? 'Error de red.' : 'Network error.');
+            showToast(language === 'es' ? 'Error de red.' : 'Network error.', 'error');
         } finally {
             setIsProcessing(false);
         }
@@ -678,21 +700,15 @@ function PreorderScreenForm() {
     };
 
     const addRecipeToCombo = (comboId: string, mealType: string) => {
-        const recipeName = prompt(language === 'es' ? 'Nombre del Platillo:' : 'Meal Name:');
-        if (!recipeName) return;
-
-        setCombos(prev => prev.map(c => {
-            if (c.id !== comboId) return c;
-            // Prevent duplicate types
-            if (c.recipes.some(r => r.mealType === mealType)) {
-                alert(language === 'es' ? 'Ya existe una receta de este tipo en el combo.' : 'Meal type already exists.');
-                return c;
-            }
-            return {
-                ...c,
-                recipes: [...c.recipes, { id: generateUUIDv7(), name: recipeName, mealType }]
-            };
-        }));
+        setAdminModalConfig({
+            isOpen: true,
+            type: 'recipe',
+            comboId,
+            mealType,
+            recipeName: '',
+            extraName: '',
+            extraPrice: '15'
+        });
     };
 
     const removeRecipeFromCombo = (comboId: string, mealType: string) => {
@@ -706,18 +722,15 @@ function PreorderScreenForm() {
     };
 
     const addExtraToCombo = (comboId: string) => {
-        const name = prompt(language === 'es' ? 'Nombre del Acompañamiento Opcional:' : 'Accompaniment Name:');
-        if (!name) return;
-        const priceStr = prompt(language === 'es' ? 'Precio Extra (MXN):' : 'Extra Price (MXN):', '15');
-        const price = parseInt(priceStr || '0') || 0;
-
-        setCombos(prev => prev.map(c => {
-            if (c.id !== comboId) return c;
-            return {
-                ...c,
-                extras: [...c.extras, { id: 'extra_' + Math.random().toString(36).substring(2, 6), name, price }]
-            };
-        }));
+        setAdminModalConfig({
+            isOpen: true,
+            type: 'extra',
+            comboId,
+            mealType: '',
+            recipeName: '',
+            extraName: '',
+            extraPrice: '15'
+        });
     };
 
     const removeExtraFromCombo = (comboId: string, extraId: string) => {
@@ -728,6 +741,54 @@ function PreorderScreenForm() {
                 extras: c.extras.filter(e => e.id !== extraId)
             };
         }));
+    };
+
+    const handleAdminModalSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const { type, comboId, mealType, recipeName, extraName, extraPrice } = adminModalConfig;
+
+        if (type === 'recipe') {
+            if (!recipeName.trim()) {
+                showToast(language === 'es' ? 'El nombre es requerido.' : 'Name is required.', 'error');
+                return;
+            }
+
+            let wasAdded = false;
+            setCombos(prev => prev.map(c => {
+                if (c.id !== comboId) return c;
+                if (c.recipes.some(r => r.mealType === mealType)) {
+                    showToast(language === 'es' ? 'Ya existe una receta de este tipo en el combo.' : 'Meal type already exists.', 'error');
+                    return c;
+                }
+                wasAdded = true;
+                return {
+                    ...c,
+                    recipes: [...c.recipes, { id: generateUUIDv7(), name: recipeName.trim(), mealType: mealType || 'BREAKFAST' }]
+                };
+            }));
+
+            if (wasAdded) {
+                showToast(language === 'es' ? 'Receta agregada exitosamente.' : 'Recipe added successfully.', 'success');
+            }
+        } else {
+            if (!extraName.trim()) {
+                showToast(language === 'es' ? 'El nombre es requerido.' : 'Name is required.', 'error');
+                return;
+            }
+
+            const price = parseInt(extraPrice) || 0;
+            setCombos(prev => prev.map(c => {
+                if (c.id !== comboId) return c;
+                return {
+                    ...c,
+                    extras: [...c.extras, { id: 'extra_' + Math.random().toString(36).substring(2, 6), name: extraName.trim(), price }]
+                };
+            }));
+
+            showToast(language === 'es' ? 'Acompañamiento agregado exitosamente.' : 'Accompaniment added successfully.', 'success');
+        }
+
+        setAdminModalConfig(prev => ({ ...prev, isOpen: false }));
     };
 
     if (isSuccess && ticketData) {
@@ -1502,6 +1563,76 @@ function PreorderScreenForm() {
 
                 </div>
             )}
+
+            {/* Admin Modification Prompt Modal */}
+            <Modal 
+                isOpen={adminModalConfig.isOpen} 
+                onClose={() => setAdminModalConfig(prev => ({ ...prev, isOpen: false }))} 
+                title={adminModalConfig.type === 'recipe' 
+                    ? (language === 'es' ? 'Agregar Platillo' : 'Add Meal') 
+                    : (language === 'es' ? 'Agregar Acompañamiento' : 'Add Side/Accompaniment')}
+            >
+                <form onSubmit={handleAdminModalSubmit} className="space-y-4">
+                    {adminModalConfig.type === 'recipe' ? (
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                                {language === 'es' ? 'Nombre del Platillo' : 'Meal Name'}
+                            </label>
+                            <input
+                                type="text"
+                                value={adminModalConfig.recipeName}
+                                onChange={(e) => setAdminModalConfig(prev => ({ ...prev, recipeName: e.target.value }))}
+                                placeholder={language === 'es' ? 'Ej: Enchiladas Verdes con Huevo' : 'e.g. Green Enchiladas with Egg'}
+                                className="w-full px-4 py-3 rounded-xl border border-border bg-muted/20 text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none font-bold text-foreground"
+                                autoFocus
+                            />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                                    {language === 'es' ? 'Nombre del Acompañamiento' : 'Accompaniment Name'}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={adminModalConfig.extraName}
+                                    onChange={(e) => setAdminModalConfig(prev => ({ ...prev, extraName: e.target.value }))}
+                                    placeholder={language === 'es' ? 'Ej: Salsa Casera Molcajeteada' : 'e.g. Handmade Spicy Sauce'}
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-muted/20 text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none font-bold text-foreground"
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                                    {language === 'es' ? 'Precio Extra (MXN)' : 'Extra Price (MXN)'}
+                                </label>
+                                <input
+                                    type="number"
+                                    value={adminModalConfig.extraPrice}
+                                    onChange={(e) => setAdminModalConfig(prev => ({ ...prev, extraPrice: e.target.value }))}
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-muted/20 text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none font-bold text-foreground"
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    <div className="flex gap-2 pt-2">
+                        <button
+                            type="button"
+                            onClick={() => setAdminModalConfig(prev => ({ ...prev, isOpen: false }))}
+                            className="flex-1 py-3 border border-border hover:bg-muted text-foreground text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+                        >
+                            {language === 'es' ? 'Cancelar' : 'Cancel'}
+                        </button>
+                        <button
+                            type="submit"
+                            className="flex-1 py-3 bg-primary hover:bg-primary/95 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-primary/20"
+                        >
+                            {language === 'es' ? 'Guardar' : 'Save'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
         </div>
     );
