@@ -41,6 +41,7 @@ export default defineConfig({
                 additionalManifestEntries: [
                     // Core navigation
                     { url: '/', revision: null },
+                    { url: '/origen', revision: null },
                     { url: '/pantry', revision: null },
                     { url: '/planner', revision: null },
                     { url: '/saved-recipes', revision: null },

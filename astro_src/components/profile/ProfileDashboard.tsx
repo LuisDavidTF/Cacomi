@@ -25,6 +25,7 @@ export function ProfileDashboard() {
     const [isBiometricModalOpen, setIsBiometricModalOpen] = useState(false);
     const [isSetPasswordModalOpen, setIsSetPasswordModalOpen] = useState(false);
     const [expandedPreorderId, setExpandedPreorderId] = useState<string | null>(null);
+    const [pickupStatuses, setPickupStatuses] = useState<any>({});
 
     // Load preorders for current user from Dexie
     const userPreorders = useLiveQuery(

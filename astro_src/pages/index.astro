@@ -1,10 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { RecipeFeed } from '@components/recipes/RecipeFeed';
-import { FeatureAnnouncement } from '@components/landing/FeatureAnnouncement';
-import { FloatingWelcome } from '@components/landing/FloatingWelcome';
-import { CompactWelcome } from '@components/landing/CompactWelcome';
+import { LifestyleFeed } from '@components/landing/LifestyleFeed';
 import { RecipeService } from '@/lib/services/recipes';
+import SeoContentBlock from '@components/landing/SeoContentBlock.astro';
+import RecentPosts from '@components/landing/RecentPosts.astro';
 
 // Force dynamic SSR (do not prerender)
 export const prerender = false;
@@ -13,91 +12,23 @@ export const prerender = false;
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=31536000');
 Astro.response.headers.set('Cache-Tag', 'recipes-feed');
 
-const CURRENT_APP_VERSION = 'v1.1.0';
-
-// Auth and Visit Tracking
-const isAuthenticated = Astro.cookies.has('auth_token');
-const hasEverLoggedIn = Astro.cookies.has('has_ever_logged_in') || isAuthenticated;
-const visitCount = parseInt(Astro.cookies.get('home_visit_count')?.value || '0', 10);
-const seenFeaturesVersion = Astro.cookies.get('seen_features_version')?.value;
-
-// Business Logic
-const isNewUser = !hasEverLoggedIn && visitCount < 3;
-const hasNewFeatures = false; // Planificador en desarrollo - ocultar banner
-
-// Server-side Cookie Setting
-// NOTE: For unauthenticated users, the home_visit_count tracking has been moved
-// to a client-side inline script (see below in Layout) to avoid sending 'Set-Cookie'
-// headers. 'Set-Cookie' headers on SSR responses completely disable CDN edge caching (Vercel/Cloudflare).
-
-if (isAuthenticated && !Astro.cookies.has('has_ever_logged_in')) {
-  // Mark permanently as a user who has logged in
-  Astro.cookies.set('has_ever_logged_in', 'true', { path: '/', maxAge: 31536000 });
-}
-
 let initialData = { data: [], meta: { nextCursor: null } };
 try {
-  initialData = await RecipeService.getAll({}, { limit: 10 });
+  initialData = await RecipeService.getAll({}, { limit: 12 });
 } catch (error) {
   console.error("Error fetching initial recipes:", error);
 }
-import { RecommendedDailyMenu } from '@components/landing/RecommendedDailyMenu';
-import SeoContentBlock from '@components/landing/SeoContentBlock.astro';
-import RecentPosts from '@components/landing/RecentPosts.astro';
 ---
 
 <Layout>
-  {!isAuthenticated && (
-    <CompactWelcome client:idle />
-  )}
+  {/* Elegant Vida Lifestyle Portal (Hero & Relatos Grid) */}
+  <LifestyleFeed initialRecipes={initialData} client:load />
 
-  <RecommendedDailyMenu client:visible />
-
-  <div id="latest-recipes" class={isAuthenticated ? "mt-0" : "mt-0"}>
-    { !isAuthenticated && (
-      <div class="container mx-auto px-4 mb-8">
-        <h2 class="text-2xl md:text-3xl font-bold text-foreground">Comunidad</h2>
-        <p class="text-sm md:text-base text-muted-foreground mt-1">Descubre lo que otros están cocinando hoy.</p>
-      </div>
-    )}
-    <RecipeFeed initialData={initialData} client:visible />
+  {/* Rich SEO Content Blocks at the bottom to ensure AdSense approval */}
+  <RecentPosts />
+  
+  <div class="border-t border-border/30 bg-[#fbf9f6] dark:bg-slate-900/10">
+    <SeoContentBlock />
   </div>
-
-  {isNewUser && (
-    <FloatingWelcome client:idle />
-  )}
-
-  {hasNewFeatures && (
-    <div id="new-feature-announcement">
-      <FeatureAnnouncement version={CURRENT_APP_VERSION} client:idle />
-    </div>
-  )}
-
-  {!isAuthenticated && (
-    <>
-      <RecentPosts />
-      <SeoContentBlock />
-    </>
-  )}
-
-  <script is:inline>
-    (function() {
-      const isAuthenticated = document.cookie.includes('auth_token');
-      const hasEverLoggedIn = document.cookie.includes('has_ever_logged_in') || isAuthenticated;
-      
-      if (!hasEverLoggedIn && !isAuthenticated) {
-        // Read visit count
-        const match = document.cookie.match(/(^| )home_visit_count=([^;]+)/);
-        const visitCount = match ? parseInt(match[2], 10) : 0;
-        
-        // Increment and set cookie
-        const nextCount = visitCount + 1;
-        const expires = new Date();
-        expires.setFullYear(expires.getFullYear() + 1); // 1 year expiry
-        
-        // Set SameSite=Lax for compatibility and secure edge-caching
-        document.cookie = "home_visit_count=" + nextCount + "; path=/; expires=" + expires.toUTCString() + "; SameSite=Lax";
-      }
-    })();
-  </script>
 </Layout>
+

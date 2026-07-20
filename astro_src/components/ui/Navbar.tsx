@@ -103,6 +103,14 @@ export function Navbar() {
 
     const getIsActive = (path: string) => currentPath === path;
 
+    const isVidaActive = () => {
+        return currentPath === '/' || currentPath === '' || currentPath.startsWith('/blog') || currentPath.startsWith('/revista') || currentPath === '/juego';
+    };
+
+    const isOrigenActive = () => {
+        return currentPath === '/origen' || currentPath === '/planner' || currentPath === '/pantry' || currentPath === '/preorder' || currentPath.startsWith('/recipes');
+    };
+
     return (
         <>
             {/* Desktop Top Navbar (Header) */}
@@ -127,45 +135,41 @@ export function Navbar() {
                             </a>
                         </div>
 
-                        {/* Center: Main Navigation (Desktop) */}
-                        <div className="hidden md:flex flex-1 items-center justify-center space-x-1 lg:space-x-2">
-                            <a href="/" onClick={handleLogoClick} className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <Home className="w-6 h-6" />
-                                <span className="hidden xl:inline">{t?.nav?.home || 'Inicio'}</span>
-                            </a>
-                            <a href="/pantry" className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/pantry') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <ShoppingBasket className="w-6 h-6" />
-                                <span className="hidden xl:inline">{t?.nav?.pantry || 'Despensa'}</span>
-                            </a>
-                            <a href="/blog" className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap ${getIsActive('/blog') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <BookOpen className="w-6 h-6" />
-                                <span className="hidden xl:inline">Blog</span>
-                            </a>
+                        {/* Center: Main Navigation (Desktop) - Luxury Concept */}
+                        <div className="hidden md:flex flex-1 items-center justify-center space-x-2 lg:space-x-3">
+                            {/* Vida */}
                             <a 
-                                href="/juego" 
-                                data-astro-reload
-                                className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/juego') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                href="/" 
+                                onClick={handleLogoClick} 
+                                className={`flex items-center gap-1.5 px-4 py-2 text-sm lg:text-base font-semibold rounded-full transition-all duration-200 whitespace-nowrap ${isVidaActive() ? 'bg-[#f4e6d9] text-[#2c2b2a] border border-[#e8d5c4]/50 shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                             >
-                                <Gamepad2 className="w-6 h-6" />
-                                <span className="hidden xl:inline">Juego</span>
-                                <span className="absolute -top-1 -right-0.5 flex h-4 px-1.5 items-center justify-center rounded-full bg-green-500 text-[8px] font-black text-white uppercase tracking-tighter shadow-md border border-background scale-90 group-hover:scale-100 transition-transform">
+                                <Home className="w-4 h-4" />
+                                <span>{t?.nav?.vida || 'Vida'}</span>
+                            </a>
+                            
+                            {/* Origen */}
+                            <a 
+                                href="/origen" 
+                                className={`flex items-center gap-1.5 px-4 py-2 text-sm lg:text-base font-semibold rounded-full transition-all duration-200 whitespace-nowrap border ${isOrigenActive() ? 'border-dashed border-[#e07e53]/60 bg-[#fdfaf7] text-[#e07e53]' : 'border-dashed border-transparent hover:border-border text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                            >
+                                <ShoppingBasket className="w-4 h-4" />
+                                <span>{t?.nav?.origen || 'Origen'}</span>
+                            </a>
+
+                            {/* Atelier (Disabled for now) */}
+                            <div className="flex items-center gap-1.5 px-4 py-2 text-sm lg:text-base font-medium text-muted-foreground opacity-45 cursor-not-allowed select-none whitespace-nowrap">
+                                <BookOpen className="w-4 h-4" />
+                                <span>{t?.nav?.atelier || 'Atelier'}</span>
+                            </div>
+
+                            {/* Esenciales (Disabled for now) */}
+                            <div className="flex items-center gap-1.5 px-4 py-2 text-sm lg:text-base font-medium text-muted-foreground opacity-45 cursor-not-allowed select-none whitespace-nowrap relative group">
+                                <Menu className="w-4 h-4" />
+                                <span>{t?.nav?.esenciales || 'Esenciales'}</span>
+                                <span className="absolute -top-1 -right-2 flex h-3.5 px-1.5 items-center justify-center rounded-full bg-green-500 text-[7px] font-black text-white uppercase tracking-tighter scale-75">
                                     NEW
                                 </span>
-                            </a>
-                            <a href="/planner" className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/planner') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <CalendarDays className="w-6 h-6" />
-                                <span className="hidden xl:inline">{t?.nav?.planner || 'Planificador'}</span>
-                                <span className="absolute -top-1 -right-0.5 flex h-4 px-1.5 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white uppercase tracking-tighter shadow-md border border-background scale-90 group-hover:scale-100 transition-transform">
-                                    BETA
-                                </span>
-                            </a>
-                            <a href="/preorder" className={`flex items-center gap-2 px-3 py-2 text-sm lg:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap relative group ${getIsActive('/preorder') ? 'bg-primary/10 text-primary pointer-events-none' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                                <ShoppingBasket className="w-6 h-6" />
-                                <span className="hidden xl:inline">{t?.nav?.preorder || 'Comprar Comida'}</span>
-                                <span className="absolute -top-1 -right-0.5 flex h-4 px-1.5 items-center justify-center rounded-full bg-amber-500 text-[8px] font-black text-white uppercase tracking-tighter shadow-md border border-background scale-90 group-hover:scale-100 transition-transform">
-                                    {t?.nav?.preorderBadge || 'NUEVO'}
-                                </span>
-                            </a>
+                            </div>
                         </div>
                         
                         {/* Center: Search Bar */}
@@ -314,7 +318,7 @@ export function Navbar() {
                                     <div className="w-px h-5 bg-border/50 mx-1 hidden lg:block"></div>
                                     <a
                                         href="/login"
-                                        className="flex items-center text-sm lg:text-base font-bold px-8 py-2.5 rounded-full text-primary-foreground bg-primary hover:opacity-90 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95"
+                                        className="flex items-center text-sm lg:text-base font-bold px-6 py-2 rounded-full text-white bg-[#e07e53] hover:bg-[#d06e43] hover:opacity-95 shadow-md shadow-[#e07e53]/15 transition-all hover:scale-[1.02] active:scale-95 whitespace-nowrap"
                                     >
                                         <LogIn className="w-4 h-4 mr-2" />
                                         {t?.nav?.login || 'Entrar'}
@@ -355,63 +359,45 @@ export function Navbar() {
             </header>
 
 
-            {/* Mobile Bottom Navigation Bar */}
+            {/* Mobile Bottom Navigation Bar - Grouped */}
             <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border/50 md:hidden pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
                 <div className="flex w-full h-16">
-                    {/* Home */}
-                    <a href="/" onClick={handleLogoClick} className={`flex flex-1 flex-col items-center justify-center gap-1 ${getIsActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-                        <Home className="w-6 h-6 sm:w-7 sm:h-7" />
-                        <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.home || 'Inicio'}</span>
+                    {/* Vida */}
+                    <a 
+                        href="/" 
+                        onClick={handleLogoClick} 
+                        className={`flex flex-1 flex-col items-center justify-center gap-1 ${isVidaActive() ? 'text-[#e07e53] font-semibold' : 'text-muted-foreground hover:text-foreground'}`}
+                    >
+                        <Home className="w-5 h-5" />
+                        <span className="text-[11px] font-medium leading-none whitespace-nowrap">{t?.nav?.vida || 'Vida'}</span>
                     </a>
 
-                    {/* Pantry */}
-                    <a href="/pantry" className={`flex flex-1 flex-col items-center justify-center gap-1 ${getIsActive('/pantry') ? 'text-primary pointer-events-none' : 'text-muted-foreground hover:text-foreground'}`}>
-                        <ShoppingBasket className="w-6 h-6 sm:w-7 sm:h-7" />
-                        <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.pantry || 'Despensa'}</span>
+                    {/* Origen */}
+                    <a 
+                        href="/origen" 
+                        className={`flex flex-1 flex-col items-center justify-center gap-1 ${isOrigenActive() ? 'text-[#e07e53] font-semibold' : 'text-muted-foreground hover:text-foreground'}`}
+                    >
+                        <ShoppingBasket className="w-5 h-5" />
+                        <span className="text-[11px] font-medium leading-none whitespace-nowrap">{t?.nav?.origen || 'Origen'}</span>
                     </a>
-
-                    {/* Create Button (Center) - Only if authenticated */}
-                    {isAuthenticated ? (
-                        <div className="flex flex-1 items-end justify-center pb-2 relative pointer-events-none">
-                            <a href="/create-recipe" className={`absolute bottom-2 bg-primary text-primary-foreground p-3.5 sm:p-4 rounded-full shadow-lg border-4 border-background transition-transform flex items-center justify-center z-10 ${getIsActive('/create-recipe') ? 'pointer-events-none scale-105' : 'pointer-events-auto hover:scale-105'}`}>
-                                <Plus className="w-7 h-7 sm:w-8 sm:h-8" />
-                            </a>
-                        </div>
-                    ) : (
-                        <a 
-                            href="/planner" 
-                            className={`flex flex-1 flex-col items-center justify-center gap-1 ${getIsActive('/planner') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-                        >
-                            <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7" />
-                            <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.plan || 'Plan'}</span>
-                        </a>
-                    )}
-
-                    {/* Planner for authenticated users */}
-                    {isAuthenticated && (
-                        <a href="/planner" className={`flex flex-1 flex-col items-center justify-center gap-1 relative ${getIsActive('/planner') ? 'text-primary pointer-events-none' : 'text-muted-foreground hover:text-foreground'}`}>
-                            <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7" />
-                            <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.plan || 'Plan'}</span>
-                            <span className="absolute top-0 right-1 bg-primary text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full border border-background shadow-md tracking-tighter">
-                                BETA
-                            </span>
-                        </a>
-                    )}
 
                     {/* Menu / Profile / Login */}
                     {isAuthenticated ? (
-                        <button onClick={() => setIsMobileMenuOpen(true)} className={`flex flex-1 flex-col items-center justify-center gap-1 ${isMobileMenuOpen ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+                        <button 
+                            onClick={() => setIsMobileMenuOpen(true)} 
+                            className={`flex flex-1 flex-col items-center justify-center gap-1 ${isMobileMenuOpen ? 'text-[#e07e53]' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
                             {user?.profile_photo ? (
-                                <img src={user.profile_photo} alt="Perfil" className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-transparent object-cover" />
+                                <img src={user.profile_photo} alt="Perfil" className="w-6 h-6 rounded-full border-2 border-transparent object-cover" />
                             ) : (
-                                <Menu className="w-6 h-6 sm:w-7 sm:h-7" />
+                                <Menu className="w-5 h-5" />
                             )}
-                            <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.menu || 'Menú'}</span>
+                            <span className="text-[11px] font-medium leading-none whitespace-nowrap">{t?.nav?.menu || 'Menú'}</span>
                         </button>
                     ) : (
                         <a href="/login" className="flex flex-1 flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground">
-                            <LogIn className="w-6 h-6 sm:w-7 sm:h-7" />
-                            <span className="text-xs font-medium leading-none whitespace-nowrap">{t?.nav?.login || 'Entrar'}</span>
+                            <LogIn className="w-5 h-5" />
+                            <span className="text-[11px] font-medium leading-none whitespace-nowrap">{t?.nav?.login || 'Entrar'}</span>
                         </a>
                     )}
                 </div>
@@ -443,58 +429,77 @@ export function Navbar() {
                             </div>
                         </div>
 
-                        <div className="space-y-2 mb-4">
-                            <a href="/profile" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/profile') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
-                                <User className="w-6 h-6 mr-3 opacity-70" />
-                                {t?.nav?.profile || 'Mi Perfil'}
-                            </a>
-                            <a href="/saved-recipes" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/saved-recipes') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
-                                <Download className="w-6 h-6 mr-3 opacity-70" />
-                                {t?.profile?.savedRecipes || 'Recetas Guardadas'}
-                            </a>
-                            <a href="/profile/health-progress" className="relative flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base pointer-events-none cursor-not-allowed overflow-hidden" onClick={() => setIsMobileMenuOpen(false)}>
-                                <div className="flex items-center flex-1 opacity-60">
-                                    <Activity className="w-6 h-6 mr-3 text-muted-foreground" />
-                                    <span className="flex-1">{t?.nav?.progress || 'Mi Progreso'}</span>
+                        <div className="space-y-4 mb-6 overflow-y-auto max-h-[50vh]">
+                            {/* Vida Section in Menu */}
+                            <div>
+                                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-2 mb-2">Vida</h3>
+                                <div className="space-y-1">
+                                    <a href="/blog" className={`flex items-center px-3 py-2.5 rounded-xl border border-border/40 transition-colors text-sm ${getIsActive('/blog') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                        <BookOpen className="w-5 h-5 mr-3 opacity-70" />
+                                        Blog & Guías
+                                    </a>
+                                    <a href="/juego" data-astro-reload className={`flex items-center px-3 py-2.5 rounded-xl border border-border/40 transition-colors text-sm relative ${getIsActive('/juego') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                        <Gamepad2 className="w-5 h-5 mr-3 opacity-70" />
+                                        El Reto Diario
+                                        <span className="absolute top-2.5 right-3 bg-green-500 text-[8px] font-black text-white uppercase px-1.5 py-0.5 rounded-full scale-90">
+                                            NEW
+                                        </span>
+                                    </a>
                                 </div>
-                                <span className="bg-primary/10 text-primary text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-primary/20 backdrop-blur-md shadow-sm tracking-widest z-[60]">
-                                    {t?.nav?.comingSoon || 'Soon'}
-                                </span>
-                            </a>
-                            <a href="/blog" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/blog') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
-                                <BookOpen className="w-6 h-6 mr-3 opacity-70" />
-                                Blog
-                            </a>
-                             <a href="/juego" data-astro-reload className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base relative ${getIsActive('/juego') ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
-                                <Gamepad2 className="w-6 h-6 mr-3 opacity-70" />
-                                El Reto Diario
-                                <span className="absolute top-3 right-4 bg-green-500 text-[10px] font-black text-white uppercase px-2 py-0.5 rounded-full">
-                                    NUEVO
-                                </span>
-                            </a>
-                            <a href="/preorder" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base relative ${getIsActive('/preorder') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={(e) => { setIsMobileMenuOpen(false); if (currentPath === '/preorder') e.preventDefault(); }}>
-                                <ShoppingBasket className="w-6 h-6 mr-3 opacity-70" />
-                                <span className="flex-1">{t?.nav?.preorder || 'Comprar Comida'}</span>
-                                <span className="bg-amber-500 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-md ml-2 tracking-widest">
-                                    {t?.nav?.preorderBadge || 'NUEVO'}
-                                </span>
-                            </a>
-                            <a href="/settings" className={`flex items-center px-4 py-3 rounded-xl border border-border/50 transition-colors text-base ${getIsActive('/settings') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
-                                <Settings className="w-6 h-6 mr-3 opacity-70" />
-                                {t?.nav?.settings || 'Ajustes'}
-                            </a>
+                            </div>
 
-                            {(user?.role === 'ADMIN') && (
-                                <a
-                                    data-astro-reload
-                                    href={adminPath}
-                                    className="flex items-center px-4 py-3 rounded-xl border border-indigo-200 dark:border-indigo-800/30 transition-colors text-base text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 font-bold mt-2"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    <Settings className="w-6 h-6 mr-3 opacity-80" />
-                                    Admin Panel
-                                </a>
-                            )}
+                            {/* Origen Section in Menu */}
+                            <div>
+                                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-2 mb-2">Origen</h3>
+                                <div className="space-y-1">
+                                    <a href="/planner" className={`flex items-center px-3 py-2.5 rounded-xl border border-border/40 transition-colors text-sm ${getIsActive('/planner') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                        <CalendarDays className="w-5 h-5 mr-3 opacity-70" />
+                                        {t?.nav?.planner || 'Planificador'}
+                                    </a>
+                                    <a href="/pantry" className={`flex items-center px-3 py-2.5 rounded-xl border border-border/40 transition-colors text-sm ${getIsActive('/pantry') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                        <ShoppingBasket className="w-5 h-5 mr-3 opacity-70" />
+                                        {t?.nav?.pantry || 'Despensa'}
+                                    </a>
+                                    <a href="/preorder" className={`flex items-center px-3 py-2.5 rounded-xl border border-border/40 transition-colors text-sm relative ${getIsActive('/preorder') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                        <ShoppingBasket className="w-5 h-5 mr-3 opacity-70" />
+                                        <span className="flex-1">{t?.nav?.preorder || 'Comprar Comida'}</span>
+                                        <span className="bg-amber-500 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-md ml-2 scale-90">
+                                            PREVENTA
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Mi Cuenta Section */}
+                            <div>
+                                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-2 mb-2">Mi Cuenta</h3>
+                                <div className="space-y-1">
+                                    <a href="/profile" className={`flex items-center px-3 py-2.5 rounded-xl border border-border/40 transition-colors text-sm ${getIsActive('/profile') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                        <User className="w-5 h-5 mr-3 opacity-70" />
+                                        {t?.nav?.profile || 'Mi Perfil'}
+                                    </a>
+                                    <a href="/saved-recipes" className={`flex items-center px-3 py-2.5 rounded-xl border border-border/40 transition-colors text-sm ${getIsActive('/saved-recipes') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                        <Download className="w-5 h-5 mr-3 opacity-70" />
+                                        {t?.profile?.savedRecipes || 'Recetas Guardadas'}
+                                    </a>
+                                    <a href="/settings" className={`flex items-center px-3 py-2.5 rounded-xl border border-border/40 transition-colors text-sm ${getIsActive('/settings') ? 'bg-primary/10 text-primary pointer-events-none' : 'hover:bg-muted text-foreground/80 hover:text-foreground'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                                        <Settings className="w-5 h-5 mr-3 opacity-70" />
+                                        {t?.nav?.settings || 'Ajustes'}
+                                    </a>
+
+                                    {(user?.role === 'ADMIN') && (
+                                        <a
+                                            data-astro-reload
+                                            href={adminPath}
+                                            className="flex items-center px-3 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800/30 transition-colors text-sm text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 font-bold"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            <Settings className="w-5 h-5 mr-3 opacity-80" />
+                                            Admin Panel
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                         
                         <button onClick={logout} className="w-full flex items-center justify-center px-4 py-3 mt-auto text-base font-bold text-destructive bg-destructive/5 hover:bg-destructive/10 border border-destructive/20 rounded-xl transition-colors">

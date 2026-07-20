@@ -1,0 +1,166 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { translations } from '../context/SettingsContext';
+import { CalendarDays, ShoppingBasket, Package, Sparkles, ChefHat } from 'lucide-react';
+import { RecommendedDailyMenu } from '../components/landing/RecommendedDailyMenu';
+
+export const prerender = false;
+
+const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
+const t = translations[lang] || translations.es;
+---
+
+<Layout title={`${t.origen?.title || 'Origen'} - Cacomi`} description={t.origen?.desc}>
+  {/* Hero Section */}
+  <section class="bg-[#fdfaf7] dark:bg-card/20 border-b border-[#f5ebde] dark:border-border/30 py-16">
+    <div class="container mx-auto px-4 md:px-8 max-w-6xl text-center space-y-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e07e53]/15 text-[#e07e53] text-[10px] md:text-xs font-bold uppercase tracking-wider border border-[#e07e53]/25">
+        <ChefHat className="w-3.5 h-3.5" />
+        <span>Ecosistema Origen</span>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-serif text-[#2c2b2a] dark:text-white leading-tight font-light">
+        Origen. <span class="italic font-normal text-[#e07e53]">{t.origen?.subtitle || 'La nutrición y los insumos.'}</span>
+      </h1>
+      <p class="text-[#5c5a57] dark:text-gray-300 text-sm md:text-base leading-relaxed max-w-2xl mx-auto font-light">
+        {t.origen?.desc || 'La conexión entre lo natural, lo puro y tu bienestar diario. Encuentra herramientas y soluciones diseñadas por profesionales.'}
+      </p>
+    </div>
+  </section>
+
+  {/* Tools Grid */}
+  <section class="container mx-auto px-4 md:px-8 py-16 max-w-6xl">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      {/* Planificador Semanal */}
+      <div class="bg-card border border-border/40 p-6 md:p-8 rounded-3xl flex flex-col justify-between hover:shadow-lg transition-all duration-300">
+        <div class="space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+            <CalendarDays className="w-6 h-6" />
+          </div>
+          <div class="space-y-2 text-left">
+            <h3 class="text-xl font-bold font-serif text-[#2c2b2a] dark:text-white">
+              {t.origen?.plannerTitle || 'Planificador Semanal'}
+            </h3>
+            <p class="text-muted-foreground text-sm leading-relaxed font-light">
+              {t.origen?.plannerDesc || 'Organiza tus comidas con inteligencia artificial, equilibra tus macros y genera listas de compras automáticas.'}
+            </p>
+          </div>
+        </div>
+        <div class="pt-6 text-left">
+          <a 
+            href="/planner" 
+            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white dark:bg-slate-900 border border-border text-sm font-semibold text-[#2c2b2a] dark:text-white hover:bg-muted transition-all active:scale-95 shadow-sm"
+          >
+            {t.origen?.plannerBtn || 'Abrir Planificador'}
+          </a>
+        </div>
+      </div>
+
+      {/* Mi Alacena Inteligente */}
+      <div class="bg-card border border-border/40 p-6 md:p-8 rounded-3xl flex flex-col justify-between hover:shadow-lg transition-all duration-300">
+        <div class="space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+            <ShoppingBasket className="w-6 h-6" />
+          </div>
+          <div class="space-y-2 text-left">
+            <h3 class="text-xl font-bold font-serif text-[#2c2b2a] dark:text-white">
+              {t.origen?.pantryTitle || 'Mi Alacena Inteligente'}
+            </h3>
+            <p class="text-muted-foreground text-sm leading-relaxed font-light">
+              {t.origen?.pantryDesc || 'Lleva el control de tus ingredientes, evita el desperdicio y genera recetas automáticas basadas en tu stock.'}
+            </p>
+          </div>
+        </div>
+        <div class="pt-6 text-left">
+          <a 
+            href="/pantry" 
+            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white dark:bg-slate-900 border border-border text-sm font-semibold text-[#2c2b2a] dark:text-white hover:bg-muted transition-all active:scale-95 shadow-sm"
+          >
+            {t.origen?.pantryBtn || 'Gestionar Alacena'}
+          </a>
+        </div>
+      </div>
+
+      {/* Comida Preparada (Preventa) */}
+      <div class="bg-card border border-[#e8d5c4]/50 p-6 md:p-8 rounded-3xl flex flex-col justify-between hover:shadow-lg transition-all duration-300 bg-[#fdfaf7]/40 dark:bg-card/10">
+        <div class="space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#e07e53]/10 text-[#e07e53] flex items-center justify-center relative">
+            <Package className="w-6 h-6" />
+            <span class="absolute -top-1 -right-1 flex h-3 px-1 items-center justify-center rounded-full bg-amber-500 text-[6px] font-black text-white uppercase tracking-tighter shadow-sm">
+              NEW
+            </span>
+          </div>
+          <div class="space-y-2 text-left">
+            <div class="flex items-center gap-2">
+              <h3 class="text-xl font-bold font-serif text-[#2c2b2a] dark:text-white">
+                {t.origen?.preorderTitle || 'Comida Preparada (Preventa)'}
+              </h3>
+              <span class="bg-[#e07e53]/10 text-[#e07e53] text-[9px] font-black uppercase px-2 py-0.5 rounded border border-[#e07e53]/20">
+                Preventa
+              </span>
+            </div>
+            <p class="text-muted-foreground text-sm leading-relaxed font-light">
+              {t.origen?.preorderDesc || 'Tu plan semanal cocinado por chefs profesionales y entregado en la puerta de tu hogar.'}
+            </p>
+          </div>
+        </div>
+        <div class="pt-6 text-left">
+          <a 
+            href="/preorder" 
+            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#e07e53] hover:bg-[#d06e43] text-sm font-semibold text-white transition-all active:scale-95 shadow-sm shadow-[#e07e53]/10"
+          >
+            {t.origen?.preorderBtn || 'Ordenar Comida'}
+          </a>
+        </div>
+      </div>
+
+      {/* Ingredientes Crudos Premium */}
+      <div class="bg-card border border-border/40 p-6 md:p-8 rounded-3xl flex flex-col justify-between opacity-60 hover:opacity-80 transition-all duration-300">
+        <div class="space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div class="space-y-2 text-left">
+            <div class="flex items-center gap-2">
+              <h3 class="text-xl font-bold font-serif text-[#2c2b2a] dark:text-white">
+                {t.origen?.rawIngredientsTitle || 'Ingredientes Crudos'}
+              </h3>
+              <span class="bg-emerald-500/10 text-emerald-600 text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded border border-emerald-500/20 tracking-wider">
+                Soon
+              </span>
+            </div>
+            <p class="text-muted-foreground text-sm leading-relaxed font-light">
+              {t.origen?.rawIngredientsDesc || 'Insumos frescos de alta calidad seleccionados directamente de productores locales para tu cocina.'}
+            </p>
+          </div>
+        </div>
+        <div class="pt-6 text-left">
+          <button 
+            disabled 
+            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-muted border border-border/60 text-sm font-semibold text-muted-foreground cursor-not-allowed select-none"
+          >
+            {t.origen?.comingSoon || 'Próximamente'}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Featured Recommended Daily Menu Section */}
+    <div class="border-t border-border/40 pt-16">
+      <div class="text-left mb-10 max-w-2xl">
+        <span class="text-xs font-black uppercase tracking-widest text-[#e07e53] bg-[#e07e53]/10 px-2.5 py-1 rounded-full border border-[#e07e53]/20">
+          Inspiración de Hoy
+        </span>
+        <h2 class="text-3xl font-serif text-[#2c2b2a] dark:text-white mt-4 font-light">
+          {t.recommendedMenu?.title || 'Menú Recomendado del Día'}
+        </h2>
+        <p class="text-muted-foreground text-sm mt-1">
+          {t.recommendedMenu?.subtitle || 'El menú balanceado que compartimos hoy en nuestras redes. ¡Agrégalo a tu planeador o pídelo en preventa!'}
+        </p>
+      </div>
+
+      <div class="bg-card border border-border/40 rounded-[2rem] p-6 shadow-sm overflow-hidden">
+        <RecommendedDailyMenu client:load />
+      </div>
+    </div>
+  </section>
+</Layout>
