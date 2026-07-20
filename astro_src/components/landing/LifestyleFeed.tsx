@@ -2,18 +2,36 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@context/SettingsContext';
-import { Clock, User, Bookmark, BookmarkCheck, RefreshCw, X, ArrowRight, BookOpen } from 'lucide-react';
+import { Clock, User, Bookmark, BookmarkCheck, RefreshCw, X, ArrowRight } from 'lucide-react';
 import { slugify } from '@/utils/slugify';
+
+// Import correct components
+import { RecipeCard } from '@components/recipes/RecipeCard';
+import { RecipeFeed } from '@components/recipes/RecipeFeed';
+
+// Import hooks and layout components for delete functionality
+import { useApiClient } from '@hooks/useApiClient';
+import { useToast } from '@context/ToastContext';
+import { Modal } from '@components/ui/Modal';
+import { Button } from '@components/ui/Button';
 
 interface Recipe {
     id: string | number;
     publicId?: string;
     name: string;
     description: string;
-    prepTime: number;
-    userName?: string;
+    preparationTimeMinutes: number;
+    authorName?: string;
     imageUrl?: string;
+    type?: string;
     mealType?: string;
+    calories?: number;
+    protein?: number;
+    user_id?: string | number;
+    user?: {
+        id: string | number;
+        name?: string;
+    };
 }
 
 interface Article {
@@ -58,13 +76,13 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
     const [activeTab, setActiveTab] = useState<string>('all');
     const [savedIds, setSavedIds] = useState<string[]>([]);
     const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-    
-    // Pagination state for recipes (only under "Recetas" tab)
-    const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes.data || []);
-    const [nextCursor, setNextCursor] = useState<string | null>(initialRecipes.meta?.nextCursor || null);
-    const [loadingMore, setLoadingMore] = useState(false);
 
-    // Load saved items (recipes or articles) from localStorage on mount
+    // Delete recipe functionality state
+    const api = useApiClient();
+    const { showToast } = useToast();
+    const [deleteModalState, setDeleteModalState] = useState<{ isOpen: boolean; recipe: any }>({ isOpen: false, recipe: null });
+
+    // Load saved items from localStorage on mount
     useEffect(() => {
         const stored = localStorage.getItem('cacomi_saved_lifestyle');
         if (stored) {
@@ -92,21 +110,26 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
         localStorage.setItem('cacomi_saved_lifestyle', JSON.stringify(newSavedIds));
     };
 
-    // Fetch more recipes for pagination under "Recetas"
-    const loadMoreRecipes = async () => {
-        if (loadingMore || !nextCursor) return;
-        setLoadingMore(true);
+    // Recipe handlers for editing and deleting
+    const handleEdit = (recipe: any) => {
+        window.location.href = `/edit-recipe/${recipe.publicId || recipe.id}`;
+    };
+
+    const handleDelete = (recipe: any) => {
+        setDeleteModalState({ isOpen: true, recipe });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteModalState.recipe) return;
+        const recipeId = deleteModalState.recipe.publicId || deleteModalState.recipe.id;
         try {
-            const response = await fetch(`/api/recipes?limit=12&cursor=${nextCursor}`);
-            if (response.ok) {
-                const data = await response.json();
-                setRecipes(prev => [...prev, ...(data.data || [])]);
-                setNextCursor(data.meta?.nextCursor || null);
-            }
-        } catch (e) {
-            console.error("Error loading more recipes:", e);
-        } finally {
-            setLoadingMore(false);
+            await api.deleteRecipe(recipeId);
+            showToast(language === 'es' ? 'Receta eliminada' : 'Recipe deleted', 'success');
+            setDeleteModalState({ isOpen: false, recipe: null });
+            // Reload page to reflect changes
+            window.location.reload();
+        } catch (error: any) {
+            showToast(error.message || 'Error', 'error');
         }
     };
 
@@ -300,7 +323,7 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                             </div>
                         </div>
 
-                        {/* Row 2: Recetas Recientes (First 4 recipes) */}
+                        {/* Row 2: Recetas Recientes (First 4 recipes with full RecipeCard styling) */}
                         <div className="space-y-6">
                             <div className="text-left border-b border-border/20 pb-3 flex justify-between items-center">
                                 <h3 className="text-xl font-serif font-bold text-[#2c2b2a] dark:text-white">Recetas de la Comunidad</h3>
@@ -309,88 +332,24 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {recipes.slice(0, 4).map(recipe => {
-                                    const id = `recipe-${recipe.publicId || recipe.id}`;
-                                    const isSaved = savedIds.includes(id);
-                                    return (
-                                        <div key={recipe.id} className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left">
-                                            <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
-                                                <img src={recipe.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                                                <span className={`absolute top-3 left-3 shadow-md ${getCategoryStyles('RECETAS')}`}>RECETAS</span>
-                                                <button onClick={(e) => toggleSave(id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md">
-                                                    {isSaved ? <BookmarkCheck className="w-4 h-4 text-[#e07e53]" /> : <Bookmark className="w-4 h-4 text-gray-500" />}
-                                                </button>
-                                            </div>
-                                            <div className="p-5 flex flex-col flex-grow">
-                                                <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">
-                                                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {recipe.prepTime} min</span>
-                                                    <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {recipe.userName || 'Chef Cacomi'}</span>
-                                                </div>
-                                                <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{recipe.name}</h3>
-                                                <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{recipe.description || 'Deliciosa receta saludable.'}</p>
-                                                <a href={`/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`} className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform">
-                                                    Ver receta <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                                </a>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                {initialRecipes.data.slice(0, 4).map(recipe => (
+                                    <RecipeCard
+                                        key={recipe.id}
+                                        recipe={recipe}
+                                        viewHref={`/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`}
+                                        onEdit={handleEdit}
+                                        onDelete={handleDelete}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* 2. TAB: Recetas (Full List with Pagination) */}
+                {/* 2. TAB: Recetas (Full original RecipeFeed component with all features, filter categories, offline check, edit/delete) */}
                 {activeTab === 'recipes' && (
-                    <div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {recipes.map(recipe => {
-                                const id = `recipe-${recipe.publicId || recipe.id}`;
-                                const isSaved = savedIds.includes(id);
-                                return (
-                                    <div key={recipe.id} className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left">
-                                        <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
-                                            <img src={recipe.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                                            <span className={`absolute top-3 left-3 shadow-md ${getCategoryStyles('RECETAS')}`}>RECETAS</span>
-                                            <button onClick={(e) => toggleSave(id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md">
-                                                {isSaved ? <BookmarkCheck className="w-4 h-4 text-[#e07e53]" /> : <Bookmark className="w-4 h-4 text-gray-500" />}
-                                            </button>
-                                        </div>
-                                        <div className="p-5 flex flex-col flex-grow">
-                                            <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">
-                                                <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {recipe.prepTime} min</span>
-                                                <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {recipe.userName || 'Chef Cacomi'}</span>
-                                            </div>
-                                            <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{recipe.name}</h3>
-                                            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{recipe.description || 'Deliciosa receta saludable.'}</p>
-                                            <a href={`/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`} className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform">
-                                                Ver receta <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                            </a>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Ver más recetas pagination button */}
-                        {nextCursor && (
-                            <div className="flex justify-center mt-12">
-                                <button
-                                    onClick={loadMoreRecipes}
-                                    disabled={loadingMore}
-                                    className="px-8 py-3.5 rounded-full bg-white dark:bg-card border border-border/80 text-xs font-bold text-[#e07e53] hover:bg-muted transition-all flex items-center gap-2 shadow-xs"
-                                >
-                                    {loadingMore ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-[#e07e53] border-t-transparent rounded-full animate-spin"></div>
-                                            {language === 'es' ? 'Cargando...' : 'Loading...'}
-                                        </>
-                                    ) : (
-                                        language === 'es' ? 'Ver más recetas' : 'Load more recipes'
-                                    )}
-                                </button>
-                            </div>
-                        )}
+                    <div className="text-left">
+                        <RecipeFeed initialData={initialRecipes} />
                     </div>
                 )}
 
@@ -522,6 +481,33 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal for Explorar Todo row */}
+            <Modal
+                isOpen={deleteModalState.isOpen}
+                onClose={() => setDeleteModalState({ isOpen: false, recipe: null })}
+                title={t?.feed?.deleteTitle || 'Eliminar Receta'}
+            >
+                <div className="space-y-4 text-left">
+                    <p className="text-foreground">
+                        {t?.feed?.deleteConfirm || '¿Estás seguro de que deseas eliminar la receta'} <strong>{deleteModalState.recipe?.name}</strong>?
+                    </p>
+                    <div className="flex justify-end gap-3">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setDeleteModalState({ isOpen: false, recipe: null })}
+                        >
+                            {t?.feed?.cancel || 'Cancelar'}
+                        </Button>
+                        <Button
+                            variant="danger"
+                            onClick={confirmDelete}
+                        >
+                            {t?.feed?.confirmDelete || 'Eliminar'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }
