@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useSettings } from '@context/SettingsContext';
-import { Globe, Mail, CheckCircle2 } from 'lucide-react';
+import { Globe, Mail, CheckCircle2, Instagram, Facebook } from 'lucide-react';
 
 export function Footer() {
     const { t, language } = useSettings();
@@ -22,6 +22,12 @@ export function Footer() {
         }
     };
 
+    const handleMailClick = (e) => {
+        e.preventDefault();
+        const parts = { u: 'soporte', a: '@', d: 'cacomi', t: '.app' };
+        window.location.href = `mailto:${parts.u}${parts.a}${parts.d}${parts.t}`;
+    };
+
     return (
         <footer className="mt-20 border-t border-border/40 bg-[#fbf9f6] dark:bg-card/20 py-16 pb-24 md:pb-16" role="contentinfo">
             <div className="container mx-auto px-4 md:px-8 max-w-6xl space-y-16">
@@ -39,8 +45,8 @@ export function Footer() {
                         </h3>
                         <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed font-light">
                             {language === 'es' 
-                                ? 'Recibe mensualmente reflexiones sobre diseño, recetas estacionales y novedades de nuestro Atelier.'
-                                : 'Receive monthly thoughts on design, seasonal recipes, and updates from our Atelier.'}
+                                ? 'Recibe mensualmente reflexiones sobre diseño, recetas estacionales y el estilo de vida consciente de Cacomi.'
+                                : 'Receive monthly thoughts on design, seasonal recipes, and Cacomi\'s conscious lifestyle.'}
                         </p>
 
                         {isSubscribed ? (
@@ -83,7 +89,7 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pt-4 text-left border-t border-border/30">
                     
                     {/* Brand Column */}
-                    <div className="md:col-span-6 space-y-6">
+                    <div className="md:col-span-6 space-y-5">
                         <span className="font-serif text-3xl font-bold tracking-tight text-[#2c2b2a] dark:text-white">
                             Cacomi
                         </span>
@@ -92,20 +98,50 @@ export function Footer() {
                                 ? 'Curando cada sombra, cada textura y cada momento de silencio.' 
                                 : 'Curating every shadow, every texture, and every moment of silence.'}
                         </p>
-                        <div className="flex gap-3">
+                        
+                        {/* Spambot-Safe Selectable Email Display */}
+                        <div className="text-xs text-muted-foreground flex items-center pt-1 font-light select-all">
+                            <Mail className="w-3.5 h-3.5 mr-2 shrink-0 text-[#e07e53]" />
+                            <span>soporte</span>
+                            <span>@</span>
+                            <span>cacomi</span>
+                            <span>.app</span>
+                        </div>
+
+                        {/* Social Networks & Mail Buttons */}
+                        <div className="flex gap-3 pt-2">
                             <a 
                                 href="https://cacomi.com" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-full bg-muted/40 hover:bg-muted text-foreground/80 hover:text-foreground flex items-center justify-center transition-all duration-300"
+                                className="w-10 h-10 rounded-full bg-muted/40 hover:bg-muted text-foreground/80 hover:text-[#e07e53] flex items-center justify-center transition-all duration-300"
                                 aria-label="Website"
                             >
                                 <Globe className="w-4 h-4" />
                             </a>
                             <a 
-                                href="/contacto" 
-                                className="w-10 h-10 rounded-full bg-muted/40 hover:bg-muted text-foreground/80 hover:text-foreground flex items-center justify-center transition-all duration-300"
-                                aria-label="Contact"
+                                href={t?.common?.instagramUrl || 'https://instagram.com/cacomi'} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="w-10 h-10 rounded-full bg-muted/40 hover:bg-muted text-foreground/80 hover:text-[#E4405F] flex items-center justify-center transition-all duration-300"
+                                aria-label="Instagram"
+                            >
+                                <Instagram className="w-4 h-4" />
+                            </a>
+                            <a 
+                                href={t?.common?.facebookUrl || 'https://facebook.com/cacomi'} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="w-10 h-10 rounded-full bg-muted/40 hover:bg-muted text-foreground/80 hover:text-[#1877F2] flex items-center justify-center transition-all duration-300"
+                                aria-label="Facebook"
+                            >
+                                <Facebook className="w-4 h-4" />
+                            </a>
+                            <a 
+                                href="#" 
+                                onClick={handleMailClick}
+                                className="w-10 h-10 rounded-full bg-muted/40 hover:bg-muted text-foreground/80 hover:text-[#e07e53] flex items-center justify-center transition-all duration-300"
+                                aria-label="Email Support"
                             >
                                 <Mail className="w-4 h-4" />
                             </a>
@@ -115,7 +151,7 @@ export function Footer() {
                     {/* Navigation Columns */}
                     <div className="md:col-span-6 grid grid-cols-3 gap-6">
                         
-                        {/* Explorar */}
+                        {/* Explorar (No Atelier) */}
                         <div className="space-y-4">
                             <h4 className="text-[#2c2b2a] dark:text-white font-bold text-xs uppercase tracking-widest">
                                 {language === 'es' ? 'Explorar' : 'Explore'}
@@ -123,18 +159,18 @@ export function Footer() {
                             <ul className="space-y-2.5 text-xs text-muted-foreground font-light">
                                 <li><a href="/" className="hover:text-[#e07e53] transition-colors">{t?.nav?.vida || 'Vida'}</a></li>
                                 <li><a href="/origen" className="hover:text-[#e07e53] transition-colors">{t?.nav?.origen || 'Origen'}</a></li>
-                                <li><a href="#" className="hover:text-[#e07e53] transition-colors">{t?.nav?.atelier || 'Atelier'}</a></li>
                             </ul>
                         </div>
 
-                        {/* Nosotros */}
+                        {/* Nosotros (Filosofía, Historias, Acerca de, Contacto) */}
                         <div className="space-y-4">
                             <h4 className="text-[#2c2b2a] dark:text-white font-bold text-xs uppercase tracking-widest">
                                 {language === 'es' ? 'Nosotros' : 'About'}
                             </h4>
                             <ul className="space-y-2.5 text-xs text-muted-foreground font-light">
-                                <li><a href="/about" className="hover:text-[#e07e53] transition-colors">{language === 'es' ? 'Filosofía' : 'Philosophy'}</a></li>
-                                <li><a href="/blog" className="hover:text-[#e07e53] transition-colors">{language === 'es' ? 'Historias' : 'Stories'}</a></li>
+                                <li><a href="/about" className="hover:text-[#e07e53] transition-colors">{language === 'es' ? 'Acerca de' : 'About Us'}</a></li>
+                                <li><a href="/filosofia" className="hover:text-[#e07e53] transition-colors">{language === 'es' ? 'Filosofía' : 'Philosophy'}</a></li>
+                                <li><a href="/historias" className="hover:text-[#e07e53] transition-colors">{language === 'es' ? 'Historias' : 'Stories'}</a></li>
                                 <li><a href="/contacto" className="hover:text-[#e07e53] transition-colors">{t?.common?.contactLink || 'Contacto'}</a></li>
                             </ul>
                         </div>

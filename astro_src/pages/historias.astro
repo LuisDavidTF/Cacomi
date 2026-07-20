@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { translations } from '@context/SettingsContext';
+import { getCollection } from 'astro:content';
+import { Calendar, User, ArrowRight } from 'lucide-react';
+
+export const prerender = false;
+
+const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
+const t = translations[lang] || translations.es;
+
+// Load real blog articles
+const allBlogs = await getCollection('blog');
+const sortedBlogs = allBlogs.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()).slice(0, 5);
+
+const content = {
+  es: {
+    title: 'Historias de la Comunidad - Diario Cacomi',
+    desc: 'Explora relatos visuales, entrevistas de diseño, bienestar y la hemeroteca completa de Cacomi.',
+    heading: 'Historias',
+    subheading: 'Un registro de diseño, reflexiones y cocina lenta.',
+    btnRead: 'Leer más',
+    allBlogsBtn: 'Ver hemeroteca completa'
+  },
+  en: {
+    title: 'Community Stories - Cacomi Journal',
+    desc: 'Explore visual stories, design interviews, well-being, and Cacomi\'s complete archive.',
+    heading: 'Stories',
+    subheading: 'A record of design, thoughts, and slow cooking.',
+    btnRead: 'Read more',
+    allBlogsBtn: 'View complete archive'
+  },
+  fr: {
+    title: 'Histoires de la Communauté - Journal Cacomi',
+    desc: 'Explorez des histoires visuelles, des interviews sur le design, le bien-être et les archives de Cacomi.',
+    heading: 'Histoires',
+    subheading: 'Un registre de design, de pensées et de cuisine lente.',
+    btnRead: 'Lire plus',
+    allBlogsBtn: 'Voir les archives complètes'
+  }
+};
+
+const current = content[lang] || content.es;
+---
+
+<Layout title={current.title} description={current.desc}>
+  <main class="bg-[#fbf9f6] dark:bg-slate-950 min-h-screen py-24 text-left">
+    <div class="container mx-auto px-4 md:px-8 max-w-3xl space-y-12">
+      
+      {/* Page Header */}
+      <div class="space-y-4 border-b border-border/40 pb-8">
+        <h1 class="font-serif text-4xl md:text-5xl font-bold text-[#2c2b2a] dark:text-white leading-tight">
+          {current.heading}
+        </h1>
+        <p class="text-muted-foreground text-lg font-light leading-relaxed">
+          {current.subheading}
+        </p>
+      </div>
+
+      {/* Stories Feed */}
+      <div class="space-y-10">
+        {sortedBlogs.map(post => (
+          <article class="group space-y-4 border-b border-border/30 pb-8">
+            <div class="flex items-center gap-4 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+              <span class="flex items-center gap-1"><Calendar class="w-3.5 h-3.5" /> {post.data.date}</span>
+              <span class="flex items-center gap-1"><User class="w-3.5 h-3.5" /> {post.data.author || 'Equipo Cacomi'}</span>
+            </div>
+            
+            <h2 class="font-serif text-2xl font-bold text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors leading-snug">
+              <a href={`/blog/${post.id}`}>{post.data.title}</a>
+            </h2>
+            
+            <p class="text-muted-foreground text-sm leading-relaxed font-light line-clamp-3">
+              {post.data.description}
+            </p>
+            
+            <div class="pt-2">
+              <a href={`/blog/${post.id}`} class="inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform">
+                {current.btnRead} <ArrowRight class="w-3.5 h-3.5 ml-1" />
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* Link to Full Blog */}
+      <div class="text-center pt-8">
+        <a 
+          href="/blog" 
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#e07e53] hover:bg-[#d06e43] text-white font-semibold shadow-md shadow-[#e07e53]/10 transition-all hover:scale-[1.02] active:scale-95"
+        >
+          {current.allBlogsBtn} <ArrowRight class="w-4 h-4" />
+        </a>
+      </div>
+
+    </div>
+  </main>
+</Layout>

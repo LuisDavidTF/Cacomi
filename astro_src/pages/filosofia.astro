@@ -1,0 +1,130 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { translations } from '@context/SettingsContext';
+import { BookOpen, Compass, ShieldCheck } from 'lucide-react';
+
+export const prerender = false;
+
+const lang = Astro.cookies.get('cacomi_language')?.value || 'es';
+const t = translations[lang] || translations.es;
+
+// Localized content for the Philosophy page
+const content = {
+  es: {
+    title: 'Filosofía - El Manifiesto de una Vida Lenta',
+    desc: 'Descubre los valores fundamentales de Cacomi: cocina consciente, minimalismo estético y el arte de encontrar belleza en lo simple.',
+    heading: 'Nuestra Filosofía',
+    subheading: 'Hacia un estilo de vida consciente y equilibrado.',
+    pillar1Title: 'Cocina Lenta & Consciente',
+    pillar1Desc: 'Entendemos la nutrición como un acto de respeto hacia el cuerpo y la tierra. Promovemos el uso de ingredientes orgánicos, insumos locales y la preparación pausada, regresando a los sabores puros.',
+    pillar2Title: 'El Silencio y el Concepto de "Ma"',
+    pillar2Desc: 'Inspirados en la estética japonesa, valoramos el espacio vacío y el silencio. En un mundo saturado de información, creamos interfaces y contenidos que actúan como un respiro visual.',
+    pillar3Title: 'Sostenibilidad Honesta',
+    pillar3Desc: 'Desde el empaque de nuestros productos hasta la selección de proveedores, cada paso está diseñado para reducir el desperdicio. Abrazamos la imperfección y la durabilidad.',
+    closing: 'Cacomi no busca ser una herramienta de consumo masivo, sino un compañero en tu búsqueda de calma, diseño y bienestar.'
+  },
+  en: {
+    title: 'Philosophy - The Slow Living Manifesto',
+    desc: 'Discover Cacomi\'s core values: conscious cooking, aesthetic minimalism, and the art of finding beauty in simplicity.',
+    heading: 'Our Philosophy',
+    subheading: 'Towards a conscious and balanced lifestyle.',
+    pillar1Title: 'Slow & Conscious Cooking',
+    pillar1Desc: 'We view nutrition as an act of respect for the body and the earth. We promote organic ingredients, local produce, and slow preparation, returning to pure flavors.',
+    pillar2Title: 'Silence and the Concept of "Ma"',
+    pillar2Desc: 'Inspired by Japanese aesthetics, we value negative space and silence. In an information-saturated world, we design interfaces and content that act as visual breathing room.',
+    pillar3Title: 'Honest Sustainability',
+    pillar3Desc: 'From our packaging to our choice of partners, every step is designed to minimize waste. We embrace imperfection and durability.',
+    closing: 'Cacomi does not seek to be a tool for mass consumption, but a companion in your search for calm, design, and well-being.'
+  },
+  fr: {
+    title: 'Philosophie - Le Manifeste de la Vie Lente',
+    desc: 'Découvrez les valeurs fondamentales de Cacomi : cuisine consciente, minimalisme esthétique et l\'art de trouver la beauté dans la simplicité.',
+    heading: 'Notre Philosophie',
+    subheading: 'Vers un mode de vie conscient et équilibré.',
+    pillar1Title: 'Cuisine Lente et Consciente',
+    pillar1Desc: 'Nous concevons la nutrition comme un acte de respect envers le corps et la terre. Nous encourageons les ingrédients biologiques, locaux et la préparation lente.',
+    pillar2Title: 'Le Silence et le Concept de "Ma"',
+    pillar2Desc: 'Inspirés par l\'esthétique japonaise, nous valorisons l\'espace vide et le silence. Nous créons des interfaces qui agissent comme un répit visuel.',
+    pillar3Title: 'Durabilité Honnête',
+    pillar3Desc: 'De l\'emballage de nos produits à la sélection de nos partenaires, chaque étape est conçue pour réduire le gaspillage. Nous embrassons la durabilité.',
+    closing: 'Cacomi ne cherche pas à être un outil de consommation de masse, mais un compagnon dans votre quête de calme, de design et de bien-être.'
+  }
+};
+
+const current = content[lang] || content.es;
+---
+
+<Layout title={current.title} description={current.desc}>
+  <main class="bg-[#fbf9f6] dark:bg-slate-950 min-h-screen py-24 text-left">
+    <div class="container mx-auto px-4 md:px-8 max-w-3xl space-y-16">
+      
+      {/* Page Header */}
+      <div class="space-y-4 border-b border-border/40 pb-8">
+        <h1 class="font-serif text-4xl md:text-5xl font-bold text-[#2c2b2a] dark:text-white leading-tight">
+          {current.heading}
+        </h1>
+        <p class="text-muted-foreground text-lg font-light leading-relaxed">
+          {current.subheading}
+        </p>
+      </div>
+
+      {/* Pillars Section */}
+      <div class="space-y-12">
+        
+        {/* Pillar 1 */}
+        <div class="flex gap-5">
+          <div class="w-12 h-12 rounded-2xl bg-[#e07e53]/10 text-[#e07e53] flex items-center justify-center shrink-0">
+            <Compass class="w-6 h-6" />
+          </div>
+          <div class="space-y-2">
+            <h3 class="font-serif text-xl font-bold text-[#2c2b2a] dark:text-white">
+              {current.pillar1Title}
+            </h3>
+            <p class="text-muted-foreground text-sm leading-relaxed font-light">
+              {current.pillar1Desc}
+            </p>
+          </div>
+        </div>
+
+        {/* Pillar 2 */}
+        <div class="flex gap-5">
+          <div class="w-12 h-12 rounded-2xl bg-[#e07e53]/10 text-[#e07e53] flex items-center justify-center shrink-0">
+            <BookOpen class="w-6 h-6" />
+          </div>
+          <div class="space-y-2">
+            <h3 class="font-serif text-xl font-bold text-[#2c2b2a] dark:text-white">
+              {current.pillar2Title}
+            </h3>
+            <p class="text-muted-foreground text-sm leading-relaxed font-light">
+              {current.pillar2Desc}
+            </p>
+          </div>
+        </div>
+
+        {/* Pillar 3 */}
+        <div class="flex gap-5">
+          <div class="w-12 h-12 rounded-2xl bg-[#e07e53]/10 text-[#e07e53] flex items-center justify-center shrink-0">
+            <ShieldCheck class="w-6 h-6" />
+          </div>
+          <div class="space-y-2">
+            <h3 class="font-serif text-xl font-bold text-[#2c2b2a] dark:text-white">
+              {current.pillar3Title}
+            </h3>
+            <p class="text-muted-foreground text-sm leading-relaxed font-light">
+              {current.pillar3Desc}
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Conclusion */}
+      <div class="bg-[#f4e6d9]/30 dark:bg-card/45 border border-[#e8d5c4]/30 rounded-3xl p-8 text-center">
+        <p class="font-serif text-base md:text-lg text-[#2c2b2a] dark:text-white max-w-xl mx-auto leading-relaxed">
+          {current.closing}
+        </p>
+      </div>
+
+    </div>
+  </main>
+</Layout>
