@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { decodeJwtPayload } from '../../../middleware';
+import Stripe from 'stripe';
 
 export const prerender = false;
 
@@ -80,12 +81,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
         if (stripeSecretKey) {
             try {
-                // If the user configures Stripe credentials in .env.local, they would install stripe: npm i stripe
-                const stripePkg = 'stripe';
-                const { default: Stripe } = await import(/* @vite-ignore */ stripePkg);
-                const stripe = new (Stripe as any)(stripeSecretKey, {
+                const stripe = new Stripe(stripeSecretKey, {
                     apiVersion: '2025-01-27'
-                });
+                } as any);
 
                 // Create a Stripe PaymentIntent for the deposit amount
                 const paymentIntent = await stripe.paymentIntents.create({

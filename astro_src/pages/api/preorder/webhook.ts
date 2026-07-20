@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getBackendUrl } from '../../../lib/services/config';
+import Stripe from 'stripe';
 
 export const prerender = false;
 
@@ -13,11 +14,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (stripeSecretKey && webhookSecret && signature) {
         try {
-            const stripePkg = 'stripe';
-            const { default: Stripe } = await import(/* @vite-ignore */ stripePkg);
-            const stripe = new (Stripe as any)(stripeSecretKey, {
+            const stripe = new Stripe(stripeSecretKey, {
                 apiVersion: '2025-01-27'
-            });
+            } as any);
             event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
         } catch (err: any) {
             console.error("[Webhook signature verification failed]:", err.message);
