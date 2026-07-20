@@ -77,6 +77,14 @@ try {
   <LifestyleFeed 
     initialRecipes={initialRecipes} 
     initialArticles={initialArticles}
+    revistas={allRevistas.map(r => ({
+      id: r.id,
+      number: r.data.number,
+      title: r.data.title,
+      description: r.data.description,
+      image: r.data.image,
+      date: r.data.date
+    }))}
     latestRevista={latestRevista ? {
       id: latestRevista.id,
       number: latestRevista.data.number,

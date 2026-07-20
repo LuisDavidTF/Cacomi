@@ -641,8 +641,8 @@ export const translations = {
             networksDesc: 'Síguenos para estar al día de novedades, recetas y actualizaciones semanales.'
         },
         vida: {
-            heroTitle: 'Vida. Descubre el arte de vivir con intención.',
-            heroSubtitle: 'Explora un diario visual dedicado a las texturas, rituales y filosofías que definen el estilo de vida de la comunidad Cacomi.',
+            heroTitle: 'Vida. Curando cada sombra, cada textura.',
+            heroSubtitle: 'Un diario visual dedicado a la cocina lenta, el diseño minimalista y los rituales diarios que nos reconectan con la tierra y el silencio.',
             btnExplore: 'Explorar Relatos',
             btnAbout: 'Conócenos',
             featuredChapter: 'REVISTA DESTACADA',
@@ -1282,8 +1282,8 @@ export const translations = {
             networksDesc: 'Follow us to stay updated with news, recipes, and weekly updates.'
         },
         vida: {
-            heroTitle: 'Vida. Discover the art of curated living.',
-            heroSubtitle: 'Explore a visual journal dedicated to the textures, rituals, and philosophies that define the Cacomi lifestyle.',
+            heroTitle: 'Vida. Curating every shadow, every texture.',
+            heroSubtitle: 'A visual journal dedicated to slow food, minimalist design, and the daily rituals that reconnect us with the earth and silence.',
             btnExplore: 'Explore Stories',
             btnAbout: 'About Us',
             featuredChapter: 'FEATURED MAGAZINE',
@@ -1876,8 +1876,8 @@ export const translations = {
             networksDesc: 'Suivez-nous pour rester au courant des nouveautés, des recettes et des mises à jour hebdomadaires.'
         },
         vida: {
-            heroTitle: 'Vida. Découvrez l\'art de vivre avec intention.',
-            heroSubtitle: 'Explorez un journal visuel dédié aux textures, rituels et philosophies qui définissent le style de vie de la communauté Cacomi.',
+            heroTitle: 'Vida. Épurant chaque ombre, chaque texture.',
+            heroSubtitle: 'Un journal visuel dédié à la cuisine lente, au design minimaliste et aux rituels quotidiens qui nous reconnectent à la terre et au silence.',
             btnExplore: 'Explorer les Récits',
             btnAbout: 'À Propos de Nous',
             featuredChapter: 'REVUE VEDETTE',

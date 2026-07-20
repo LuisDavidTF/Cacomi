@@ -28,6 +28,15 @@ interface Article {
     date: string;
 }
 
+interface Magazine {
+    id: string;
+    number: number;
+    title: string;
+    description: string;
+    image?: string;
+    date: string;
+}
+
 interface LatestRevista {
     id: string;
     number: number;
@@ -39,22 +48,23 @@ interface LatestRevista {
 interface LifestyleFeedProps {
     initialRecipes: { data: Recipe[]; meta?: { nextCursor: string | null } };
     initialArticles: Article[];
+    revistas: Magazine[];
     latestRevista: LatestRevista | null;
     isAuthenticated: boolean;
 }
 
-export function LifestyleFeed({ initialRecipes, initialArticles, latestRevista, isAuthenticated }: LifestyleFeedProps) {
+export function LifestyleFeed({ initialRecipes, initialArticles, revistas, latestRevista, isAuthenticated }: LifestyleFeedProps) {
     const { t, language } = useSettings();
     const [activeTab, setActiveTab] = useState<string>('all');
     const [savedIds, setSavedIds] = useState<string[]>([]);
     const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
     
-    // Pagination state for recipes
+    // Pagination state for recipes (only under "Recetas" tab)
     const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes.data || []);
     const [nextCursor, setNextCursor] = useState<string | null>(initialRecipes.meta?.nextCursor || null);
     const [loadingMore, setLoadingMore] = useState(false);
 
-    // Load saved articles/recipes from localStorage on mount
+    // Load saved items (recipes or articles) from localStorage on mount
     useEffect(() => {
         const stored = localStorage.getItem('cacomi_saved_lifestyle');
         if (stored) {
@@ -66,7 +76,7 @@ export function LifestyleFeed({ initialRecipes, initialArticles, latestRevista, 
         }
     }, []);
 
-    // Save items to localStorage when state changes
+    // Save items to localStorage
     const toggleSave = (id: string, e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -82,7 +92,7 @@ export function LifestyleFeed({ initialRecipes, initialArticles, latestRevista, 
         localStorage.setItem('cacomi_saved_lifestyle', JSON.stringify(newSavedIds));
     };
 
-    // Fetch more recipes from the API route for pagination/scrolling
+    // Fetch more recipes for pagination under "Recetas"
     const loadMoreRecipes = async () => {
         if (loadingMore || !nextCursor) return;
         setLoadingMore(true);
@@ -99,47 +109,6 @@ export function LifestyleFeed({ initialRecipes, initialArticles, latestRevista, 
             setLoadingMore(false);
         }
     };
-
-    // Combine static articles and dynamic recipes into feed items
-    const getCombinedItems = () => {
-        const recipeItems: Article[] = recipes.map(recipe => ({
-            id: `recipe-${recipe.publicId || recipe.id}`,
-            title: recipe.name,
-            description: recipe.description || 'Deliciosa receta saludable para disfrutar hoy.',
-            content: `/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`, // points to recipe detail
-            category: 'RECETAS',
-            author: recipe.userName || 'Chef Cacomi',
-            readTime: recipe.prepTime || 15,
-            image: recipe.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
-            date: '2026-07-20'
-        }));
-
-        return [...initialArticles, ...recipeItems];
-    };
-
-    const allItems = getCombinedItems();
-
-    // Filter items based on active tab
-    const getFilteredItems = () => {
-        if (activeTab === 'saved') {
-            return allItems.filter(item => savedIds.includes(item.id));
-        }
-        if (activeTab === 'recipes') {
-            return allItems.filter(item => item.category === 'RECETAS');
-        }
-        if (activeTab === 'philosophy') {
-            return allItems.filter(item => item.category === 'FILOSOFÍA');
-        }
-        if (activeTab === 'interiors') {
-            return allItems.filter(item => item.category === 'INTERIORES');
-        }
-        if (activeTab === 'community') {
-            return allItems.filter(item => item.category === 'RECETAS' && item.author !== 'Chef Cacomi');
-        }
-        return allItems; // Explorar Todo (default)
-    };
-
-    const filteredItems = getFilteredItems();
 
     // High Contrast, solid, extremely legible category styles
     const getCategoryStyles = (category: string) => {
@@ -166,10 +135,10 @@ export function LifestyleFeed({ initialRecipes, initialArticles, latestRevista, 
                         {/* Hero Text */}
                         <div className="lg:col-span-7 text-left space-y-6">
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-[#2c2b2a] dark:text-white leading-tight font-light">
-                                {t?.vida?.heroTitle || 'Vida. Descubre el arte de vivir con intención.'}
+                                {t?.vida?.heroTitle || 'Vida. Curando cada sombra, cada textura.'}
                             </h1>
                             <p className="text-[#5c5a57] dark:text-gray-300 text-base md:text-lg leading-relaxed max-w-xl font-light">
-                                {t?.vida?.heroSubtitle || 'Explora un diario visual dedicado a las texturas, rituales y filosofías que definen el estilo de vida de la comunidad Cacomi.'}
+                                {t?.vida?.heroSubtitle || 'Un diario visual dedicado a la cocina lenta, el diseño minimalista y los rituales diarios que nos reconectan con la tierra y el silencio.'}
                             </p>
                             
                             <div className="flex flex-wrap gap-4 pt-4">
@@ -258,17 +227,8 @@ export function LifestyleFeed({ initialRecipes, initialArticles, latestRevista, 
                     </button>
                 </div>
 
-                {/* Filter Tabs */}
+                {/* Clean Filter Tabs (Explorar Todo, Recetas, Revistas, Artículos) */}
                 <div className="flex flex-wrap gap-2 mb-10 overflow-x-auto pb-2 scrollbar-none">
-                    <button 
-                        onClick={() => setActiveTab('saved')}
-                        className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-full border transition-all whitespace-nowrap ${activeTab === 'saved' ? 'bg-[#e07e53] text-white border-transparent' : 'bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground'}`}
-                    >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        {t?.vida?.tabSaved || 'Guardados'}
-                        {savedIds.length > 0 && <span className="ml-1 bg-white/20 text-white rounded-full text-[9px] px-1.5 py-0.5 leading-none">{savedIds.length}</span>}
-                    </button>
-
                     <button 
                         onClick={() => setActiveTab('all')}
                         className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all whitespace-nowrap ${activeTab === 'all' ? 'bg-[#e07e53] text-white border-transparent' : 'bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground'}`}
@@ -284,124 +244,141 @@ export function LifestyleFeed({ initialRecipes, initialArticles, latestRevista, 
                     </button>
 
                     <button 
-                        onClick={() => setActiveTab('philosophy')}
-                        className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all whitespace-nowrap ${activeTab === 'philosophy' ? 'bg-[#e07e53] text-white border-transparent' : 'bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground'}`}
+                        onClick={() => setActiveTab('magazines')}
+                        className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all whitespace-nowrap ${activeTab === 'magazines' ? 'bg-[#e07e53] text-white border-transparent' : 'bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground'}`}
                     >
-                        {t?.vida?.tabPhilosophy || 'Filosofía'}
+                        {language === 'es' ? 'Revistas' : 'Magazines'}
                     </button>
 
                     <button 
-                        onClick={() => setActiveTab('interiors')}
-                        className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all whitespace-nowrap ${activeTab === 'interiors' ? 'bg-[#e07e53] text-white border-transparent' : 'bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground'}`}
+                        onClick={() => setActiveTab('articles')}
+                        className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all whitespace-nowrap ${activeTab === 'articles' ? 'bg-[#e07e53] text-white border-transparent' : 'bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground'}`}
                     >
-                        {t?.vida?.tabInteriors || 'Interiores'}
-                    </button>
-
-                    <button 
-                        onClick={() => setActiveTab('community')}
-                        className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all whitespace-nowrap ${activeTab === 'community' ? 'bg-[#e07e53] text-white border-transparent' : 'bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground'}`}
-                    >
-                        {t?.vida?.tabCommunity || 'Comunidad'}
+                        {language === 'es' ? 'Artículos' : 'Articles'}
                     </button>
                 </div>
 
-                {/* Articles/Recipes Grid */}
-                {filteredItems.length > 0 ? (
+                {/* Tabs Grid Renderer */}
+                
+                {/* 1. TAB: Explorar Todo (Curated Preview Rows) */}
+                {activeTab === 'all' && (
+                    <div className="space-y-16">
+                        {/* Row 1: Artículos Destacados (First 4 articles) */}
+                        <div className="space-y-6">
+                            <div className="text-left border-b border-border/20 pb-3 flex justify-between items-center">
+                                <h3 className="text-xl font-serif font-bold text-[#2c2b2a] dark:text-white">Artículos Recomendados</h3>
+                                <button onClick={() => setActiveTab('articles')} className="text-xs font-bold text-[#e07e53] hover:underline flex items-center gap-1">
+                                    Ver todos <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {initialArticles.slice(0, 4).map(item => {
+                                    const isSaved = savedIds.includes(item.id);
+                                    return (
+                                        <div key={item.id} className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left">
+                                            <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
+                                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                                                <span className={`absolute top-3 left-3 shadow-md ${getCategoryStyles(item.category)}`}>{item.category}</span>
+                                                <button onClick={(e) => toggleSave(item.id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md">
+                                                    {isSaved ? <BookmarkCheck className="w-4 h-4 text-[#e07e53]" /> : <Bookmark className="w-4 h-4 text-gray-500" />}
+                                                </button>
+                                            </div>
+                                            <div className="p-5 flex flex-col flex-grow">
+                                                <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">
+                                                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {item.readTime} min</span>
+                                                    <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {item.author}</span>
+                                                </div>
+                                                <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{item.title}</h3>
+                                                <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{item.description}</p>
+                                                <button onClick={() => setSelectedArticle(item)} className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform self-start">
+                                                    Leer relato <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Row 2: Recetas Recientes (First 4 recipes) */}
+                        <div className="space-y-6">
+                            <div className="text-left border-b border-border/20 pb-3 flex justify-between items-center">
+                                <h3 className="text-xl font-serif font-bold text-[#2c2b2a] dark:text-white">Recetas de la Comunidad</h3>
+                                <button onClick={() => setActiveTab('recipes')} className="text-xs font-bold text-[#e07e53] hover:underline flex items-center gap-1">
+                                    Ver todas <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {recipes.slice(0, 4).map(recipe => {
+                                    const id = `recipe-${recipe.publicId || recipe.id}`;
+                                    const isSaved = savedIds.includes(id);
+                                    return (
+                                        <div key={recipe.id} className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left">
+                                            <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
+                                                <img src={recipe.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                                                <span className={`absolute top-3 left-3 shadow-md ${getCategoryStyles('RECETAS')}`}>RECETAS</span>
+                                                <button onClick={(e) => toggleSave(id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md">
+                                                    {isSaved ? <BookmarkCheck className="w-4 h-4 text-[#e07e53]" /> : <Bookmark className="w-4 h-4 text-gray-500" />}
+                                                </button>
+                                            </div>
+                                            <div className="p-5 flex flex-col flex-grow">
+                                                <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">
+                                                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {recipe.prepTime} min</span>
+                                                    <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {recipe.userName || 'Chef Cacomi'}</span>
+                                                </div>
+                                                <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{recipe.name}</h3>
+                                                <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{recipe.description || 'Deliciosa receta saludable.'}</p>
+                                                <a href={`/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`} className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform">
+                                                    Ver receta <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* 2. TAB: Recetas (Full List with Pagination) */}
+                {activeTab === 'recipes' && (
                     <div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {filteredItems.map(item => {
-                                const isRecipe = item.category === 'RECETAS';
-                                const isSaved = savedIds.includes(item.id);
-
+                            {recipes.map(recipe => {
+                                const id = `recipe-${recipe.publicId || recipe.id}`;
+                                const isSaved = savedIds.includes(id);
                                 return (
-                                    <div 
-                                        key={item.id}
-                                        className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left"
-                                    >
-                                        {/* Image & Bookmark action */}
+                                    <div key={recipe.id} className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left">
                                         <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
-                                            <img 
-                                                src={item.image} 
-                                                alt={item.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                loading="lazy"
-                                            />
-                                            <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
-
-                                            {/* High-contrast solid Category Badge */}
-                                            <span className={`absolute top-3 left-3 tracking-wider shadow-md ${getCategoryStyles(item.category)}`}>
-                                                {item.category}
-                                            </span>
-
-                                            {/* Bookmark Button */}
-                                            <button 
-                                                onClick={(e) => toggleSave(item.id, e)}
-                                                className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md"
-                                                aria-label="Guardar relato"
-                                            >
-                                                {isSaved ? (
-                                                    <BookmarkCheck className="w-4 h-4 text-[#e07e53]" />
-                                                ) : (
-                                                    <Bookmark className="w-4 h-4 text-gray-500" />
-                                                )}
+                                            <img src={recipe.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                                            <span className={`absolute top-3 left-3 shadow-md ${getCategoryStyles('RECETAS')}`}>RECETAS</span>
+                                            <button onClick={(e) => toggleSave(id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md">
+                                                {isSaved ? <BookmarkCheck className="w-4 h-4 text-[#e07e53]" /> : <Bookmark className="w-4 h-4 text-gray-500" />}
                                             </button>
                                         </div>
-
-                                        {/* Card Content */}
                                         <div className="p-5 flex flex-col flex-grow">
-                                            {/* Meta: time and author */}
                                             <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="w-3.5 h-3.5 text-muted-foreground/60" />
-                                                    {item.readTime} {t?.vida?.readTime || 'min'}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <User className="w-3.5 h-3.5 text-muted-foreground/60" />
-                                                    {item.author}
-                                                </span>
+                                                <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {recipe.prepTime} min</span>
+                                                <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {recipe.userName || 'Chef Cacomi'}</span>
                                             </div>
-
-                                            {/* Title */}
-                                            <h3 className="font-serif text-lg font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">
-                                                {item.title}
-                                            </h3>
-
-                                            {/* Description */}
-                                            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">
-                                                {item.description}
-                                            </p>
-
-                                            {/* Footer action link */}
-                                            <div className="mt-auto pt-2">
-                                                {isRecipe ? (
-                                                    <a 
-                                                        href={item.content}
-                                                        className="inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform"
-                                                    >
-                                                        {t?.vida?.viewRecipe || 'Ver receta'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                                    </a>
-                                                ) : (
-                                                    <button 
-                                                        onClick={() => setSelectedArticle(item)}
-                                                        className="inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform"
-                                                    >
-                                                        {t?.vida?.readArticle || 'Leer relato'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                                    </button>
-                                                )}
-                                            </div>
+                                            <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{recipe.name}</h3>
+                                            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{recipe.description || 'Deliciosa receta saludable.'}</p>
+                                            <a href={`/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`} className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform">
+                                                Ver receta <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                            </a>
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
 
-                        {/* Cargar Más Button (Pagination/Infinite Scroll fallback) */}
-                        {nextCursor && (activeTab === 'recipes' || activeTab === 'all') && (
+                        {/* Ver más recetas pagination button */}
+                        {nextCursor && (
                             <div className="flex justify-center mt-12">
                                 <button
                                     onClick={loadMoreRecipes}
                                     disabled={loadingMore}
-                                    className="px-8 py-3 rounded-full bg-white dark:bg-card border border-border/80 text-xs font-bold text-[#e07e53] hover:bg-muted transition-all flex items-center gap-2 shadow-xs"
+                                    className="px-8 py-3.5 rounded-full bg-white dark:bg-card border border-border/80 text-xs font-bold text-[#e07e53] hover:bg-muted transition-all flex items-center gap-2 shadow-xs"
                                 >
                                     {loadingMore ? (
                                         <>
@@ -415,19 +392,70 @@ export function LifestyleFeed({ initialRecipes, initialArticles, latestRevista, 
                             </div>
                         )}
                     </div>
-                ) : (
-                    <div className="text-center py-16 border border-dashed border-border rounded-3xl bg-muted/10">
-                        <BookOpen className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-                        <p className="text-sm font-semibold text-muted-foreground">
-                            {activeTab === 'saved' 
-                                ? (language === 'es' ? 'No tienes relatos guardados todavía.' : 'No saved stories yet.')
-                                : (language === 'es' ? 'No hay publicaciones en esta categoría.' : 'No stories in this category.')}
-                        </p>
+                )}
+
+                {/* 3. TAB: Revistas (Full Grid of Editions) */}
+                {activeTab === 'magazines' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {revistas.map(revista => (
+                            <a 
+                                key={revista.id} 
+                                href={`/revista/${revista.id}`}
+                                className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left"
+                            >
+                                <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
+                                    <img src={revista.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'} alt={revista.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                                    <span className="absolute top-3 left-3 bg-[#e07e53] text-white shadow-md px-2.5 py-0.5 text-[9px] rounded-full font-bold tracking-wider">
+                                        EDICIÓN #{revista.number}
+                                    </span>
+                                </div>
+                                <div className="p-5 flex flex-col flex-grow">
+                                    <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2 block">{revista.date}</span>
+                                    <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{revista.title}</h3>
+                                    <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{revista.description}</p>
+                                    <span className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] group-hover:translate-x-0.5 transition-transform">
+                                        Leer revista <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                    </span>
+                                </div>
+                            </a>
+                        ))}
                     </div>
                 )}
+
+                {/* 4. TAB: Artículos (Full Grid of Blog Posts) */}
+                {activeTab === 'articles' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {initialArticles.map(item => {
+                            const isSaved = savedIds.includes(item.id);
+                            return (
+                                <div key={item.id} className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left">
+                                    <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
+                                        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                                        <span className={`absolute top-3 left-3 shadow-md ${getCategoryStyles(item.category)}`}>{item.category}</span>
+                                        <button onClick={(e) => toggleSave(item.id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md">
+                                            {isSaved ? <BookmarkCheck className="w-4 h-4 text-[#e07e53]" /> : <Bookmark className="w-4 h-4 text-gray-500" />}
+                                        </button>
+                                    </div>
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">
+                                            <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {item.readTime} min</span>
+                                            <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {item.author}</span>
+                                        </div>
+                                        <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{item.title}</h3>
+                                        <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{item.description}</p>
+                                        <button onClick={() => setSelectedArticle(item)} className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform self-start">
+                                            Leer relato <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
             </section>
 
-            {/* Article Detail Modal (Slide-over/Modal Reader for Real Long-form Articles) */}
+            {/* Article Detail Modal */}
             {selectedArticle && (
                 <div className="fixed inset-0 z-[60] flex justify-end">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedArticle(null)}></div>
