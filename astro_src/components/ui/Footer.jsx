@@ -10,7 +10,7 @@ export function Footer() {
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubscribe = (e: React.FormEvent) => {
+    const handleSubscribe = (e) => {
         e.preventDefault();
         if (email.trim()) {
             setIsLoading(true);
