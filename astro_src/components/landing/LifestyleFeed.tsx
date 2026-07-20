@@ -28,85 +28,31 @@ interface Article {
     date: string;
 }
 
-interface LifestyleFeedProps {
-    initialRecipes: { data: Recipe[] };
+interface LatestRevista {
+    id: string;
+    number: number;
+    title: string;
+    description: string;
+    image?: string;
 }
 
-export function LifestyleFeed({ initialRecipes }: LifestyleFeedProps) {
+interface LifestyleFeedProps {
+    initialRecipes: { data: Recipe[]; meta?: { nextCursor: string | null } };
+    initialArticles: Article[];
+    latestRevista: LatestRevista | null;
+    isAuthenticated: boolean;
+}
+
+export function LifestyleFeed({ initialRecipes, initialArticles, latestRevista, isAuthenticated }: LifestyleFeedProps) {
     const { t, language } = useSettings();
     const [activeTab, setActiveTab] = useState<string>('all');
     const [savedIds, setSavedIds] = useState<string[]>([]);
     const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-    const [showNewsletterModal, setShowNewsletterModal] = useState(false);
-    const [email, setEmail] = useState('');
-    const [isSubscribed, setIsSubscribed] = useState(false);
-
-    // Static Lifestyle Articles
-    const staticArticles: Article[] = [
-        {
-            id: 'art-1',
-            title: 'Arquitectura del silencio: espacios que respiran.',
-            description: 'Cómo el entorno físico dicta nuestro estado mental y el valor de simplificar los espacios cotidianos.',
-            category: 'FILOSOFÍA',
-            author: 'Cacomi',
-            readTime: 12,
-            image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-            date: '2026-07-20',
-            content: `El silencio no es la ausencia de sonido, sino la presencia de claridad. En el diseño de nuestros hogares, cada objeto que agregamos compite por nuestra atención subconsciente. La arquitectura del silencio propone un retorno a lo esencial: líneas limpias, materiales naturales crudos y abundante luz natural.
-
-Al reducir el desorden visual, permitimos que la mente descanse. La cocina, tradicionalmente un espacio de alta estimulación y ruido, se convierte en un templo de contemplación cuando eliminamos los utensilios redundantes y priorizamos herramientas de alta calidad hechas de piedra, madera y hierro. 
-
-Crear un espacio que respira es el primer paso hacia una vida consciente. No se trata de vaciar tus habitaciones, sino de llenarlas con intención.`
-        },
-        {
-            id: 'art-2',
-            title: 'Curando el vacío: menos es más en el diseño.',
-            description: 'Lecciones de diseño japonés sobre el concepto de "Ma" (el espacio vacío con propósito) y su impacto en el bienestar.',
-            category: 'INTERIORES',
-            author: 'Diseño',
-            readTime: 5,
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80',
-            date: '2026-07-18',
-            content: `En la estética tradicional japonesa, el concepto de "Ma" representa la apreciación del vacío. No es un espacio inútil o una simple brecha, sino una pausa activa que define y resalta los elementos a su alrededor.
-
-En un mundo saturado de información y estímulos, curar el vacío en nuestro hogar es un acto de resistencia y autocuidado. Un muro blanco sin cuadros, una esquina libre de muebles o una mesa de comedor de madera maciza limpia de adornos crean áreas de descanso cognitivo.
-
-Al decorar tu hogar, pregúntate: ¿este objeto aporta serenidad o simplemente llena un espacio? Elige la serenidad. Deja espacio para que fluya la energía y tu mente respire.`
-        },
-        {
-            id: 'art-3',
-            title: 'Siguiendo el hilo: del campo a la prenda.',
-            description: 'Un viaje al origen de los textiles premium, el valor de las fibras 100% naturales y la confección lenta.',
-            category: 'ATELIER',
-            author: 'Oficio',
-            readTime: 8,
-            image: 'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?auto=format&fit=crop&w=800&q=80',
-            date: '2026-07-15',
-            content: `La verdadera elegancia no grita, se siente en la textura de un tejido honesto. La filosofía del Atelier Cacomi se basa en el respeto al origen de cada fibra. Desde los campos de algodón crudo hasta el telar artesanal, cada paso en el proceso de confección lenta aporta carácter y durabilidad a la prenda.
-
-Optar por camisas de lino a la medida o pantalones de dril de algodón 100% natural es una declaración de intenciones. Estas fibras respiran con tu cuerpo, envejecen con gracia y reducen el impacto ecológico.
-
-En un mundo obsesionado con la inmediatez, vestir prendas confeccionadas bajo pedido nos reconecta con el ritmo de los artesanos. La espera justifica la calidad.`
-        },
-        {
-            id: 'art-4',
-            title: 'El minimalismo como un ritual diario en tu cocina.',
-            description: 'Simplificar la preparación de alimentos y la mente para redescubrir los sabores auténticos.',
-            category: 'FILOSOFÍA',
-            author: 'Editorial',
-            readTime: 15,
-            image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80',
-            date: '2026-07-12',
-            content: `Cocinar de forma minimalista no significa comer aburrido; al contrario, es el camino para redescubrir el verdadero sabor de los ingredientes. Cuando sobrecargamos un plato con condimentos industriales y capas infinitas de salsas pesadas, ocultamos la frescura de los alimentos.
-
-El minimalismo culinario propone:
-- Utilizar un máximo de 5 ingredientes de la más alta calidad por platillo.
-- Dominar técnicas de cocción sencillas que respeten los nutrientes (vapor, asado al carbón, emulsiones naturales).
-- Disfrutar del proceso de preparación como una meditación activa.
-
-Al simplificar tu despensa y tu menú, liberas espacio mental y dejas que los insumos puros de la tierra sean los protagonistas.`
-        }
-    ];
+    
+    // Pagination state for recipes
+    const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes.data || []);
+    const [nextCursor, setNextCursor] = useState<string | null>(initialRecipes.meta?.nextCursor || null);
+    const [loadingMore, setLoadingMore] = useState(false);
 
     // Load saved articles/recipes from localStorage on mount
     useEffect(() => {
@@ -136,9 +82,27 @@ Al simplificar tu despensa y tu menú, liberas espacio mental y dejas que los in
         localStorage.setItem('cacomi_saved_lifestyle', JSON.stringify(newSavedIds));
     };
 
+    // Fetch more recipes from the API route for pagination/scrolling
+    const loadMoreRecipes = async () => {
+        if (loadingMore || !nextCursor) return;
+        setLoadingMore(true);
+        try {
+            const response = await fetch(`/api/recipes?limit=12&cursor=${nextCursor}`);
+            if (response.ok) {
+                const data = await response.json();
+                setRecipes(prev => [...prev, ...(data.data || [])]);
+                setNextCursor(data.meta?.nextCursor || null);
+            }
+        } catch (e) {
+            console.error("Error loading more recipes:", e);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
     // Combine static articles and dynamic recipes into feed items
     const getCombinedItems = () => {
-        const recipeItems: Article[] = (initialRecipes?.data || []).map(recipe => ({
+        const recipeItems: Article[] = recipes.map(recipe => ({
             id: `recipe-${recipe.publicId || recipe.id}`,
             title: recipe.name,
             description: recipe.description || 'Deliciosa receta saludable para disfrutar hoy.',
@@ -150,7 +114,7 @@ Al simplificar tu despensa y tu menú, liberas espacio mental y dejas que los in
             date: '2026-07-20'
         }));
 
-        return [...staticArticles, ...recipeItems];
+        return [...initialArticles, ...recipeItems];
     };
 
     const allItems = getCombinedItems();
@@ -177,98 +141,102 @@ Al simplificar tu despensa y tu menú, liberas espacio mental y dejas que los in
 
     const filteredItems = getFilteredItems();
 
-    const handleSubscribe = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (email.trim()) {
-            setIsSubscribed(true);
-            setTimeout(() => {
-                setIsSubscribed(false);
-                setEmail('');
-                setShowNewsletterModal(false);
-            }, 2500);
-        }
-    };
-
+    // High Contrast, solid, extremely legible category styles
     const getCategoryStyles = (category: string) => {
         switch (category) {
             case 'FILOSOFÍA':
-                return 'bg-[#7E5109]/10 text-[#7E5109] dark:bg-[#7E5109]/20 dark:text-[#F39C12]';
+                return 'bg-[#7E5109] text-white dark:bg-[#b07d2b] shadow-xs px-2.5 py-0.5 text-[9px] rounded-full font-bold tracking-wider';
             case 'RECETAS':
-                return 'bg-[#196F3D]/10 text-[#196F3D] dark:bg-[#196F3D]/20 dark:text-[#2ECC71]';
+                return 'bg-[#196F3D] text-white dark:bg-[#27ae60] shadow-xs px-2.5 py-0.5 text-[9px] rounded-full font-bold tracking-wider';
             case 'INTERIORES':
-                return 'bg-[#1A5276]/10 text-[#1A5276] dark:bg-[#1A5276]/20 dark:text-[#3498DB]';
+                return 'bg-[#1A5276] text-white dark:bg-[#2980b9] shadow-xs px-2.5 py-0.5 text-[9px] rounded-full font-bold tracking-wider';
             case 'ATELIER':
-                return 'bg-[#5D6D7E]/10 text-[#5D6D7E] dark:bg-[#5D6D7E]/20 dark:text-[#A6ACAF]';
+                return 'bg-[#5D6D7E] text-white dark:bg-[#7f8c8d] shadow-xs px-2.5 py-0.5 text-[9px] rounded-full font-bold tracking-wider';
             default:
-                return 'bg-[#78281F]/10 text-[#78281F] dark:bg-[#78281F]/20 dark:text-[#E74C3C]';
+                return 'bg-[#78281F] text-white dark:bg-[#c0392b] shadow-xs px-2.5 py-0.5 text-[9px] rounded-full font-bold tracking-wider';
         }
     };
 
     return (
         <div className="w-full">
-            {/* Elegant Brand Hero (Matching Mockup 2) */}
+            {/* Elegant Brand Hero */}
             <section className="relative bg-[#fcf9f5] dark:bg-card/30 border-b border-[#f3e9dc] dark:border-border/30 overflow-hidden py-16 lg:py-24">
                 <div className="container mx-auto px-4 md:px-8 max-w-6xl">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                         {/* Hero Text */}
                         <div className="lg:col-span-7 text-left space-y-6">
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-[#2c2b2a] dark:text-white leading-tight font-light">
-                                Vida. Discover the art of <span className="italic font-normal text-[#e07e53]">curated living.</span>
+                                {t?.vida?.heroTitle || 'Vida. Descubre el arte de vivir con intención.'}
                             </h1>
                             <p className="text-[#5c5a57] dark:text-gray-300 text-base md:text-lg leading-relaxed max-w-xl font-light">
-                                Explore a visual journal dedicated to the textures, rituals, and philosophies that define the Cacomi lifestyle.
+                                {t?.vida?.heroSubtitle || 'Explora un diario visual dedicado a las texturas, rituales y filosofías que definen el estilo de vida de la comunidad Cacomi.'}
                             </p>
                             
                             <div className="flex flex-wrap gap-4 pt-4">
-                                <button 
-                                    onClick={() => {
-                                        const el = document.getElementById('discover-relatos');
-                                        el?.scrollIntoView({ behavior: 'smooth' });
-                                    }}
-                                    className="px-6 py-3 rounded-full bg-[#e07e53] hover:bg-[#d06e43] text-white font-semibold shadow-md shadow-[#e07e53]/10 transition-all hover:scale-[1.02] active:scale-95"
+                                {isAuthenticated ? (
+                                    <button 
+                                        onClick={() => {
+                                            const el = document.getElementById('discover-relatos');
+                                            el?.scrollIntoView({ behavior: 'smooth' });
+                                        }}
+                                        className="px-6 py-3 rounded-full bg-[#e07e53] hover:bg-[#d06e43] text-white font-semibold shadow-md shadow-[#e07e53]/10 transition-all hover:scale-[1.02] active:scale-95"
+                                    >
+                                        {t?.vida?.btnExplore || 'Explorar Relatos'}
+                                    </button>
+                                ) : (
+                                    <a 
+                                        href="/register"
+                                        className="px-6 py-3 rounded-full bg-[#e07e53] hover:bg-[#d06e43] text-white font-semibold shadow-md shadow-[#e07e53]/10 transition-all hover:scale-[1.02] active:scale-95 text-center"
+                                    >
+                                        {t?.auth?.registerBtn || 'Crear Cuenta'}
+                                    </a>
+                                )}
+                                <a 
+                                    href="/about"
+                                    className="px-6 py-3 rounded-full bg-[#f4e6d9] hover:bg-[#e8d5c4] text-[#2c2b2a] font-semibold transition-all border border-[#e8d5c4] text-center"
                                 >
-                                    {t?.vida?.btnExplore || 'Explorar Vida'}
-                                </button>
-                                <button 
-                                    onClick={() => setShowNewsletterModal(true)}
-                                    className="px-6 py-3 rounded-full bg-[#f4e6d9] hover:bg-[#e8d5c4] text-[#2c2b2a] font-semibold transition-all border border-[#e8d5c4]"
-                                >
-                                    {t?.vida?.btnSubscribe || 'Suscribirse'}
-                                </button>
+                                    {t?.vida?.btnAbout || 'Conócenos'}
+                                </a>
                             </div>
                         </div>
 
-                        {/* Overlapping Featured Card */}
+                        {/* Featured Magazine Card */}
                         <div className="lg:col-span-5 relative flex justify-center">
-                            <div 
-                                onClick={() => setSelectedArticle(staticArticles[3])} // Capítulo 01 is index 3
-                                className="group relative w-full max-w-[360px] bg-white dark:bg-card border border-border/50 rounded-3xl overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl transition-all duration-500 hover:-translate-y-1"
-                            >
-                                <div className="aspect-[4/5] w-full overflow-hidden relative">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80" 
-                                        alt="Curated lifestyle" 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                            {latestRevista ? (
+                                <a 
+                                    href={`/revista/${latestRevista.id}`}
+                                    className="group relative w-full max-w-[360px] bg-white dark:bg-card border border-border/50 rounded-3xl overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 block text-left"
+                                >
+                                    <div className="aspect-[4/5] w-full overflow-hidden relative">
+                                        <img 
+                                            src={latestRevista.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'} 
+                                            alt={latestRevista.title} 
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                                    </div>
+                                    
+                                    {/* Overlay Floating Info Card */}
+                                    <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md dark:bg-slate-900/95 border border-white/20 p-5 rounded-2xl shadow-lg">
+                                        <span className="text-[10px] font-black tracking-widest text-[#e07e53] uppercase block mb-1">
+                                            {t?.vida?.featuredChapter || `EDICIÓN #${latestRevista.number}`}
+                                        </span>
+                                        <h3 className="font-serif text-base font-bold text-[#2c2b2a] dark:text-white leading-snug group-hover:text-[#e07e53] transition-colors line-clamp-2">
+                                            {latestRevista.title}
+                                        </h3>
+                                    </div>
+                                </a>
+                            ) : (
+                                <div className="w-full max-w-[360px] aspect-[4/5] bg-muted/30 border border-dashed border-border rounded-3xl flex items-center justify-center">
+                                    <span className="text-xs text-muted-foreground">No hay revista disponible</span>
                                 </div>
-                                
-                                {/* Overlay Floating Info Card */}
-                                <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md dark:bg-slate-900/95 border border-white/20 p-5 rounded-2xl shadow-lg">
-                                    <span className="text-[10px] font-bold tracking-widest text-[#e07e53] uppercase block mb-1">
-                                        CAPÍTULO 01
-                                    </span>
-                                    <h3 className="font-serif text-lg font-bold text-[#2c2b2a] dark:text-white leading-snug group-hover:text-[#e07e53] transition-colors">
-                                        El minimalismo como un ritual diario.
-                                    </h3>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Discover Section (Matching Mockup 1) */}
+            {/* Discover Section */}
             <section id="discover-relatos" className="container mx-auto px-4 md:px-8 py-16 max-w-6xl">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 border-b border-border/40 pb-6">
                     <div className="text-left">
@@ -296,7 +264,7 @@ Al simplificar tu despensa y tu menú, liberas espacio mental y dejas que los in
                         onClick={() => setActiveTab('saved')}
                         className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-full border transition-all whitespace-nowrap ${activeTab === 'saved' ? 'bg-[#e07e53] text-white border-transparent' : 'bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground'}`}
                     >
-                        <Bookmark className="w-3.5 h-3.5" />
+                        <BookOpen className="w-3.5 h-3.5" />
                         {t?.vida?.tabSaved || 'Guardados'}
                         {savedIds.length > 0 && <span className="ml-1 bg-white/20 text-white rounded-full text-[9px] px-1.5 py-0.5 leading-none">{savedIds.length}</span>}
                     </button>
@@ -339,91 +307,113 @@ Al simplificar tu despensa y tu menú, liberas espacio mental y dejas que los in
 
                 {/* Articles/Recipes Grid */}
                 {filteredItems.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {filteredItems.map(item => {
-                            const isRecipe = item.category === 'RECETAS';
-                            const isSaved = savedIds.includes(item.id);
+                    <div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {filteredItems.map(item => {
+                                const isRecipe = item.category === 'RECETAS';
+                                const isSaved = savedIds.includes(item.id);
 
-                            return (
-                                <div 
-                                    key={item.id}
-                                    className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5"
+                                return (
+                                    <div 
+                                        key={item.id}
+                                        className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left"
+                                    >
+                                        {/* Image & Bookmark action */}
+                                        <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
+                                            <img 
+                                                src={item.image} 
+                                                alt={item.title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                loading="lazy"
+                                            />
+                                            <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
+
+                                            {/* High-contrast solid Category Badge */}
+                                            <span className={`absolute top-3 left-3 tracking-wider shadow-md ${getCategoryStyles(item.category)}`}>
+                                                {item.category}
+                                            </span>
+
+                                            {/* Bookmark Button */}
+                                            <button 
+                                                onClick={(e) => toggleSave(item.id, e)}
+                                                className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md"
+                                                aria-label="Guardar relato"
+                                            >
+                                                {isSaved ? (
+                                                    <BookmarkCheck className="w-4 h-4 text-[#e07e53]" />
+                                                ) : (
+                                                    <Bookmark className="w-4 h-4 text-gray-500" />
+                                                )}
+                                            </button>
+                                        </div>
+
+                                        {/* Card Content */}
+                                        <div className="p-5 flex flex-col flex-grow">
+                                            {/* Meta: time and author */}
+                                            <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="w-3.5 h-3.5 text-muted-foreground/60" />
+                                                    {item.readTime} {t?.vida?.readTime || 'min'}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <User className="w-3.5 h-3.5 text-muted-foreground/60" />
+                                                    {item.author}
+                                                </span>
+                                            </div>
+
+                                            {/* Title */}
+                                            <h3 className="font-serif text-lg font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">
+                                                {item.title}
+                                            </h3>
+
+                                            {/* Description */}
+                                            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">
+                                                {item.description}
+                                            </p>
+
+                                            {/* Footer action link */}
+                                            <div className="mt-auto pt-2">
+                                                {isRecipe ? (
+                                                    <a 
+                                                        href={item.content}
+                                                        className="inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform"
+                                                    >
+                                                        {t?.vida?.viewRecipe || 'Ver receta'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                                    </a>
+                                                ) : (
+                                                    <button 
+                                                        onClick={() => setSelectedArticle(item)}
+                                                        className="inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform"
+                                                    >
+                                                        {t?.vida?.readArticle || 'Leer relato'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Cargar Más Button (Pagination/Infinite Scroll fallback) */}
+                        {nextCursor && (activeTab === 'recipes' || activeTab === 'all') && (
+                            <div className="flex justify-center mt-12">
+                                <button
+                                    onClick={loadMoreRecipes}
+                                    disabled={loadingMore}
+                                    className="px-8 py-3 rounded-full bg-white dark:bg-card border border-border/80 text-xs font-bold text-[#e07e53] hover:bg-muted transition-all flex items-center gap-2 shadow-xs"
                                 >
-                                    {/* Image & Bookmark action */}
-                                    <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
-                                        <img 
-                                            src={item.image} 
-                                            alt={item.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                            loading="lazy"
-                                        />
-                                        <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
-
-                                        {/* Category Badge */}
-                                        <span className={`absolute top-3 right-3 text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider shadow-sm backdrop-blur-md ${getCategoryStyles(item.category)}`}>
-                                            {item.category}
-                                        </span>
-
-                                        {/* Bookmark Button */}
-                                        <button 
-                                            onClick={(e) => toggleSave(item.id, e)}
-                                            className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md"
-                                            aria-label="Guardar relato"
-                                        >
-                                            {isSaved ? (
-                                                <BookmarkCheck className="w-4 h-4 text-[#e07e53]" />
-                                            ) : (
-                                                <Bookmark className="w-4 h-4 text-gray-500" />
-                                            )}
-                                        </button>
-                                    </div>
-
-                                    {/* Card Content */}
-                                    <div className="p-5 flex flex-col flex-grow text-left">
-                                        {/* Meta: time and author */}
-                                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="w-3.5 h-3.5 text-muted-foreground/60" />
-                                                {item.readTime} {t?.vida?.readTime || 'min'}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <User className="w-3.5 h-3.5 text-muted-foreground/60" />
-                                                {item.author}
-                                            </span>
-                                        </div>
-
-                                        {/* Title */}
-                                        <h3 className="font-serif text-lg font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">
-                                            {item.title}
-                                        </h3>
-
-                                        {/* Description */}
-                                        <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">
-                                            {item.description}
-                                        </p>
-
-                                        {/* Footer action link */}
-                                        <div className="mt-auto pt-2">
-                                            {isRecipe ? (
-                                                <a 
-                                                    href={item.content}
-                                                    className="inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform"
-                                                >
-                                                    {t?.vida?.viewRecipe || 'Ver receta'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                                </a>
-                                            ) : (
-                                                <button 
-                                                    onClick={() => setSelectedArticle(item)}
-                                                    className="inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform"
-                                                >
-                                                    {t?.vida?.readArticle || 'Leer artículo'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                    {loadingMore ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-[#e07e53] border-t-transparent rounded-full animate-spin"></div>
+                                            {language === 'es' ? 'Cargando...' : 'Loading...'}
+                                        </>
+                                    ) : (
+                                        language === 'es' ? 'Ver más recetas' : 'Load more recipes'
+                                    )}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="text-center py-16 border border-dashed border-border rounded-3xl bg-muted/10">
@@ -437,59 +427,7 @@ Al simplificar tu despensa y tu menú, liberas espacio mental y dejas que los in
                 )}
             </section>
 
-            {/* Newsletter Modal */}
-            {showNewsletterModal && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowNewsletterModal(false)}></div>
-                    <div className="bg-background border border-border/60 rounded-3xl p-6 md:p-8 max-w-md w-full relative z-10 shadow-2xl animate-in zoom-in duration-200">
-                        <button 
-                            onClick={() => setShowNewsletterModal(false)}
-                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-                        
-                        <div className="text-left space-y-4">
-                            <span className="text-xs font-extrabold uppercase tracking-widest text-[#e07e53] bg-[#e07e53]/15 px-2.5 py-1 rounded-full">
-                                Boletín Cacomi
-                            </span>
-                            <h3 className="text-2xl font-serif font-black text-[#2c2b2a] dark:text-white">
-                                {language === 'es' ? 'Únete al Estilo de Vida Consciente' : 'Join the Conscious Lifestyle'}
-                            </h3>
-                            <p className="text-muted-foreground text-xs leading-relaxed">
-                                {language === 'es' 
-                                    ? 'Recibe relatos semanales sobre filosofía culinaria, diseño de interiores wabi-sabi y recetas minimalistas exclusivas.'
-                                    : 'Receive weekly stories on culinary philosophy, wabi-sabi interior design, and exclusive minimalist recipes.'}
-                            </p>
-                            
-                            {isSubscribed ? (
-                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-2xl text-xs font-bold text-center">
-                                    {t?.vida?.subscribeSuccess || '¡Gracias por suscribirte al boletín de Cacomi!'}
-                                </div>
-                            ) : (
-                                <form onSubmit={handleSubscribe} className="space-y-3 pt-2">
-                                    <input 
-                                        type="email" 
-                                        required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder={t?.vida?.subscribePlaceholder || 'Tu correo electrónico'}
-                                        className="w-full px-4 py-3 border border-border rounded-xl bg-muted/30 focus:outline-none focus:ring-2 focus:ring-[#e07e53]/20 focus:border-[#e07e53]/30 text-sm"
-                                    />
-                                    <button 
-                                        type="submit"
-                                        className="w-full py-3 rounded-xl bg-[#e07e53] hover:bg-[#d06e43] text-white font-bold shadow-md shadow-[#e07e53]/10 transition-all text-sm"
-                                    >
-                                        {t?.vida?.btnSubscribe || 'Suscribirse'}
-                                    </button>
-                                </form>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Article Detail Modal (Slide-over/Modal Reader) */}
+            {/* Article Detail Modal (Slide-over/Modal Reader for Real Long-form Articles) */}
             {selectedArticle && (
                 <div className="fixed inset-0 z-[60] flex justify-end">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedArticle(null)}></div>

@@ -156,20 +156,6 @@ export function Navbar() {
                                 <span>{t?.nav?.origen || 'Origen'}</span>
                             </a>
 
-                            {/* Atelier (Disabled for now) */}
-                            <div className="flex items-center gap-1.5 px-4 py-2 text-sm lg:text-base font-medium text-muted-foreground opacity-45 cursor-not-allowed select-none whitespace-nowrap">
-                                <BookOpen className="w-4 h-4" />
-                                <span>{t?.nav?.atelier || 'Atelier'}</span>
-                            </div>
-
-                            {/* Esenciales (Disabled for now) */}
-                            <div className="flex items-center gap-1.5 px-4 py-2 text-sm lg:text-base font-medium text-muted-foreground opacity-45 cursor-not-allowed select-none whitespace-nowrap relative group">
-                                <Menu className="w-4 h-4" />
-                                <span>{t?.nav?.esenciales || 'Esenciales'}</span>
-                                <span className="absolute -top-1 -right-2 flex h-3.5 px-1.5 items-center justify-center rounded-full bg-green-500 text-[7px] font-black text-white uppercase tracking-tighter scale-75">
-                                    NEW
-                                </span>
-                            </div>
                         </div>
                         
                         {/* Center: Search Bar */}

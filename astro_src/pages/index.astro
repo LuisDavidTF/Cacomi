@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { LifestyleFeed } from '@components/landing/LifestyleFeed';
 import { RecipeService } from '@/lib/services/recipes';
+import { getCollection } from 'astro:content';
 import SeoContentBlock from '@components/landing/SeoContentBlock.astro';
 import RecentPosts from '@components/landing/RecentPosts.astro';
 
@@ -12,9 +13,60 @@ export const prerender = false;
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=31536000');
 Astro.response.headers.set('Cache-Tag', 'recipes-feed');
 
-let initialData = { data: [], meta: { nextCursor: null } };
+const isAuthenticated = Astro.cookies.has('auth_token');
+
+// Load real blog articles and magazine editions from Astro content collection
+const allBlogs = await getCollection('blog');
+const allRevistas = await getCollection('revista');
+
+// Get the latest edition
+const latestRevista = allRevistas.sort((a, b) => b.data.number - a.data.number)[0] || null;
+
+// Map blog posts to lifestyle feed schema
+const initialArticles = allBlogs.map(post => {
+  let category = 'FILOSOFÍA';
+  let readTime = 10;
+
+  if (post.id.includes('silencio') || post.id.includes('ayuno')) {
+    category = 'FILOSOFÍA';
+    readTime = post.id.includes('silencio') ? 12 : 15;
+  } else if (post.id.includes('vacio') || post.id.includes('fridge')) {
+    category = 'INTERIORES';
+    readTime = 5;
+  } else if (post.id.includes('hilo')) {
+    category = 'ATELIER';
+    readTime = 8;
+  } else if (post.id.includes('minimalismo')) {
+    category = 'FILOSOFÍA';
+    readTime = 15;
+  } else {
+    // Fallback based on tags
+    const tags = post.data.tags || [];
+    if (tags.includes('interiores') || tags.includes('organizar')) {
+      category = 'INTERIORES';
+    } else if (tags.includes('recetas') || tags.includes('cocina')) {
+      category = 'RECETAS';
+    } else {
+      category = 'FILOSOFÍA';
+    }
+  }
+
+  return {
+    id: post.id,
+    title: post.data.title,
+    description: post.data.description,
+    content: post.body || '', // Raw Markdown content for reader modal
+    category,
+    author: post.data.author || 'Equipo Cacomi',
+    readTime,
+    image: post.data.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
+    date: post.data.date
+  };
+});
+
+let initialRecipes = { data: [], meta: { nextCursor: null } };
 try {
-  initialData = await RecipeService.getAll({}, { limit: 12 });
+  initialRecipes = await RecipeService.getAll({}, { limit: 12 });
 } catch (error) {
   console.error("Error fetching initial recipes:", error);
 }
@@ -22,13 +74,54 @@ try {
 
 <Layout>
   {/* Elegant Vida Lifestyle Portal (Hero & Relatos Grid) */}
-  <LifestyleFeed initialRecipes={initialData} client:load />
+  <LifestyleFeed 
+    initialRecipes={initialRecipes} 
+    initialArticles={initialArticles}
+    latestRevista={latestRevista ? {
+      id: latestRevista.id,
+      number: latestRevista.data.number,
+      title: latestRevista.data.title,
+      description: latestRevista.data.description,
+      image: latestRevista.data.image
+    } : null}
+    isAuthenticated={isAuthenticated}
+    client:load 
+  />
 
-  {/* Rich SEO Content Blocks at the bottom to ensure AdSense approval */}
+  {/* Rich static text content detailing Cacomi's history and values for AdSense approval */}
+  <div class="border-t border-border/30 bg-[#fbf9f6]/80 dark:bg-slate-900/20 py-16">
+    <div class="container mx-auto px-4 md:px-8 max-w-4xl text-left space-y-8">
+      <h2 class="text-3xl font-serif text-[#2c2b2a] dark:text-white text-center">Sobre la Filosofía Cacomi</h2>
+      <p class="text-sm md:text-base text-muted-foreground leading-relaxed font-light">
+        Cacomi no es solo una plataforma de planificación y gestión de recetas. Es un movimiento hacia una vida más intencional y equilibrada. Creemos que la cocina es el centro del bienestar en el hogar, y que la simplificación del espacio y de los procesos cotidianos es el primer paso para liberar la mente de la sobreestimulación de la era moderna.
+      </p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+        <div class="space-y-3">
+          <h3 class="text-lg font-bold font-serif text-[#2c2b2a] dark:text-white">Nutrición y Conciencia</h3>
+          <p class="text-xs md:text-sm text-muted-foreground leading-relaxed font-light">
+            Nuestros planes de comidas y recetas de la comunidad celebran los ingredientes en su estado más puro. Mediante técnicas culinarias honestas y el uso de insumos de alta calidad cultivados localmente, promovemos una alimentación que respeta tanto a tu cuerpo como a la tierra.
+          </p>
+        </div>
+        <div class="space-y-3">
+          <h3 class="text-lg font-bold font-serif text-[#2c2b2a] dark:text-white">Diseño del Entorno</h3>
+          <p class="text-xs md:text-sm text-muted-foreground leading-relaxed font-light">
+            Inspirados en el minimalismo y el concepto japonés del *Ma* (el vacío activo con propósito), entendemos que un espacio limpio y ordenado es indispensable para cultivar un estado mental enfocado y sereno.
+          </p>
+        </div>
+      </div>
+      
+      <p class="text-sm md:text-base text-muted-foreground leading-relaxed font-light pt-4 border-t border-border/40">
+        Nos asociamos con productores agrícolas locales y artesanos textiles para asegurar que cada recomendación, preventa y producto ofrecido en nuestro ecosistema refleje nuestros valores de honestidad, sostenibilidad y durabilidad. Te invitamos a explorar nuestros relatos semanales, unirte a nuestras discusiones de comunidad y dar el primer paso hacia un estilo de vida más consciente.
+      </p>
+    </div>
+  </div>
+
   <RecentPosts />
   
   <div class="border-t border-border/30 bg-[#fbf9f6] dark:bg-slate-900/10">
     <SeoContentBlock />
   </div>
 </Layout>
+
 
