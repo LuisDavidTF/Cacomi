@@ -627,7 +627,8 @@ function PreorderScreenForm() {
                     totalCost: cart.subtotal,
                     amountPaid: cart.deposit,
                     remaining: cart.remaining,
-                    simulatedDay: simulatedDayOfWeek
+                    simulatedDay: simulatedDayOfWeek,
+                    userId: user?.id
                 })
             });
 

@@ -1,11 +1,14 @@
 import type { APIRoute } from 'astro';
+import { decodeJwtPayload } from '../../../middleware';
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request }) => {
+const TOKEN_NAME = 'auth_token';
+
+export const POST: APIRoute = async ({ request, cookies }) => {
     try {
         const body = await request.json();
-        const { meals, userCoordinates, paymentPlan, totalCost, amountPaid, remaining } = body;
+        const { meals, userCoordinates, paymentPlan, totalCost, amountPaid, remaining, userId: bodyUserId } = body;
 
         // Server-side validation
         if (!meals || !Array.isArray(meals) || meals.length === 0) {
@@ -54,6 +57,22 @@ export const POST: APIRoute = async ({ request }) => {
             });
         }
 
+        // Securely identify user from JWT token
+        const authHeader = request.headers.get('Authorization');
+        const token = (authHeader && authHeader.startsWith('Bearer ')) 
+            ? authHeader.substring(7) 
+            : cookies.get(TOKEN_NAME)?.value;
+            
+        let userId = bodyUserId || 1;
+        if (token) {
+            const payload = decodeJwtPayload(token);
+            if (payload && (payload.userId || payload.id)) {
+                userId = Number(payload.userId || payload.id) || userId;
+            }
+        }
+
+        const orderId = 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
         // Stripe API integration preparation (BFF proxy pattern)
         const stripeSecretKey = import.meta.env.STRIPE_SECRET_KEY;
         let transactionId = 'ch_' + Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -62,7 +81,6 @@ export const POST: APIRoute = async ({ request }) => {
         if (stripeSecretKey) {
             try {
                 // If the user configures Stripe credentials in .env.local, they would install stripe: npm i stripe
-                // We load it dynamically to prevent bundle compile errors if the package is not installed yet.
                 const stripePkg = 'stripe';
                 const { default: Stripe } = await import(/* @vite-ignore */ stripePkg);
                 const stripe = new (Stripe as any)(stripeSecretKey, {
@@ -74,6 +92,8 @@ export const POST: APIRoute = async ({ request }) => {
                     amount: Math.round(amountPaid * 100), // in cents
                     currency: 'mxn',
                     metadata: {
+                        orderId,
+                        userId: userId.toString(),
                         meals_count: meals.length.toString(),
                         payment_plan: paymentPlan,
                         total_cost: totalCost.toString(),
@@ -98,7 +118,7 @@ export const POST: APIRoute = async ({ request }) => {
         // Return successful checkout details
         return new Response(JSON.stringify({
             success: true,
-            orderId: 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+            orderId,
             transactionId,
             clientSecret,
             amountPaid,

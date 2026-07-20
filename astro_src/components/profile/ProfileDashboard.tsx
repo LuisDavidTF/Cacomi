@@ -259,6 +259,47 @@ export function ProfileDashboard() {
                                     {/* Order Details (Expandable) */}
                                     {isExpanded && (
                                         <div className="px-4 pb-5 pt-2 border-t border-border/40 bg-white dark:bg-slate-900/40 space-y-4 text-xs animate-in slide-in-from-top-1 duration-200">
+                                            {/* Real-time Pickup code display */}
+                                            {(() => {
+                                                const liveInfo = pickupStatuses[order.id];
+                                                const savedCode = order.pickupCode;
+                                                const codeToDisplay = liveInfo?.pickupCode || savedCode;
+                                                const liveStatus = liveInfo?.status || order.realTimeStatus || order.status;
+
+                                                return (
+                                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                                                        <div className="space-y-1">
+                                                            <span className="text-[9px] font-black uppercase tracking-wider text-primary">
+                                                                Código de Recogida
+                                                            </span>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                {liveInfo?.loading ? (
+                                                                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                                                ) : codeToDisplay ? (
+                                                                    <span className="font-mono text-base font-black text-primary tracking-wider bg-white dark:bg-slate-800 px-3 py-1 rounded-xl shadow-sm border border-primary/20">
+                                                                        {codeToDisplay}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-xs text-muted-foreground italic font-semibold">
+                                                                        Generando código de recogida...
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="text-left sm:text-right space-y-0.5">
+                                                            <span className="text-[8px] text-muted-foreground uppercase font-black tracking-widest block">
+                                                                Estado del Pedido
+                                                            </span>
+                                                            <span className="font-bold text-foreground text-xs uppercase flex items-center gap-1.5 justify-start sm:justify-end mt-1">
+                                                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                                                                {liveStatus === 'SUCCESS' ? 'Pago Verificado (En Preparación)' : liveStatus}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+
                                             <div className="border-b border-border/50 pb-2">
                                                 <h4 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground font-sans">
                                                     {t?.preorder?.orderItems || "Combos en este pedido"}

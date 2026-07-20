@@ -97,6 +97,8 @@ export interface LocalPreorder {
     paymentPlan: 'half' | 'full';
     deliveryDateRange: string;
     userEmail: string;
+    pickupCode?: string;
+    realTimeStatus?: string;
 }
 
 export type { LocalPantryItem as PantryItemType };
