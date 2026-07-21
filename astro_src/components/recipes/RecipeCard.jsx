@@ -105,52 +105,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
             </div>
           )}
 
-          <div className={cn(
-            "absolute top-3 left-3 z-10 transition-opacity duration-300",
-            isAdmin ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-          )}>
-            <div className="flex flex-col gap-2">
-                {isAdmin && (
-                  <button 
-                      onClick={handleStarClick} 
-                      className={cn(
-                        "p-2 rounded-full transition-all shadow-sm",
-                        isSelected 
-                          ? "bg-primary text-white scale-110" 
-                          : "bg-white/90 text-primary hover:bg-primary hover:text-primary-foreground"
-                      )}
-                      title="Añadir al Menú Recomendado"
-                  >
-                      <Sparkles className={cn("w-4 h-4", isSelected && "animate-pulse")} />
-                  </button>
-                )}
 
-                <button 
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowShare(true); }} 
-                    className="bg-white/90 p-2 rounded-full text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
-                    title={t.share.shareGeneric}
-                >
-                    <ShareIcon className="w-4 h-4" />
-                </button>
-
-                {isOwner && (
-                    <>
-                    <button 
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(recipe); }} 
-                        className="bg-white/90 p-2 rounded-full text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"
-                    >
-                        <EditIcon className="w-4 h-4" />
-                    </button>
-                    <button 
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(recipe); }} 
-                        className="bg-white/90 p-2 rounded-full text-red-600 hover:bg-red-50 transition-colors shadow-sm"
-                    >
-                        <TrashIcon className="w-4 h-4" />
-                    </button>
-                    </>
-                )}
-            </div>
-          </div>
 
         <div className="absolute bottom-4 left-4 right-4 z-10 text-white">
           <div className="flex flex-wrap items-center gap-4 text-xs font-medium mb-2">
@@ -284,14 +239,59 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
         )}
 
         {/* Footer Actions */}
-        <div className="pt-4 border-t border-border mt-auto">
+        <div className="pt-4 border-t border-border mt-auto flex items-center justify-between gap-3 relative z-20">
           <div
-            className="w-full inline-flex items-center justify-center bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group/btn relative z-20"
+            className="flex-1 inline-flex items-center justify-center bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group/btn"
           >
             {t.feed.view}
             <svg className="w-4 h-4 ml-2 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
+          </div>
+
+          {/* Action buttons (Share, Edit, Delete, Star) placed cleanly here to prevent image cluttering or overlap */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {isAdmin && (
+              <button 
+                  onClick={handleStarClick} 
+                  className={cn(
+                    "p-2 rounded-xl transition-all border border-border/60 hover:scale-[1.05] active:scale-95 shadow-2xs",
+                    isSelected 
+                      ? "bg-primary text-white border-primary" 
+                      : "bg-muted/40 text-primary hover:bg-primary hover:text-primary-foreground"
+                  )}
+                  title="Añadir al Menú Recomendado"
+              >
+                  <Sparkles className={cn("w-4 h-4", isSelected && "animate-pulse")} />
+              </button>
+            )}
+
+            <button 
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowShare(true); }} 
+                className="p-2 rounded-xl border border-border/60 text-muted-foreground bg-muted/20 hover:bg-primary hover:text-primary-foreground transition-all hover:scale-[1.05] active:scale-95 shadow-2xs"
+                title={t.share.shareGeneric}
+            >
+                <ShareIcon className="w-4 h-4" />
+            </button>
+
+            {isOwner && (
+                <>
+                <button 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(recipe); }} 
+                    className="p-2 rounded-xl border border-border/60 text-blue-600 bg-blue-50/50 hover:bg-blue-600 hover:text-white transition-all hover:scale-[1.05] active:scale-95 shadow-2xs"
+                    title={language === 'es' ? 'Editar Receta' : 'Edit Recipe'}
+                >
+                    <EditIcon className="w-4 h-4" />
+                </button>
+                <button 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(recipe); }} 
+                    className="p-2 rounded-xl border border-border/60 text-red-600 bg-red-50/50 hover:bg-red-600 hover:text-white transition-all hover:scale-[1.05] active:scale-95 shadow-2xs"
+                    title={language === 'es' ? 'Eliminar Receta' : 'Delete Recipe'}
+                >
+                    <TrashIcon className="w-4 h-4" />
+                </button>
+                </>
+            )}
           </div>
         </div>
       </div>
