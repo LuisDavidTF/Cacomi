@@ -336,50 +336,48 @@ export function Navbar() {
 
             {/* Mobile Bottom Navigation Bar (Floating Dock) — Translucent iOS Style */}
             {mounted && createPortal(
-                <nav className="fixed bottom-5 left-4 right-4 max-w-md mx-auto z-40 bg-white/80 dark:bg-neutral-900/85 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.08] rounded-full shadow-lg shadow-black/10 md:hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
-                    <div className="flex w-full h-14 items-center justify-around px-2">
-                        {/* Vida */}
-                        <a 
-                            href="/" 
-                            onClick={handleLogoClick} 
-                            className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isVidaActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
-                        >
-                            <Home className="w-5 h-5" />
-                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.vida || 'Vida'}</span>
-                        </a>
+                <nav className="fixed bottom-5 left-4 right-4 max-w-md mx-auto z-40 bg-white/80 dark:bg-neutral-900/85 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.08] rounded-full shadow-lg shadow-black/10 md:hidden animate-in fade-in slide-in-from-bottom-5 duration-300 flex h-14 items-center justify-around px-2">
+                    {/* Vida */}
+                    <a 
+                        href="/" 
+                        onClick={handleLogoClick} 
+                        className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isVidaActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
+                    >
+                        <Home className="w-5 h-5" />
+                        <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.vida || 'Vida'}</span>
+                    </a>
 
-                        {/* Origen */}
-                        <a 
-                            href="/origen" 
-                            className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isOrigenActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-[#e07e53]'}`}
-                        >
-                            <ShoppingBasket className="w-5 h-5" />
-                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.origen || 'Origen'}</span>
-                        </a>
+                    {/* Origen */}
+                    <a 
+                        href="/origen" 
+                        className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isOrigenActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-[#e07e53]'}`}
+                    >
+                        <ShoppingBasket className="w-5 h-5" />
+                        <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.origen || 'Origen'}</span>
+                    </a>
 
-                        {/* Menu / Profile / Login */}
-                        {isAuthenticated ? (
-                            <button 
-                                onClick={() => setIsMobileMenuOpen(true)} 
-                                className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isMobileMenuOpen ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
-                            >
-                                {user?.profile_photo ? (
-                                    <img src={user.profile_photo} alt="Perfil" className="w-5 h-5 rounded-full border border-black/10 object-cover" />
-                                ) : (
-                                    <Menu className="w-5 h-5" />
-                                )}
-                                <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.menu || 'Menú'}</span>
-                            </button>
-                        ) : (
-                            <a 
-                                href="/login" 
-                                className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 text-[#8e8e93] hover:text-foreground"
-                            >
-                                <LogIn className="w-5 h-5" />
-                                <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.login || 'Entrar'}</span>
-                            </a>
-                        )}
-                    </div>
+                    {/* Menu / Profile / Login */}
+                    {isAuthenticated ? (
+                        <button 
+                            onClick={() => setIsMobileMenuOpen(true)} 
+                            className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isMobileMenuOpen ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
+                        >
+                            {user?.profile_photo ? (
+                                <img src={user.profile_photo} alt="Perfil" className="w-5 h-5 rounded-full border border-black/10 object-cover" />
+                            ) : (
+                                <Menu className="w-5 h-5" />
+                            )}
+                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.menu || 'Menú'}</span>
+                        </button>
+                    ) : (
+                        <a 
+                            href="/login" 
+                            className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 text-[#8e8e93] hover:text-foreground"
+                        >
+                            <LogIn className="w-5 h-5" />
+                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.login || 'Entrar'}</span>
+                        </a>
+                    )}
                 </nav>,
                 document.body
             )}
