@@ -329,45 +329,48 @@ export function Navbar() {
             </header>
 
 
-            {/* Mobile Bottom Navigation Bar (Tab Bar) — Translucent iOS Style */}
-            <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/85 dark:bg-neutral-950/85 backdrop-blur-xl border-t border-black/[0.06] dark:border-white/[0.06] md:hidden pb-safe shadow-[0_-1px_0_rgba(0,0,0,0.03)]">
-                <div className="flex w-full h-12">
+            {/* Mobile Bottom Navigation Bar (Floating Dock) — Translucent iOS Style */}
+            <nav className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-40 bg-white/80 dark:bg-neutral-900/85 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.08] rounded-full shadow-lg shadow-black/10 md:hidden">
+                <div className="flex w-full h-14 items-center justify-around px-2">
                     {/* Vida */}
                     <a 
                         href="/" 
                         onClick={handleLogoClick} 
-                        className={`flex flex-1 flex-col items-center justify-center ${isVidaActive() ? 'text-[#e07e53] font-semibold' : 'text-[#8e8e93] hover:text-foreground'}`}
+                        className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isVidaActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
                     >
-                        <Home className="w-5.5 h-5.5" />
-                        <span className="text-[9px] font-medium tracking-tight mt-0.5 whitespace-nowrap">{t?.nav?.vida || 'Vida'}</span>
+                        <Home className="w-5 h-5" />
+                        <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.vida || 'Vida'}</span>
                     </a>
 
                     {/* Origen */}
                     <a 
                         href="/origen" 
-                        className={`flex flex-1 flex-col items-center justify-center ${isOrigenActive() ? 'text-[#e07e53] font-semibold' : 'text-[#8e8e93] hover:text-foreground'}`}
+                        className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isOrigenActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-[#e07e53]'}`}
                     >
-                        <ShoppingBasket className="w-5.5 h-5.5" />
-                        <span className="text-[9px] font-medium tracking-tight mt-0.5 whitespace-nowrap">{t?.nav?.origen || 'Origen'}</span>
+                        <ShoppingBasket className="w-5 h-5" />
+                        <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.origen || 'Origen'}</span>
                     </a>
 
                     {/* Menu / Profile / Login */}
                     {isAuthenticated ? (
                         <button 
                             onClick={() => setIsMobileMenuOpen(true)} 
-                            className={`flex flex-1 flex-col items-center justify-center ${isMobileMenuOpen ? 'text-[#e07e53] font-semibold' : 'text-[#8e8e93] hover:text-foreground'}`}
+                            className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isMobileMenuOpen ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
                         >
                             {user?.profile_photo ? (
-                                <img src={user.profile_photo} alt="Perfil" className="w-5.5 h-5.5 rounded-full border border-black/10 object-cover" />
+                                <img src={user.profile_photo} alt="Perfil" className="w-5 h-5 rounded-full border border-black/10 object-cover" />
                             ) : (
-                                <Menu className="w-5.5 h-5.5" />
+                                <Menu className="w-5 h-5" />
                             )}
-                            <span className="text-[9px] font-medium tracking-tight mt-0.5 whitespace-nowrap">{t?.nav?.menu || 'Menú'}</span>
+                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.menu || 'Menú'}</span>
                         </button>
                     ) : (
-                        <a href="/login" className="flex flex-1 flex-col items-center justify-center text-[#8e8e93] hover:text-foreground">
-                            <LogIn className="w-5.5 h-5.5" />
-                            <span className="text-[9px] font-medium tracking-tight mt-0.5 whitespace-nowrap">{t?.nav?.login || 'Entrar'}</span>
+                        <a 
+                            href="/login" 
+                            className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 text-[#8e8e93] hover:text-foreground"
+                        >
+                            <LogIn className="w-5 h-5" />
+                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.login || 'Entrar'}</span>
                         </a>
                     )}
                 </div>
