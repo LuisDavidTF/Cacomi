@@ -8,6 +8,7 @@ import { ShareModal } from '@components/ui/ShareModal';
 import { Sparkles, MoreVertical, Bookmark, BookmarkCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRecommendedMenuStore } from '@store/useRecommendedMenuStore';
+import { RichText } from '@components/ui/RichText';
 import { db } from '@/lib/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -270,7 +271,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
 
         {recipe.description && (
           <p className="text-muted-foreground text-sm line-clamp-2 mb-4 flex-grow leading-relaxed font-light">
-            {recipe.description}
+            <RichText text={recipe.description} />
           </p>
         )}
 

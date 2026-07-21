@@ -417,7 +417,7 @@ export function RecipeDetail({ recipe: initialRecipe, recipeId }) {
                                 {t.recipe?.desc || 'Descripción'}
                             </h2>
                             <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base sm:text-lg font-light italic">
-                                {recipe.description || 'Sin descripción detallada.'}
+                                <RichText text={recipe.description || 'Sin descripción detallada.'} />
                             </p>
                         </section>
 

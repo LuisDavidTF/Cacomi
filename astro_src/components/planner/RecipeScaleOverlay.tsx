@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Loader2, Info, Sparkles } from 'lucide-react';
 import { db } from '@/lib/db';
 import { useSettings } from '../../context/SettingsContext';
+import { RichText } from '../ui/RichText';
 
 interface RecipeScaleOverlayProps {
     recipeUUID: string;
@@ -198,7 +199,7 @@ export function RecipeScaleOverlay({ recipeUUID, multiplier, onClose }: RecipeSc
                                         {index + 1}
                                     </div>
                                     <p className="text-sm text-foreground/90 dark:text-foreground/80 leading-relaxed pt-2 font-medium">
-                                        {scaledText}
+                                        <RichText text={scaledText} />
                                     </p>
                                 </div>
                             );
