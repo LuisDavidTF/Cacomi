@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useSettings } from '@context/SettingsContext';
-import { Globe, Mail, CheckCircle2, Instagram, Facebook } from 'lucide-react';
+import { Globe, Mail, CheckCircle2 } from 'lucide-react';
+import { InstagramIcon, FacebookIcon } from './Icons';
 
 export function Footer() {
     const { t, language } = useSettings();
@@ -126,7 +127,7 @@ export function Footer() {
                                 className="w-10 h-10 rounded-full bg-muted/40 hover:bg-muted text-foreground/80 hover:text-[#E4405F] flex items-center justify-center transition-all duration-300"
                                 aria-label="Instagram"
                             >
-                                <Instagram className="w-4 h-4" />
+                                <InstagramIcon className="w-4 h-4" />
                             </a>
                             <a 
                                 href={t?.common?.facebookUrl || 'https://facebook.com/cacomi'} 
@@ -135,7 +136,7 @@ export function Footer() {
                                 className="w-10 h-10 rounded-full bg-muted/40 hover:bg-muted text-foreground/80 hover:text-[#1877F2] flex items-center justify-center transition-all duration-300"
                                 aria-label="Facebook"
                             >
-                                <Facebook className="w-4 h-4" />
+                                <FacebookIcon className="w-4 h-4" />
                             </a>
                             <a 
                                 href="#" 

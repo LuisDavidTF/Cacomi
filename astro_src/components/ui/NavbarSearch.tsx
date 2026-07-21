@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, X } from 'lucide-react';
+import { Search, Loader2, X, BookOpen, Compass } from 'lucide-react';
 import { useSettings } from '@/context/SettingsContext';
 import { slugify } from '@/utils/slugify';
 
@@ -31,7 +31,7 @@ export function NavbarSearch({ isMobile = false }: { isMobile?: boolean }) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [query]);
 
-    // Debounced search
+    // Debounced search querying the unified search API
     useEffect(() => {
         if (!query.trim()) {
             setResults([]);
@@ -42,7 +42,7 @@ export function NavbarSearch({ isMobile = false }: { isMobile?: boolean }) {
         setIsLoading(true);
         const timer = setTimeout(async () => {
             try {
-                const res = await fetch(`/api/recipes/search/name?name=${encodeURIComponent(query)}&page=0&size=5`);
+                const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
                 if (res.ok) {
                     const data = await res.json();
                     setResults(data || []);
@@ -77,13 +77,46 @@ export function NavbarSearch({ isMobile = false }: { isMobile?: boolean }) {
         ? "w-[calc(100vw-120px)] sm:w-64" // On mobile it takes available space
         : "w-48 lg:w-64 xl:w-80"; // Desktop widths
 
+    const getHref = (item: any) => {
+        if (item.type === 'recipe') {
+            return `/recipes/${slugify(item.name)}/${item.id}`;
+        } else if (item.type === 'article') {
+            return `/blog/${item.slug}`;
+        } else if (item.type === 'magazine') {
+            return `/revista/${item.slug}`;
+        }
+        return '#';
+    };
+
+    const getBadgeLabel = (item: any) => {
+        if (item.type === 'recipe') {
+            return t?.recipeTypes?.[item.category?.toUpperCase()] || item.category || (language === 'es' ? 'Receta' : 'Recipe');
+        } else if (item.type === 'article') {
+            return language === 'es' ? 'Relato' : 'Story';
+        } else if (item.type === 'magazine') {
+            return language === 'es' ? 'Revista' : 'Magazine';
+        }
+        return item.category;
+    };
+
+    const getBadgeClass = (item: any) => {
+        if (item.type === 'recipe') {
+            return "text-emerald-800 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-950/40";
+        } else if (item.type === 'article') {
+            return "text-amber-800 bg-amber-100 dark:text-amber-300 dark:bg-amber-950/40";
+        } else if (item.type === 'magazine') {
+            return "text-indigo-800 bg-indigo-100 dark:text-indigo-300 dark:bg-indigo-950/40";
+        }
+        return "text-primary bg-primary/10";
+    };
+
     return (
         <div className="relative z-50 flex items-center justify-end h-10 w-10" ref={containerRef}>
             {/* Expand Button (Visible when collapsed) */}
             <button 
                 onClick={handleExpand}
                 className={`absolute inset-0 m-auto flex items-center justify-center p-2 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-all ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-                aria-label="Buscar recetas"
+                aria-label={language === 'es' ? 'Buscar contenido' : 'Search content'}
             >
                 <Search className="w-5 h-5" />
             </button>
@@ -109,7 +142,7 @@ export function NavbarSearch({ isMobile = false }: { isMobile?: boolean }) {
                         onFocus={() => {
                             if (query) setIsOpen(true);
                         }}
-                        placeholder={language === 'es' ? 'Buscar recetas...' : 'Search recipes...'}
+                        placeholder={language === 'es' ? 'Buscar recetas, relatos, revistas...' : 'Search recipes, stories, magazines...'}
                         className="block w-full pl-9 pr-10 py-1.5 md:py-2 border border-border/50 rounded-full text-sm leading-5 bg-muted/30 focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all placeholder:text-muted-foreground text-foreground shadow-sm"
                     />
                     {isLoading ? (
@@ -128,28 +161,34 @@ export function NavbarSearch({ isMobile = false }: { isMobile?: boolean }) {
             </div>
 
             {/* Dropdown Results */}
-            <div className={`absolute right-0 top-full mt-2 w-[300px] sm:w-[320px] bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-xl ring-1 ring-black/5 overflow-hidden transition-all duration-200 origin-top-right ${isOpen && query && isExpanded ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+            <div className={`absolute right-0 top-full mt-2 w-[320px] sm:w-[360px] bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-xl ring-1 ring-black/5 overflow-hidden transition-all duration-200 origin-top-right ${isOpen && query && isExpanded ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
                 {results.length > 0 ? (
                     <ul className="max-h-[60vh] overflow-y-auto p-2 space-y-1">
-                        {results.map((recipe) => (
-                            <li key={recipe.publicId || recipe.id}>
+                        {results.map((item) => (
+                            <li key={`${item.type}-${item.id}`}>
                                 <a 
-                                    href={`/recipes/${slugify(recipe.name)}/${recipe.publicId || recipe.id}`}
+                                    href={getHref(item)}
                                     onClick={() => { setIsOpen(false); setIsExpanded(false); }}
-                                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/60 transition-colors"
+                                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/60 transition-colors text-left"
                                 >
-                                    {recipe.imageUrl ? (
-                                        <img src={recipe.imageUrl} alt={recipe.name} className="w-10 h-10 rounded-lg object-cover bg-muted shrink-0" />
+                                    {item.imageUrl ? (
+                                        <img src={item.imageUrl} alt={item.name} className="w-10 h-10 rounded-lg object-cover bg-muted shrink-0" />
                                     ) : (
                                         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                                            <Search className="w-4 h-4 text-primary" />
+                                            {item.type === 'recipe' ? (
+                                                <Search className="w-4 h-4 text-primary" />
+                                            ) : item.type === 'article' ? (
+                                                <Compass className="w-4 h-4 text-amber-600" />
+                                            ) : (
+                                                <BookOpen className="w-4 h-4 text-indigo-600" />
+                                            )}
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-semibold text-foreground truncate">{recipe.name}</p>
+                                        <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
                                         <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-1.5 py-0.5 rounded-md">
-                                                {t.recipeTypes?.[recipe.mealType?.toUpperCase()] || recipe.mealType}
+                                            <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${getBadgeClass(item)}`}>
+                                                {getBadgeLabel(item)}
                                             </span>
                                         </div>
                                     </div>
@@ -159,7 +198,7 @@ export function NavbarSearch({ isMobile = false }: { isMobile?: boolean }) {
                     </ul>
                 ) : !isLoading && query ? (
                     <div className="p-6 text-center text-sm text-muted-foreground">
-                        {language === 'es' ? 'No se encontraron recetas' : 'No recipes found'}
+                        {language === 'es' ? 'No se encontraron resultados' : 'No results found'}
                     </div>
                 ) : null}
             </div>

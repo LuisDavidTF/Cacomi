@@ -109,7 +109,7 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
             "absolute top-3 left-3 z-10 transition-opacity duration-300",
             isAdmin ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           )}>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
                 {isAdmin && (
                   <button 
                       onClick={handleStarClick} 

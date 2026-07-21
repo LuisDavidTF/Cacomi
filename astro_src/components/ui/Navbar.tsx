@@ -159,7 +159,7 @@ export function Navbar() {
                         </div>
                         
                         {/* Center: Search Bar */}
-                        <div className="hidden xl:flex flex-1 items-center justify-center px-2">
+                        <div className="hidden md:flex flex-1 items-center justify-center px-2">
                             <NavbarSearch />
                         </div>
 

@@ -239,15 +239,6 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                             {t?.vida?.discoverSubtitle || 'Explora las mejores ideas para una vida consciente.'}
                         </p>
                     </div>
-                    
-                    {/* Refresh / Update Button */}
-                    <button 
-                        onClick={() => window.location.reload()}
-                        className="px-4 py-2 rounded-full border border-border text-xs font-semibold text-[#e07e53] bg-white dark:bg-card hover:bg-muted active:scale-95 transition-all flex items-center gap-2 self-start md:self-auto shadow-xs border-[#e8d5c4]/60"
-                    >
-                        <RefreshCw className="w-3.5 h-3.5" />
-                        {language === 'es' ? 'Actualizar Feed' : 'Refresh Feed'}
-                    </button>
                 </div>
 
                 {/* Clean Filter Tabs (Explorar Todo, Recetas, Revistas, Artículos) */}
