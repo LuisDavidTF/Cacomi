@@ -300,11 +300,15 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                                 {initialArticles.slice(0, 4).map(item => {
                                     const isSaved = savedIds.includes(item.id);
                                     return (
-                                        <div key={item.id} className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left">
+                                        <div 
+                                            key={item.id} 
+                                            onClick={() => setSelectedArticle(item)}
+                                            className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left cursor-pointer"
+                                        >
                                             <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
                                                 <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                                                 <span className={`absolute top-3 left-3 shadow-md ${getCategoryStyles(item.category)}`}>{item.category}</span>
-                                                <button onClick={(e) => toggleSave(item.id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md">
+                                                <button onClick={(e) => toggleSave(item.id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md z-30">
                                                     {isSaved ? <BookmarkCheck className="w-4 h-4 text-[#e07e53]" /> : <Bookmark className="w-4 h-4 text-gray-500" />}
                                                 </button>
                                             </div>
@@ -315,9 +319,9 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                                                 </div>
                                                 <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{item.title}</h3>
                                                 <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{item.description}</p>
-                                                <button onClick={() => setSelectedArticle(item)} className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform self-start">
+                                                <span className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] group-hover:translate-x-0.5 transition-transform self-start">
                                                     Leer relato <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                                </button>
+                                                </span>
                                             </div>
                                         </div>
                                     );
@@ -400,11 +404,15 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                         {initialArticles.map(item => {
                             const isSaved = savedIds.includes(item.id);
                             return (
-                                <div key={item.id} className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left">
+                                <div 
+                                    key={item.id} 
+                                    onClick={() => setSelectedArticle(item)}
+                                    className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left cursor-pointer"
+                                >
                                     <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
                                         <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                                         <span className={`absolute top-3 left-3 shadow-md ${getCategoryStyles(item.category)}`}>{item.category}</span>
-                                        <button onClick={(e) => toggleSave(item.id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md">
+                                        <button onClick={(e) => toggleSave(item.id, e)} className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md z-30">
                                             {isSaved ? <BookmarkCheck className="w-4 h-4 text-[#e07e53]" /> : <Bookmark className="w-4 h-4 text-gray-500" />}
                                         </button>
                                     </div>
@@ -415,9 +423,9 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                                         </div>
                                         <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{item.title}</h3>
                                         <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{item.description}</p>
-                                        <button onClick={() => setSelectedArticle(item)} className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform self-start">
+                                        <span className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] group-hover:translate-x-0.5 transition-transform self-start">
                                             Leer relato <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                        </button>
+                                        </span>
                                     </div>
                                 </div>
                             );

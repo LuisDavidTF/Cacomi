@@ -112,7 +112,11 @@ export function SavedItemsDashboard({ initialArticles, initialRevistas }: SavedI
                         {savedArticles.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {savedArticles.map(item => (
-                                    <div key={item.id} className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left">
+                                    <a 
+                                        key={item.id} 
+                                        href={`/blog/${item.id}`}
+                                        className="group bg-card border border-border/40 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col h-full hover:-translate-y-0.5 text-left cursor-pointer"
+                                    >
                                         <div className="aspect-[4/3] w-full overflow-hidden relative bg-muted shrink-0">
                                             <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                                             <span className={`absolute top-3 left-3 shadow-md ${getCategoryStyles(item.category)}`}>{item.category}</span>
@@ -127,11 +131,11 @@ export function SavedItemsDashboard({ initialArticles, initialRevistas }: SavedI
                                             </div>
                                             <h3 className="font-serif text-base font-bold leading-tight mb-2 text-[#2c2b2a] dark:text-white group-hover:text-[#e07e53] transition-colors line-clamp-2">{item.title}</h3>
                                             <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-6 flex-grow">{item.description}</p>
-                                            <a href={`/blog/${item.id}`} className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] hover:translate-x-0.5 transition-transform self-start">
+                                            <span className="mt-auto pt-2 inline-flex items-center text-xs font-bold text-[#e07e53] group-hover:translate-x-0.5 transition-transform self-start">
                                                 {language === 'es' ? 'Leer relato' : 'Read story'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                            </a>
+                                            </span>
                                         </div>
-                                    </div>
+                                    </a>
                                 ))}
                             </div>
                         ) : (
