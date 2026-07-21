@@ -5,9 +5,11 @@ import { useAuth } from '@context/AuthContext';
 import { useSettings } from '@context/SettingsContext';
 import { ClockIcon, EditIcon, TrashIcon, UserIcon, FlameIcon, ActivityIcon, ShareIcon } from '@components/ui/Icons';
 import { ShareModal } from '@components/ui/ShareModal';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, MoreVertical, Bookmark, BookmarkCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRecommendedMenuStore } from '@store/useRecommendedMenuStore';
+import { db } from '@/lib/db';
+import { useLiveQuery } from 'dexie-react-hooks';
 
 export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const { user } = useAuth();
@@ -20,6 +22,40 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
   const [showRecommendedModal, setShowRecommendedModal] = useState(false);
   const [selectedDay, setSelectedDay] = useState('lun');
   const [selectedType, setSelectedType] = useState('LUNCH');
+  const [showMenu, setShowMenu] = useState(false);
+
+  const isRecipeSaved = useLiveQuery(async () => {
+      const match = await db.savedRecipes.get(String(recipe.publicId || recipe.id));
+      return !!match;
+  }, [recipe.publicId, recipe.id]);
+
+  const handleToggleSave = async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const recipeId = String(recipe.publicId || recipe.id);
+      const isCurrentlySaved = await db.savedRecipes.get(recipeId);
+      if (isCurrentlySaved) {
+          await db.savedRecipes.delete(recipeId);
+      } else {
+          const normalized = {
+              id: recipeId,
+              name: recipe.name,
+              description: recipe.description || '',
+              imageUrl: recipe.imageUrl || '',
+              preparationTimeMinutes: recipe.preparationTimeMinutes || recipe.prepTime || 0,
+              authorName: recipe.authorName || recipe.user?.name || '',
+              calories: recipe.calories || recipe.nutrition?.totalCalories || 0,
+              protein: recipe.protein || recipe.nutrition?.totalProtein || 0,
+              carbs: recipe.carbs || recipe.nutrition?.totalCarbohydrates || 0,
+              fat: recipe.fat || recipe.nutrition?.totalFat || 0,
+              mealType: recipe.mealType || recipe.type || 'LUNCH',
+              ingredients: recipe.ingredients || [],
+              steps: recipe.steps || [],
+              savedAt: new Date().toISOString()
+          };
+          await db.savedRecipes.put(normalized);
+      }
+  };
 
   const handleStarClick = (e) => {
       e.preventDefault();
@@ -249,48 +285,85 @@ export function RecipeCard({ recipe, viewHref, onEdit, onDelete }) {
             </svg>
           </div>
 
-          {/* Action buttons (Share, Edit, Delete, Star) placed cleanly here to prevent image cluttering or overlap */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {isAdmin && (
-              <button 
-                  onClick={handleStarClick} 
-                  className={cn(
-                    "p-2 rounded-xl transition-all border border-border/60 hover:scale-[1.05] active:scale-95 shadow-2xs",
-                    isSelected 
-                      ? "bg-primary text-white border-primary" 
-                      : "bg-muted/40 text-primary hover:bg-primary hover:text-primary-foreground"
-                  )}
-                  title="Añadir al Menú Recomendado"
-              >
-                  <Sparkles className={cn("w-4 h-4", isSelected && "animate-pulse")} />
-              </button>
-            )}
+          {/* Save / Bookmark Recipe Button */}
+          <button 
+              onClick={handleToggleSave} 
+              className="p-2.5 rounded-xl border border-border/60 text-muted-foreground hover:bg-muted dark:hover:bg-slate-800 transition-all hover:scale-[1.05] active:scale-95 shadow-2xs flex items-center justify-center bg-card shrink-0"
+              title={isRecipeSaved ? (language === 'es' ? 'Guardada' : 'Saved') : (language === 'es' ? 'Guardar' : 'Save')}
+          >
+              {isRecipeSaved ? (
+                  <BookmarkCheck className="w-4 h-4 text-[#e07e53]" />
+              ) : (
+                  <Bookmark className="w-4 h-4 text-gray-500" />
+              )}
+          </button>
 
+          {/* Three dots actions menu */}
+          <div className="relative">
             <button 
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowShare(true); }} 
-                className="p-2 rounded-xl border border-border/60 text-muted-foreground bg-muted/20 hover:bg-primary hover:text-primary-foreground transition-all hover:scale-[1.05] active:scale-95 shadow-2xs"
-                title={t.share.shareGeneric}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(!showMenu); }} 
+                className="p-2.5 rounded-xl border border-border/60 text-muted-foreground hover:bg-muted dark:hover:bg-slate-800 transition-all hover:scale-[1.05] active:scale-95 shadow-2xs flex items-center justify-center bg-card"
+                title={language === 'es' ? 'Más opciones' : 'More options'}
             >
-                <ShareIcon className="w-4 h-4" />
+                <MoreVertical className="w-4 h-4" />
             </button>
 
-            {isOwner && (
-                <>
-                <button 
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(recipe); }} 
-                    className="p-2 rounded-xl border border-border/60 text-blue-600 bg-blue-50/50 hover:bg-blue-600 hover:text-white transition-all hover:scale-[1.05] active:scale-95 shadow-2xs"
-                    title={language === 'es' ? 'Editar Receta' : 'Edit Recipe'}
+            {showMenu && (
+              <>
+                {/* Backdrop overlay to close when clicking outside */}
+                <div 
+                  className="fixed inset-0 z-40 bg-transparent" 
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(false); }}
+                />
+                
+                {/* Menu items */}
+                <div 
+                  className="absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-slate-900 border border-border/80 rounded-2xl shadow-xl z-50 p-1.5 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150 text-left"
+                  onClick={(e) => { e.stopPropagation(); }}
                 >
-                    <EditIcon className="w-4 h-4" />
-                </button>
-                <button 
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(recipe); }} 
-                    className="p-2 rounded-xl border border-border/60 text-red-600 bg-red-50/50 hover:bg-red-600 hover:text-white transition-all hover:scale-[1.05] active:scale-95 shadow-2xs"
-                    title={language === 'es' ? 'Eliminar Receta' : 'Delete Recipe'}
-                >
-                    <TrashIcon className="w-4 h-4" />
-                </button>
-                </>
+                  {isAdmin && (
+                    <button 
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(false); handleStarClick(e); }} 
+                        className={cn(
+                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors",
+                          isSelected 
+                            ? "bg-primary/10 text-primary" 
+                            : "text-foreground hover:bg-muted"
+                        )}
+                    >
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        <span>{language === 'es' ? 'Recomendar' : 'Recommend'}</span>
+                    </button>
+                  )}
+
+                  <button 
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(false); setShowShare(true); }} 
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+                  >
+                      <ShareIcon className="w-4 h-4 text-muted-foreground" />
+                      <span className="ml-1">{t.share.shareGeneric}</span>
+                  </button>
+
+                  {isOwner && (
+                      <>
+                      <button 
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(false); onEdit(recipe); }} 
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-blue-600 hover:bg-blue-50/50 transition-colors"
+                      >
+                          <EditIcon className="w-4 h-4" />
+                          <span>{language === 'es' ? 'Editar Receta' : 'Edit Recipe'}</span>
+                      </button>
+                      <button 
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(false); onDelete(recipe); }} 
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50/50 transition-colors"
+                      >
+                          <TrashIcon className="w-4 h-4" />
+                          <span>{language === 'es' ? 'Eliminar Receta' : 'Delete Recipe'}</span>
+                      </button>
+                      </>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>

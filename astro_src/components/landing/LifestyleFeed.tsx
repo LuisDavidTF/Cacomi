@@ -206,6 +206,17 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                                        <button 
+                                            onClick={(e) => toggleSave(latestRevista.id, e)} 
+                                            className="absolute top-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md z-30"
+                                            title={savedIds.includes(latestRevista.id) ? (language === 'es' ? 'Guardada' : 'Saved') : (language === 'es' ? 'Guardar' : 'Save')}
+                                        >
+                                            {savedIds.includes(latestRevista.id) ? (
+                                                <BookmarkCheck className="w-4 h-4 text-[#e07e53]" />
+                                            ) : (
+                                                <Bookmark className="w-4 h-4 text-gray-500" />
+                                            )}
+                                        </button>
                                     </div>
                                     
                                     {/* Overlay Floating Info Card */}
@@ -358,6 +369,17 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                                     <span className="absolute top-3 left-3 bg-[#e07e53] text-white shadow-md px-2.5 py-0.5 text-[9px] rounded-full font-bold tracking-wider">
                                         EDICIÓN #{revista.number}
                                     </span>
+                                    <button 
+                                        onClick={(e) => toggleSave(revista.id, e)} 
+                                        className="absolute bottom-3 right-3 p-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/20 text-[#2c2b2a] hover:bg-white active:scale-95 transition-all shadow-md z-30"
+                                        title={savedIds.includes(revista.id) ? (language === 'es' ? 'Guardada' : 'Saved') : (language === 'es' ? 'Guardar' : 'Save')}
+                                    >
+                                        {savedIds.includes(revista.id) ? (
+                                            <BookmarkCheck className="w-4 h-4 text-[#e07e53]" />
+                                        ) : (
+                                            <Bookmark className="w-4 h-4 text-gray-500" />
+                                        )}
+                                    </button>
                                 </div>
                                 <div className="p-5 flex flex-col flex-grow">
                                     <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2 block">{revista.date}</span>
