@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-// Context
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 import { NavbarSearch } from './NavbarSearch';
@@ -30,7 +30,12 @@ export function Navbar() {
     const { t, language } = useSettings();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Close dropdown on click outside
     useEffect(() => {
@@ -330,54 +335,57 @@ export function Navbar() {
 
 
             {/* Mobile Bottom Navigation Bar (Floating Dock) — Translucent iOS Style */}
-            <nav className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-40 bg-white/80 dark:bg-neutral-900/85 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.08] rounded-full shadow-lg shadow-black/10 md:hidden">
-                <div className="flex w-full h-14 items-center justify-around px-2">
-                    {/* Vida */}
-                    <a 
-                        href="/" 
-                        onClick={handleLogoClick} 
-                        className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isVidaActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
-                    >
-                        <Home className="w-5 h-5" />
-                        <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.vida || 'Vida'}</span>
-                    </a>
-
-                    {/* Origen */}
-                    <a 
-                        href="/origen" 
-                        className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isOrigenActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-[#e07e53]'}`}
-                    >
-                        <ShoppingBasket className="w-5 h-5" />
-                        <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.origen || 'Origen'}</span>
-                    </a>
-
-                    {/* Menu / Profile / Login */}
-                    {isAuthenticated ? (
-                        <button 
-                            onClick={() => setIsMobileMenuOpen(true)} 
-                            className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isMobileMenuOpen ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
-                        >
-                            {user?.profile_photo ? (
-                                <img src={user.profile_photo} alt="Perfil" className="w-5 h-5 rounded-full border border-black/10 object-cover" />
-                            ) : (
-                                <Menu className="w-5 h-5" />
-                            )}
-                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.menu || 'Menú'}</span>
-                        </button>
-                    ) : (
+            {mounted && createPortal(
+                <nav className="fixed bottom-5 left-4 right-4 max-w-md mx-auto z-40 bg-white/80 dark:bg-neutral-900/85 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.08] rounded-full shadow-lg shadow-black/10 md:hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+                    <div className="flex w-full h-14 items-center justify-around px-2">
+                        {/* Vida */}
                         <a 
-                            href="/login" 
-                            className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 text-[#8e8e93] hover:text-foreground"
+                            href="/" 
+                            onClick={handleLogoClick} 
+                            className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isVidaActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
                         >
-                            <LogIn className="w-5 h-5" />
-                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.login || 'Entrar'}</span>
+                            <Home className="w-5 h-5" />
+                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.vida || 'Vida'}</span>
                         </a>
-                    )}
-                </div>
-            </nav>
+
+                        {/* Origen */}
+                        <a 
+                            href="/origen" 
+                            className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isOrigenActive() ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-[#e07e53]'}`}
+                        >
+                            <ShoppingBasket className="w-5 h-5" />
+                            <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.origen || 'Origen'}</span>
+                        </a>
+
+                        {/* Menu / Profile / Login */}
+                        {isAuthenticated ? (
+                            <button 
+                                onClick={() => setIsMobileMenuOpen(true)} 
+                                className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${isMobileMenuOpen ? 'text-[#e07e53] bg-[#e07e53]/10 font-bold scale-[1.02]' : 'text-[#8e8e93] hover:text-foreground'}`}
+                            >
+                                {user?.profile_photo ? (
+                                    <img src={user.profile_photo} alt="Perfil" className="w-5 h-5 rounded-full border border-black/10 object-cover" />
+                                ) : (
+                                    <Menu className="w-5 h-5" />
+                                )}
+                                <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.menu || 'Menú'}</span>
+                            </button>
+                        ) : (
+                            <a 
+                                href="/login" 
+                                className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 text-[#8e8e93] hover:text-foreground"
+                            >
+                                <LogIn className="w-5 h-5" />
+                                <span className="text-[8px] font-semibold mt-0.5 whitespace-nowrap">{t?.nav?.login || 'Entrar'}</span>
+                            </a>
+                        )}
+                    </div>
+                </nav>,
+                document.body
+            )}
 
             {/* Mobile Apple-style Bottom Sheet Menu */}
-            {isMobileMenuOpen && isAuthenticated && (
+            {mounted && isMobileMenuOpen && isAuthenticated && createPortal(
                 <div className="fixed inset-0 z-[60] md:hidden flex flex-col justify-end">
                     {/* Backdrop */}
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300" onClick={() => setIsMobileMenuOpen(false)} />
@@ -526,7 +534,8 @@ export function Navbar() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
             
             {/* Global style to animate bottom sheet */}
