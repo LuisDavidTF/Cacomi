@@ -2,17 +2,16 @@
 import { getCollection, getEntry, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 
-export const prerender = false;
+export const prerender = true;
 
-const { slug } = Astro.params;
-if (!slug) {
-  return Astro.redirect('/404');
+export async function getStaticPaths() {
+  const revistaEntries = await getCollection('revista');
+  return revistaEntries.map(entry => ({
+    params: { slug: entry.id }, props: { entry },
+  }));
 }
 
-const entry = await getEntry('revista', slug);
-if (!entry) {
-  return Astro.redirect('/404');
-}
+const { entry } = Astro.props;
 
 const { Content } = await render(entry);
 
