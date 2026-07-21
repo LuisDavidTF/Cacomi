@@ -461,8 +461,8 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
                                 </h2>
                             </div>
 
-                            <div className="prose prose-gray dark:prose-invert lg:prose-lg max-w-none text-muted-foreground font-light leading-relaxed whitespace-pre-line text-sm md:text-base">
-                                {selectedArticle.content}
+                            <div className="prose prose-gray dark:prose-invert lg:prose-lg max-w-none text-muted-foreground font-light leading-relaxed text-sm md:text-base">
+                                {renderMarkdown(selectedArticle.content)}
                             </div>
                         </div>
 
@@ -524,3 +524,101 @@ export function LifestyleFeed({ initialRecipes, initialArticles, revistas, lates
         </div>
     );
 }
+
+// Lightweight Markdown parser to React elements to avoid raw bold tags (**text**) in modals
+function renderMarkdown(text: string) {
+    if (!text) return null;
+    
+    const lines = text.split('\n');
+    let insideList = false;
+    const elements: React.ReactNode[] = [];
+    
+    lines.forEach((line, index) => {
+        const trimmed = line.trim();
+        
+        // Handle Headings
+        if (trimmed.startsWith('### ')) {
+            insideList = false;
+            elements.push(
+                <h4 key={`h3-${index}`} className="text-base font-bold text-[#2c2b2a] dark:text-white font-serif mt-6 mb-2">
+                    {parseInlineStyles(trimmed.slice(4))}
+                </h4>
+            );
+            return;
+        }
+        if (trimmed.startsWith('## ')) {
+            insideList = false;
+            elements.push(
+                <h3 key={`h2-${index}`} className="text-lg font-bold text-[#2c2b2a] dark:text-white font-serif mt-8 mb-3">
+                    {parseInlineStyles(trimmed.slice(3))}
+                </h3>
+            );
+            return;
+        }
+        if (trimmed.startsWith('# ')) {
+            insideList = false;
+            elements.push(
+                <h2 key={`h1-${index}`} className="text-xl font-bold text-[#2c2b2a] dark:text-white font-serif mt-10 mb-4">
+                    {parseInlineStyles(trimmed.slice(2))}
+                </h2>
+            );
+            return;
+        }
+        
+        // Handle Lists
+        if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            insideList = true;
+            elements.push(
+                <li key={`li-${index}`} className="list-disc ml-6 mb-2 text-muted-foreground text-sm md:text-base font-light">
+                    {parseInlineStyles(trimmed.slice(2))}
+                </li>
+            );
+            return;
+        }
+
+        // Handle Blockquotes
+        if (trimmed.startsWith('> ')) {
+            insideList = false;
+            elements.push(
+                <blockquote key={`bq-${index}`} className="border-l-4 border-[#e07e53] pl-4 italic text-muted-foreground my-4 bg-muted/20 py-2 pr-4 rounded-r-lg">
+                    {parseInlineStyles(trimmed.slice(2))}
+                </blockquote>
+            );
+            return;
+        }
+        
+        // Handle Empty lines
+        if (trimmed === '') {
+            insideList = false;
+            elements.push(<div key={`spacer-${index}`} className="h-3" />);
+            return;
+        }
+        
+        // Handle normal paragraphs
+        insideList = false;
+        elements.push(
+            <p key={`p-${index}`} className="leading-relaxed mb-4 text-sm md:text-base text-muted-foreground font-light">
+                {parseInlineStyles(line)}
+            </p>
+        );
+    });
+    
+    return elements;
+}
+
+function parseInlineStyles(text: string): React.ReactNode {
+    const parts = text.split('**');
+    return parts.map((part, index) => {
+        if (index % 2 === 1) {
+            return <strong key={`b-${index}`} className="font-bold text-[#2c2b2a] dark:text-white">{part}</strong>;
+        }
+        const subParts = part.split('*');
+        return subParts.map((subPart, subIndex) => {
+            if (subIndex % 2 === 1) {
+                return <em key={`i-${subIndex}`} className="italic">{subPart}</em>;
+            }
+            return subPart;
+        });
+    });
+}
+
