@@ -1,13 +1,42 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { RecipeFeed } from '@components/recipes/RecipeFeed';
+import { getCollection } from 'astro:content';
+import { SavedItemsDashboard } from '@components/profile/SavedItemsDashboard';
 
 // Force dynamic SSR
 export const prerender = false;
+
+// Get blog and magazines collections to match saved IDs on the client side
+const allArticles = await getCollection('blog');
+const allRevistas = await getCollection('revista');
+
+// Format articles and magazines for the client dashboard
+const articles = allArticles.map(a => ({
+  id: a.id,
+  title: a.data.title,
+  description: a.data.description,
+  image: a.data.image,
+  category: a.data.tags?.[0] || 'Artículo',
+  readTime: a.data.duration || '5',
+  author: a.data.author || 'Cacomi'
+}));
+
+const revistas = allRevistas.map(r => ({
+  id: r.id,
+  number: r.data.number,
+  title: r.data.title,
+  description: r.data.description,
+  image: r.data.image,
+  date: r.data.date
+}));
 ---
 
-<Layout title="Recetas Guardadas | Cacomi" description="Accede a tus recetas descargadas para verlas sin conexión en cualquier momento." noindex={true}>
+<Layout title="Elementos Guardados | Cacomi" description="Accede a tus recetas descargadas, relatos de blog y revistas guardadas para verlas sin conexión." noindex={true}>
   <div id="saved-recipes-container" class="mt-8">
-    <RecipeFeed forceSavedMode={true} client:load />
+    <SavedItemsDashboard 
+      initialArticles={articles}
+      initialRevistas={revistas}
+      client:load 
+    />
   </div>
 </Layout>

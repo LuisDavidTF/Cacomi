@@ -115,7 +115,7 @@ export function Navbar() {
     return (
         <>
             {/* Desktop Top Navbar (Header) — iOS 18 Glass style */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-neutral-950/70 backdrop-blur-xl transition-colors duration-300 border-b border-black/[0.05] dark:border-white/[0.05] hidden md:block h-14 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
+            <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl transition-colors duration-300 border-b border-black/[0.05] dark:border-white/[0.05] hidden md:block h-14 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
                 <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full" aria-label="Main Navigation">
                     <div className="flex justify-between items-center h-full w-full">
                         {/* Left: Logo */}
@@ -303,7 +303,7 @@ export function Navbar() {
             </header>
 
             {/* Mobile Top Header — Translucent Apple style */}
-            <header className="fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl border-b border-black/[0.05] dark:border-white/[0.05] md:hidden h-12 flex items-center justify-between px-4">
+            <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl border-b border-black/[0.05] dark:border-white/[0.05] md:hidden h-12 flex items-center justify-between px-4">
                 <div className="w-8"></div>
                 <a href="/" onClick={handleLogoClick} className="flex items-center absolute left-1/2 -translate-x-1/2 h-8">
                     <img 
